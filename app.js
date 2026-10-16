@@ -1,4 +1,4 @@
-﻿// Splash controls (mobile-first startup experience)
+// Splash controls (mobile-first startup experience)
 const splash = document.getElementById("splash");
 function hideSplash(ms = 260) {
   const s = splash;
@@ -11,12 +11,7 @@ function hideSplash(ms = 260) {
   s.addEventListener("transitionend", cleanup, { once: true });
   setTimeout(cleanup, ms + 120);
 }
-window.addEventListener('DOMContentLoaded', () => setTimeout(hideSplash, 900), { once: true });
-window.addEventListener('load', () => setTimeout(hideSplash, 520), { once: true });
-window.addEventListener('pageshow', () => setTimeout(hideSplash, 220), { once: true });
 setTimeout(() => hideSplash(180), 2800);
-splash?.addEventListener('click', () => hideSplash(150));
-document.addEventListener('touchstart', () => hideSplash(150), { once: true });
 
 // Install Prompt (beter gecontroleerde PWA-installatie)
 let deferredPrompt = null;
@@ -134,11 +129,9 @@ const FALLBACK_TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org
 const BUSBIBLIOTHEEK_PUBLIC_BUS_URL = "https://busbibliotheek95.pages.dev/";
 const NETWORK_CHECK_URL = `${window.location.origin}/manifest.json?network-check=1`;
 const NETWORK_CHECK_TIMEOUT_MS = 5000;
-const NETWORK_CHECK_INTERVAL_MS = 120000;
 const NETWORK_CHECK_CACHE_MS = 60000;
 const PRIMARY_VEHICLE_QUERY_MAX_LENGTH = 10;
 const WEATHER_CACHE_MS = 5 * 60 * 1000;
-const STATIC_DATASET_WARMUP_DELAY_MS = 1200;
 const FAVORITES_KEY = "bb_favorites_v1";
 const SETTINGS_KEY = "bb_settings_v1";
 const REALTIME_PERSISTED_CACHE_KEY = "bb_realtime_feed_cache_v1";
@@ -642,7 +635,6 @@ let feedEndDateValue = "";
 let vehiclesSourceUpdatedAt = "";
 let vehiclePhotoLookupToken = 0;
 let vehiclePhotoRenderToken = 0;
-const photoCaptureDateCache = new Map();
 const photoExifMetadataCache = new Map();
 const photoReverseGeocodeCache = new Map();
 const PHOTO_REVERSE_GEOCODE_URL = "https://nominatim.openstreetmap.org/reverse";
@@ -664,12 +656,11 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.07.05-3";
+const APP_VERSION = "2026.10.17-2";
 const dataLoadTimestamps = {
   realtime: 0
 };
 let inactivityCheckHandle = null;
-let networkCheckHandle = null;
 let tripsLoadPromise = null;
 let routesLoadPromise = null;
 let stopsLoadPromise = null;
@@ -703,294 +694,1011 @@ const usesOverlayCompatibilityMode = () =>
   isAndroidHostApp() ||
   isAndroidWebView ||
   isAndroidTvPlatform;
-const KNOWN_PHOTOGRAPHER_FOLDERS = [
-  "Busspotter 95",
-  "Robin Van de Ven",
-  "@dln.spotter",
-  "@delijn821",
-  "@delijn_spotter",
-  "@delijn_spotter_mori",
-  "@spotter_ov",
-  "Arno Janssens"
-];
-// Generated from the current contents of media/bus on 2026-04-10.
+// Generated from the current contents of media/bus on 2026-10-17.
 const PHOTO_LIBRARY_INDEX = {
-  "2015": [
-    "Robin Van de Ven/2015.jpeg",
-  ],
-  "2017": [
-    "Robin Van de Ven/2017.jpeg",
-  ],
-  "2032": [
-    "@delijn_spotter_mori/2032.jpeg",
-  ],
-  "2039": [
-    "@delijn_spotter_mori/2039.jpeg",
-  ],
-  "2085": [
-    "Robin Van de Ven/2085.jpeg",
-  ],
-  "2193": [
-    "Robin Van de Ven/2193.jpeg",
-  ],
-  "2228": [
-    "Robin Van de Ven/2228.jpeg",
-  ],
-  "2357": [
-    "Robin Van de Ven/2357.jpeg",
-  ],
-  "2362": [
-    "Robin Van de Ven/2362.jpeg",
-  ],
-  "2520": [
-    "Robin Van de Ven/2520.jpeg",
-  ],
-  "2591": [
-    "Robin Van de Ven/2591.jpeg",
-  ],
-  "2647": [
-    "@delijn_spotter_mori/2647.jpeg",
-  ],
-  "2889": [
-    "Busspotter 95/2889.jpeg",
-  ],
-  "2890": [
-    "Busspotter 95/2890.jpeg",
-  ],
-  "2894": [
-    "Busspotter 95/2894.jpeg",
-  ],
-  "2916": [
-    "@delijn_spotter_mori/2916.jpeg",
-  ],
-  "2917": [
-    "@delijn_spotter_mori/2917.jpeg",
-  ],
-  "2953": [
-    "Robin Van de Ven/2953.jpeg",
-  ],
-  "2956": [
-    "Robin Van de Ven/2956.jpeg",
-  ],
-  "2979": [
-    "Robin Van de Ven/2979.jpeg",
-  ],
-  "2982": [
-    "Robin Van de Ven/2982.jpeg",
-  ],
-  "3015": [
-    "Robin Van de Ven/3015.jpeg",
-  ],
-  "3025": [
-    "Robin Van de Ven/3025.jpeg",
-  ],
-  "3087": [
-    "@delijn_spotter_mori/3087.jpeg",
-  ],
-  "3091": [
-    "Robin Van de Ven/3091.jpeg",
-  ],
-  "3120": [
-    "Robin Van de Ven/3120.jpeg",
-  ],
-  "441315": [
-    "Robin Van de Ven/441315.jpeg",
-  ],
-  "4457": [
-    "Robin Van de Ven/4457.jpeg",
-  ],
-  "4534": [
-    "@delijn_spotter_mori/4534.jpeg",
-  ],
-  "4575": [
-    "Robin Van de Ven/4575.jpeg",
-  ],
-  "4588": [
-    "@delijn_spotter_mori/4588.jpeg",
-  ],
-  "4660": [
-    "Robin Van de Ven/4660.jpeg",
-  ],
-  "4686": [
-    "@delijn_spotter_mori/4686.jpeg",
-  ],
-  "4804": [
-    "@delijn_spotter_mori/4804.jpeg",
-  ],
-  "4864": [
-    "Robin Van de Ven/4864.jpeg",
-  ],
-  "4952": [
-    "Robin Van de Ven/4952.jpeg",
-  ],
-  "4977": [
-    "Robin Van de Ven/4977.jpeg",
-  ],
-  "5003": [
-    "Robin Van de Ven/5003.jpeg",
-  ],
-  "5020": [
-    "@delijn_spotter_mori/5020.jpeg",
-  ],
-  "502606": [
-    "Busspotter 95/502606.jpeg",
-  ],
-  "5089": [
-    "@delijn_spotter_mori/5089.jpeg",
-  ],
-  "5282": [
-    "@delijn_spotter_mori/5282.jpeg",
-  ],
-  "5299": [
-    "Robin Van de Ven/5299.jpeg",
-  ],
-  "5341": [
-    "@delijn_spotter_mori/5341.jpeg",
-  ],
-  "5343": [
-    "Robin Van de Ven/5343.jpeg",
-  ],
-  "5409": [
-    "Robin Van de Ven/5409.jpeg",
-  ],
-  "550529": [
-    "Busspotter 95/550529.jpeg",
-  ],
-  "5508": [
-    "Robin Van de Ven/5508.jpeg",
-  ],
-  "550820": [
-    "@dln.spotter/550820.jpeg",
-  ],
-  "550951": [
-    "Busspotter 95/550951.jpeg",
-  ],
-  "5544": [
-    "@delijn_spotter_mori/5544.jpeg",
-  ],
-  "5563": [
-    "@delijn_spotter_mori/5563.jpeg",
-  ],
-  "5577": [
-    "Robin Van de Ven/5577.jpeg",
-  ],
-  "5643": [
-    "Robin Van de Ven/5643.jpeg",
-  ],
-  "5738": [
-    "Robin Van de Ven/5738.jpeg",
-  ],
-  "5786": [
-    "@delijn_spotter_mori/5786.jpeg",
-  ],
-  "5882": [
-    "@delijn_spotter_mori/5882.jpeg",
-  ],
-  "5895": [
-    "@delijn_spotter_mori/5895.jpeg",
-  ],
-  "5906": [
-    "@delijn_spotter_mori/5906.jpeg",
-  ],
-  "618097": [
-    "@dln.spotter/618097.jpeg",
-  ],
-  "6211": [
-    "@delijn_spotter_mori/6211.jpeg",
-  ],
-  "643043": [
-    "@dln.spotter/643043.jpeg",
-  ],
-  "644081": [
-    "@dln.spotter/644081.jpeg",
-  ],
-  "646074": [
-    "Busspotter 95/646074.jpeg",
-  ],
-  "646075": [
-    "Robin Van de Ven/646075.jpeg",
-  ],
-  "646079": [
-    "@dln.spotter/646079 (1).jpeg",
-  ],
-  "646086": [
-    "@dln.spotter/646086.jpeg",
-  ],
-  "647017": [
-    "Robin Van de Ven/647017.jpeg",
-  ],
-  "649014": [
-    "Robin Van de Ven/649014.jpeg",
-  ],
-  "652034": [
-    "@dln.spotter/652034.jpeg",
-  ],
-  "656087": [
-    "Robin Van de Ven/656087.jpeg",
-  ],
-  "660044": [
-    "Robin Van de Ven/660044.jpeg",
-  ],
-  "660045": [
-    "Robin Van de Ven/660045.jpeg",
-  ],
-  "660046": [
-    "@dln.spotter/660046.jpeg",
-  ],
-  "669018": [
-    "Robin Van de Ven/669018.jpeg",
-  ],
-  "674113": [
-    "Robin Van de Ven/674113.jpeg",
-  ],
-  "678115": [
-    "Robin Van de Ven/678115.jpeg",
-  ],
-  "678130": [
-    "Robin Van de Ven/678130.jpeg",
-  ],
-  "678132": [
-    "Robin Van de Ven/678132.jpeg",
-  ],
-  "678163": [
-    "Robin Van de Ven/678163.jpeg",
-  ],
-  "689029": [
-    "Robin Van de Ven/689029.jpeg",
-  ],
-  "689040": [
-    "Busspotter 95/689040.jpeg",
-  ],
-  "689043": [
-    "Busspotter 95/689043.jpeg",
-  ],
-  "689047": [
-    "@dln.spotter/689047 (1).jpeg",
-  ],
-  "7133": [
-    "@delijn_spotter_mori/7133.jpeg",
-  ],
-  "7136": [
-    "@delijn_spotter_mori/7136.jpeg",
-  ],
-  "7158": [
-    "@delijn_spotter_mori/7158.jpeg",
-  ],
-  "7202": [
-    "@delijn_spotter_mori/7202.jpeg",
-  ],
-  "7212": [
-    "@delijn_spotter_mori/7212.jpeg",
-  ],
-  "7215": [
-    "@delijn_spotter_mori/7215.jpeg",
-  ],
-  "7237": [
-    "@delijn_spotter_mori/7237.jpeg",
-  ],
-  "7340": [
-    "@delijn_spotter_mori/7340.jpeg",
-  ],
+    "2889":  [
+                 "Busspotter 95/2889.jpeg"
+             ],
+    "2894":  [
+                 "Busspotter 95/2894.jpeg"
+             ],
+    "2890":  [
+                 "Busspotter 95/2890.jpeg"
+             ],
+    "502606":  [
+                   "Busspotter 95/502606.jpeg"
+               ],
+    "550951":  [
+                   "Busspotter 95/550951.jpeg"
+               ],
+    "646074":  [
+                   "Busspotter 95/646074.jpeg"
+               ],
+    "689040":  [
+                   "Busspotter 95/689040.jpeg"
+               ],
+    "647026":  [
+                   "Busspotter 95/647026.jpeg"
+               ],
+    "5000":  [
+                 "Busspotter 95/5000.jpeg"
+             ],
+    "668019":  [
+                   "Busspotter 95/668019.jpeg"
+               ],
+    "4978":  [
+                 "Busspotter 95/4978.jpeg"
+             ],
+    "550821":  [
+                   "Busspotter 95/550821.jpeg"
+               ],
+    "4979":  [
+                 "Busspotter 95/4979.jpeg",
+                 "Busspotter 95/4979 (2).jpeg"
+             ],
+    "689038":  [
+                   "Busspotter 95/689038.jpeg"
+               ],
+    "550529":  [
+                   "Busspotter 95/550529.jpeg"
+               ],
+    "4953":  [
+                 "Busspotter 95/4953.jpeg"
+             ],
+    "550435":  [
+                   "Busspotter 95/550435.jpeg",
+                   "Busspotter 95/550435 (2).jpeg"
+               ],
+    "550524":  [
+                   "Busspotter 95/550524 (2).jpeg",
+                   "Busspotter 95/550524 (3).jpeg",
+                   "Busspotter 95/550524.jpeg"
+               ],
+    "647019":  [
+                   "Busspotter 95/647019.jpeg"
+               ],
+    "689031":  [
+                   "Busspotter 95/689031.jpeg",
+                   "Busspotter 95/689031 (2).jpeg"
+               ],
+    "689047":  [
+                   "Busspotter 95/689047.jpeg",
+                   "@dln.spotter/689047 (1).jpeg",
+                   "@dln.spotter/689047.jpeg"
+               ],
+    "4451":  [
+                 "Busspotter 95/4451 (2).jpeg",
+                 "Busspotter 95/4451.jpeg"
+             ],
+    "4456":  [
+                 "Busspotter 95/4456.jpeg"
+             ],
+    "4563":  [
+                 "Busspotter 95/4563.jpeg"
+             ],
+    "4956":  [
+                 "Busspotter 95/4956.jpeg"
+             ],
+    "5996":  [
+                 "Busspotter 95/5996.jpeg"
+             ],
+    "550249":  [
+                   "Busspotter 95/550249.jpeg"
+               ],
+    "550318":  [
+                   "Busspotter 95/550318.jpeg"
+               ],
+    "550434":  [
+                   "Busspotter 95/550434 (2).jpeg",
+                   "Busspotter 95/550434.jpeg"
+               ],
+    "550523":  [
+                   "Busspotter 95/550523.jpeg",
+                   "Busspotter 95/550523 (2).jpeg"
+               ],
+    "607027":  [
+                   "Busspotter 95/607027.jpeg"
+               ],
+    "635067":  [
+                   "Busspotter 95/635067.jpeg"
+               ],
+    "646055":  [
+                   "Busspotter 95/646055.jpeg"
+               ],
+    "689042":  [
+                   "Busspotter 95/689042.jpeg"
+               ],
+    "2159":  [
+                 "Busspotter 95/2159.jpeg"
+             ],
+    "4454":  [
+                 "Busspotter 95/4454.jpeg"
+             ],
+    "4598":  [
+                 "Busspotter 95/4598.jpeg"
+             ],
+    "4997":  [
+                 "Busspotter 95/4997.jpeg"
+             ],
+    "5006":  [
+                 "Busspotter 95/5006.jpeg",
+                 "Busspotter 95/5006 (2).jpeg"
+             ],
+    "5144":  [
+                 "Busspotter 95/5144.jpeg"
+             ],
+    "5993":  [
+                 "Busspotter 95/5993.jpeg"
+             ],
+    "550149":  [
+                   "Busspotter 95/550149.jpeg"
+               ],
+    "550310":  [
+                   "Busspotter 95/550310.jpeg"
+               ],
+    "635048":  [
+                   "Busspotter 95/635048.jpeg"
+               ],
+    "647016":  [
+                   "Busspotter 95/647016.jpeg"
+               ],
+    "649014":  [
+                   "Busspotter 95/649014.jpeg",
+                   "Robin Van de Ven/649014.jpeg"
+               ],
+    "4459":  [
+                 "Busspotter 95/4459.jpeg"
+             ],
+    "635070":  [
+                   "Busspotter 95/635070.jpeg"
+               ],
+    "689037":  [
+                   "Busspotter 95/689037.jpeg"
+               ],
+    "689049":  [
+                   "Busspotter 95/689049.jpeg"
+               ],
+    "4595":  [
+                 "Busspotter 95/4595.jpeg",
+                 "Busspotter 95/4595 (2).jpeg"
+             ],
+    "5014":  [
+                 "Busspotter 95/5014.jpeg"
+             ],
+    "610086":  [
+                   "Busspotter 95/610086.jpeg"
+               ],
+    "646063":  [
+                   "Busspotter 95/646063.jpeg",
+                   "Robin Van de Ven/646063.jpeg"
+               ],
+    "4457":  [
+                 "Busspotter 95/4457.jpeg",
+                 "Robin Van de Ven/4457.jpeg"
+             ],
+    "4594":  [
+                 "Busspotter 95/4594.jpeg"
+             ],
+    "550431":  [
+                   "Busspotter 95/550431.jpeg",
+                   "Busspotter 95/550431 (2).jpeg"
+               ],
+    "686043":  [
+                   "Busspotter 95/686043.jpeg"
+               ],
+    "647017":  [
+                   "Busspotter 95/647017.jpeg",
+                   "Robin Van de Ven/647017.jpeg"
+               ],
+    "5150":  [
+                 "Busspotter 95/5150.jpeg"
+             ],
+    "4952":  [
+                 "Busspotter 95/4952.jpeg",
+                 "Robin Van de Ven/4952.jpeg"
+             ],
+    "646071":  [
+                   "Busspotter 95/646071.jpeg"
+               ],
+    "668015":  [
+                   "Busspotter 95/668015.jpeg"
+               ],
+    "550433":  [
+                   "Busspotter 95/550433.jpeg"
+               ],
+    "2015":  [
+                 "Robin Van de Ven/2015.jpeg"
+             ],
+    "2017":  [
+                 "Robin Van de Ven/2017.jpeg"
+             ],
+    "2085":  [
+                 "Robin Van de Ven/2085.jpeg"
+             ],
+    "2193":  [
+                 "Robin Van de Ven/2193.jpeg"
+             ],
+    "2362":  [
+                 "Robin Van de Ven/2362.jpeg"
+             ],
+    "2520":  [
+                 "Robin Van de Ven/2520.jpeg"
+             ],
+    "2591":  [
+                 "Robin Van de Ven/2591.jpeg"
+             ],
+    "2953":  [
+                 "Robin Van de Ven/2953.jpeg"
+             ],
+    "2956":  [
+                 "Robin Van de Ven/2956.jpeg"
+             ],
+    "2979":  [
+                 "Robin Van de Ven/2979.jpeg"
+             ],
+    "2982":  [
+                 "Robin Van de Ven/2982.jpeg"
+             ],
+    "3025":  [
+                 "Robin Van de Ven/3025.jpeg"
+             ],
+    "3091":  [
+                 "Robin Van de Ven/3091.jpeg"
+             ],
+    "3120":  [
+                 "Robin Van de Ven/3120.jpeg"
+             ],
+    "441315":  [
+                   "Robin Van de Ven/441315.jpeg"
+               ],
+    "4660":  [
+                 "Robin Van de Ven/4660.jpeg"
+             ],
+    "4864":  [
+                 "Robin Van de Ven/4864.jpeg"
+             ],
+    "4977":  [
+                 "Robin Van de Ven/4977.jpeg"
+             ],
+    "5003":  [
+                 "Robin Van de Ven/5003.jpeg",
+                 "@busspotter_04/5003.jpeg"
+             ],
+    "5299":  [
+                 "Robin Van de Ven/5299.jpeg"
+             ],
+    "5343":  [
+                 "Robin Van de Ven/5343.jpeg"
+             ],
+    "5508":  [
+                 "Robin Van de Ven/5508.jpeg"
+             ],
+    "5577":  [
+                 "Robin Van de Ven/5577.jpeg"
+             ],
+    "5643":  [
+                 "Robin Van de Ven/5643.jpeg"
+             ],
+    "5738":  [
+                 "Robin Van de Ven/5738.jpeg"
+             ],
+    "646075":  [
+                   "Robin Van de Ven/646075.jpeg"
+               ],
+    "656087":  [
+                   "Robin Van de Ven/656087.jpeg"
+               ],
+    "660044":  [
+                   "Robin Van de Ven/660044.jpeg"
+               ],
+    "660045":  [
+                   "Robin Van de Ven/660045.jpeg"
+               ],
+    "674113":  [
+                   "Robin Van de Ven/674113.jpeg"
+               ],
+    "678132":  [
+                   "Robin Van de Ven/678132.jpeg"
+               ],
+    "678163":  [
+                   "Robin Van de Ven/678163.jpeg"
+               ],
+    "689029":  [
+                   "Robin Van de Ven/689029.jpeg"
+               ],
+    "2357":  [
+                 "Robin Van de Ven/2357.jpeg"
+             ],
+    "3015":  [
+                 "Robin Van de Ven/3015.jpeg"
+             ],
+    "4575":  [
+                 "Robin Van de Ven/4575.jpeg"
+             ],
+    "678130":  [
+                   "Robin Van de Ven/678130.jpeg"
+               ],
+    "669018":  [
+                   "Robin Van de Ven/669018.jpeg"
+               ],
+    "678115":  [
+                   "Robin Van de Ven/678115.jpeg"
+               ],
+    "5409":  [
+                 "Robin Van de Ven/5409.jpeg"
+             ],
+    "2228":  [
+                 "Robin Van de Ven/2228.jpeg"
+             ],
+    "2876":  [
+                 "Robin Van de Ven/2876.jpeg"
+             ],
+    "2947":  [
+                 "Robin Van de Ven/2947.jpeg"
+             ],
+    "5500":  [
+                 "Robin Van de Ven/5500.jpeg"
+             ],
+    "629053":  [
+                   "Robin Van de Ven/629053.jpeg"
+               ],
+    "639035":  [
+                   "Robin Van de Ven/639035.jpeg"
+               ],
+    "2899":  [
+                 "Robin Van de Ven/2899.jpeg"
+             ],
+    "4458":  [
+                 "Robin Van de Ven/4458.jpeg"
+             ],
+    "5163":  [
+                 "Robin Van de Ven/5163.jpeg"
+             ],
+    "221766":  [
+                   "Robin Van de Ven/221766.jpeg"
+               ],
+    "652039":  [
+                   "Robin Van de Ven/652039.jpeg"
+               ],
+    "660048":  [
+                   "Robin Van de Ven/660048.jpeg"
+               ],
+    "668020":  [
+                   "Robin Van de Ven/668020.jpeg"
+               ],
+    "689030":  [
+                   "Robin Van de Ven/689030.jpeg"
+               ],
+    "689035":  [
+                   "Robin Van de Ven/689035.jpeg"
+               ],
+    "6125":  [
+                 "Robin Van de Ven/6125 (2).jpeg",
+                 "Robin Van de Ven/6125.jpeg"
+             ],
+    "7405":  [
+                 "Robin Van de Ven/7405.jpeg"
+             ],
+    "105368":  [
+                   "Robin Van de Ven/105368.jpeg"
+               ],
+    "611082":  [
+                   "Robin Van de Ven/611082.jpeg"
+               ],
+    "623113":  [
+                   "Robin Van de Ven/623113.jpeg"
+               ],
+    "2548":  [
+                 "Robin Van de Ven/2548.jpeg"
+             ],
+    "2966":  [
+                 "Robin Van de Ven/2966.jpeg"
+             ],
+    "4606":  [
+                 "Robin Van de Ven/4606.jpeg"
+             ],
+    "4734":  [
+                 "Robin Van de Ven/4734.jpeg"
+             ],
+    "4907":  [
+                 "Robin Van de Ven/4907.jpeg"
+             ],
+    "5644":  [
+                 "Robin Van de Ven/5644.jpeg"
+             ],
+    "5898":  [
+                 "Robin Van de Ven/5898.jpeg"
+             ],
+    "5931":  [
+                 "Robin Van de Ven/5931.jpeg"
+             ],
+    "5966":  [
+                 "Robin Van de Ven/5966.jpeg"
+             ],
+    "6307":  [
+                 "Robin Van de Ven/6307.jpeg"
+             ],
+    "6312":  [
+                 "Robin Van de Ven/6312.jpeg"
+             ],
+    "7205":  [
+                 "Robin Van de Ven/7205.jpeg"
+             ],
+    "7314":  [
+                 "Robin Van de Ven/7314.jpeg"
+             ],
+    "6111":  [
+                 "Robin Van de Ven/6111 (2).jpeg",
+                 "Robin Van de Ven/6111.jpeg"
+             ],
+    "6123":  [
+                 "Robin Van de Ven/6123 (2).jpeg",
+                 "Robin Van de Ven/6123.jpeg"
+             ],
+    "550820":  [
+                   "@dln.spotter/550820.jpeg"
+               ],
+    "618097":  [
+                   "@dln.spotter/618097.jpeg"
+               ],
+    "643043":  [
+                   "@dln.spotter/643043.jpeg"
+               ],
+    "644081":  [
+                   "@dln.spotter/644081.jpeg"
+               ],
+    "646079":  [
+                   "@dln.spotter/646079 (1).jpeg",
+                   "@dln.spotter/646079.jpeg"
+               ],
+    "646086":  [
+                   "@dln.spotter/646086.jpeg"
+               ],
+    "652034":  [
+                   "@dln.spotter/652034.jpeg"
+               ],
+    "660046":  [
+                   "@dln.spotter/660046.jpeg"
+               ],
+    "643047":  [
+                   "@dln.spotter/643047.jpeg"
+               ],
+    "2811":  [
+                 "@dln.spotter/2811 (2).jpeg",
+                 "@dln.spotter/2811.jpeg"
+             ],
+    "2833":  [
+                 "@dln.spotter/2833.jpeg"
+             ],
+    "3028":  [
+                 "@dln.spotter/3028.jpeg"
+             ],
+    "3048":  [
+                 "@dln.spotter/3048.jpeg"
+             ],
+    "154015":  [
+                   "@dln.spotter/154015.jpeg"
+               ],
+    "220630":  [
+                   "@dln.spotter/220630.jpeg"
+               ],
+    "221111":  [
+                   "@dln.spotter/221111.jpeg"
+               ],
+    "222080":  [
+                   "@dln.spotter/222080.jpeg"
+               ],
+    "618069":  [
+                   "@dln.spotter/618069.jpeg"
+               ],
+    "643039":  [
+                   "@dln.spotter/643039.jpeg"
+               ],
+    "664053":  [
+                   "@dln.spotter/664053.jpeg"
+               ],
+    "664059":  [
+                   "@dln.spotter/664059 (2).jpeg",
+                   "@dln.spotter/664059.jpeg"
+               ],
+    "669044":  [
+                   "@dln.spotter/669044.jpeg"
+               ],
+    "5480":  [
+                 "@dln.spotter/5480.jpeg"
+             ],
+    "664040":  [
+                   "@dln.spotter/664040.jpeg"
+               ],
+    "664062":  [
+                   "@dln.spotter/664062.jpeg"
+               ],
+    "664039":  [
+                   "@dln.spotter/664039.jpeg"
+               ],
+    "104032":  [
+                   "@dln.spotter/104032.jpeg"
+               ],
+    "669045":  [
+                   "@dln.spotter/669045.jpeg",
+                   "@dln.spotter/669045 (2).jpeg"
+               ],
+    "664054":  [
+                   "@dln.spotter/664054.jpeg"
+               ],
+    "669039":  [
+                   "@dln.spotter/669039.jpeg"
+               ],
+    "2552":  [
+                 "@delijn821/2552.jpeg",
+                 "@delijn821/2552 (2).jpeg",
+                 "@delijn821/2552 (3).jpeg"
+             ],
+    "2252 + 669027":  [
+                          "@delijn821/2252 + 669027.jpeg"
+                      ],
+    "676051":  [
+                   "@delijn821/676051.jpeg",
+                   "@delijn821/676051 (2).jpeg",
+                   "@delijn821/676051 (3).jpeg",
+                   "@delijn821/676051 (4).jpeg",
+                   "@delijn821/676051 (5).jpeg",
+                   "@delijn821/676051 (6).jpeg",
+                   "@delijn821/676051 (7).jpeg"
+               ],
+    "680040":  [
+                   "@delijn821/680040 (2).jpeg",
+                   "@delijn821/680040 (3).jpeg",
+                   "@delijn821/680040 (4).jpeg",
+                   "@delijn821/680040.jpeg"
+               ],
+    "678090":  [
+                   "@delijn821/678090.jpeg"
+               ],
+    "678080":  [
+                   "@delijn821/678080.jpeg",
+                   "@delijn821/678080 (2).jpeg"
+               ],
+    "550528":  [
+                   "@delijn821/550528.jpeg"
+               ],
+    "2144":  [
+                 "@delijn_spotter/2144.jpeg"
+             ],
+    "2165":  [
+                 "@delijn_spotter/2165.jpeg"
+             ],
+    "2385":  [
+                 "@delijn_spotter/2385.jpeg"
+             ],
+    "2452":  [
+                 "@delijn_spotter/2452.jpeg"
+             ],
+    "2463":  [
+                 "@delijn_spotter/2463.jpeg"
+             ],
+    "2469":  [
+                 "@delijn_spotter/2469.jpeg"
+             ],
+    "2476":  [
+                 "@delijn_spotter/2476.jpeg"
+             ],
+    "2551":  [
+                 "@delijn_spotter/2551.jpeg"
+             ],
+    "2592":  [
+                 "@delijn_spotter/2592.jpeg"
+             ],
+    "4049":  [
+                 "@delijn_spotter/4049.jpeg"
+             ],
+    "4174":  [
+                 "@delijn_spotter/4174.jpeg"
+             ],
+    "4258":  [
+                 "@delijn_spotter/4258.jpeg"
+             ],
+    "4266":  [
+                 "@delijn_spotter/4266.jpeg"
+             ],
+    "4297":  [
+                 "@delijn_spotter/4297.jpeg"
+             ],
+    "4299":  [
+                 "@delijn_spotter/4299.jpeg"
+             ],
+    "4477":  [
+                 "@delijn_spotter/4477 (2).jpeg",
+                 "@delijn_spotter/4477.jpeg"
+             ],
+    "4541":  [
+                 "@delijn_spotter/4541.jpeg"
+             ],
+    "4590":  [
+                 "@delijn_spotter/4590.jpeg"
+             ],
+    "4640":  [
+                 "@delijn_spotter/4640.jpeg"
+             ],
+    "4691":  [
+                 "@delijn_spotter/4691.jpeg"
+             ],
+    "4693":  [
+                 "@delijn_spotter/4693.jpeg"
+             ],
+    "4772":  [
+                 "@delijn_spotter/4772.jpeg"
+             ],
+    "4774":  [
+                 "@delijn_spotter/4774.jpeg"
+             ],
+    "4838":  [
+                 "@delijn_spotter/4838 (2).jpeg",
+                 "@delijn_spotter/4838.jpeg"
+             ],
+    "4841":  [
+                 "@delijn_spotter/4841.jpeg"
+             ],
+    "4844":  [
+                 "@delijn_spotter/4844 (2).jpeg",
+                 "@delijn_spotter/4844 (3).jpeg",
+                 "@delijn_spotter/4844.jpeg"
+             ],
+    "4847":  [
+                 "@delijn_spotter/4847.jpeg"
+             ],
+    "4848":  [
+                 "@delijn_spotter/4848.jpeg"
+             ],
+    "4858":  [
+                 "@delijn_spotter/4858.jpeg"
+             ],
+    "4873":  [
+                 "@delijn_spotter/4873.jpeg"
+             ],
+    "4896":  [
+                 "@delijn_spotter/4896.jpeg"
+             ],
+    "4898":  [
+                 "@delijn_spotter/4898.jpeg"
+             ],
+    "4901":  [
+                 "@delijn_spotter/4901.jpeg"
+             ],
+    "4998":  [
+                 "@delijn_spotter/4998.jpeg"
+             ],
+    "5007":  [
+                 "@delijn_spotter/5007.jpeg"
+             ],
+    "5058":  [
+                 "@delijn_spotter/5058.jpeg"
+             ],
+    "5116":  [
+                 "@delijn_spotter/5116.jpeg"
+             ],
+    "5151":  [
+                 "@delijn_spotter/5151.jpeg"
+             ],
+    "5153":  [
+                 "@delijn_spotter/5153.jpeg"
+             ],
+    "5159":  [
+                 "@delijn_spotter/5159.jpeg"
+             ],
+    "5165":  [
+                 "@delijn_spotter/5165.jpeg"
+             ],
+    "5243":  [
+                 "@delijn_spotter/5243 (2).jpeg",
+                 "@delijn_spotter/5243.jpeg"
+             ],
+    "5311":  [
+                 "@delijn_spotter/5311.jpeg"
+             ],
+    "5321":  [
+                 "@delijn_spotter/5321.jpeg"
+             ],
+    "5351":  [
+                 "@delijn_spotter/5351.jpeg"
+             ],
+    "5356":  [
+                 "@delijn_spotter/5356.jpeg"
+             ],
+    "5466":  [
+                 "@delijn_spotter/5466 (2).jpeg",
+                 "@delijn_spotter/5466.jpeg"
+             ],
+    "5472":  [
+                 "@delijn_spotter/5472.jpeg"
+             ],
+    "5487":  [
+                 "@delijn_spotter/5487.jpeg"
+             ],
+    "5517":  [
+                 "@delijn_spotter/5517.jpeg"
+             ],
+    "5722":  [
+                 "@delijn_spotter/5722.jpeg"
+             ],
+    "5800":  [
+                 "@delijn_spotter/5800.jpeg"
+             ],
+    "5810":  [
+                 "@delijn_spotter/5810.jpeg"
+             ],
+    "5811":  [
+                 "@delijn_spotter/5811.jpeg"
+             ],
+    "5866":  [
+                 "@delijn_spotter/5866.jpeg"
+             ],
+    "5875":  [
+                 "@delijn_spotter/5875.jpeg"
+             ],
+    "5977":  [
+                 "@delijn_spotter/5977.jpeg"
+             ],
+    "5979":  [
+                 "@delijn_spotter/5979.jpeg"
+             ],
+    "6003":  [
+                 "@delijn_spotter/6003.jpeg"
+             ],
+    "6018":  [
+                 "@delijn_spotter/6018.jpeg"
+             ],
+    "6019":  [
+                 "@delijn_spotter/6019.jpeg"
+             ],
+    "6102":  [
+                 "@delijn_spotter/6102.jpeg"
+             ],
+    "6119":  [
+                 "@delijn_spotter/6119.jpeg"
+             ],
+    "6148":  [
+                 "@delijn_spotter/6148.jpeg"
+             ],
+    "6339":  [
+                 "@delijn_spotter/6339.jpeg"
+             ],
+    "7085":  [
+                 "@delijn_spotter/7085.jpeg"
+             ],
+    "7203":  [
+                 "@delijn_spotter/7203.jpeg"
+             ],
+    "7206":  [
+                 "@delijn_spotter/7206.jpeg"
+             ],
+    "7225":  [
+                 "@delijn_spotter/7225.jpeg"
+             ],
+    "7236":  [
+                 "@delijn_spotter/7236.jpeg"
+             ],
+    "5341":  [
+                 "@delijn_spotter_mori/5341 (2).jpeg",
+                 "@delijn_spotter_mori/5341.jpeg"
+             ],
+    "5544":  [
+                 "@delijn_spotter_mori/5544 (2).jpeg",
+                 "@delijn_spotter_mori/5544.jpeg"
+             ],
+    "5786":  [
+                 "@delijn_spotter_mori/5786 (2).jpeg",
+                 "@delijn_spotter_mori/5786.jpeg"
+             ],
+    "4534":  [
+                 "@delijn_spotter_mori/4534 (2).jpeg",
+                 "@delijn_spotter_mori/4534.jpeg"
+             ],
+    "4557":  [
+                 "@delijn_spotter_mori/4557 (2).jpeg",
+                 "@delijn_spotter_mori/4557.jpeg"
+             ],
+    "5563":  [
+                 "@delijn_spotter_mori/5563 (2).jpeg",
+                 "@delijn_spotter_mori/5563.jpeg"
+             ],
+    "5576":  [
+                 "@delijn_spotter_mori/5576 (2).jpeg",
+                 "@delijn_spotter_mori/5576.jpeg"
+             ],
+    "5791":  [
+                 "@delijn_spotter_mori/5791 (2).jpeg",
+                 "@delijn_spotter_mori/5791.jpeg"
+             ],
+    "5793":  [
+                 "@delijn_spotter_mori/5793 (2).jpeg",
+                 "@delijn_spotter_mori/5793.jpeg"
+             ],
+    "2032":  [
+                 "@delijn_spotter_mori/2032.jpeg"
+             ],
+    "2039":  [
+                 "@delijn_spotter_mori/2039.jpeg"
+             ],
+    "2647":  [
+                 "@delijn_spotter_mori/2647.jpeg"
+             ],
+    "2916":  [
+                 "@delijn_spotter_mori/2916.jpeg"
+             ],
+    "2917":  [
+                 "@delijn_spotter_mori/2917.jpeg"
+             ],
+    "4588":  [
+                 "@delijn_spotter_mori/4588.jpeg"
+             ],
+    "4686":  [
+                 "@delijn_spotter_mori/4686.jpeg"
+             ],
+    "4804":  [
+                 "@delijn_spotter_mori/4804.jpeg"
+             ],
+    "4821":  [
+                 "@delijn_spotter_mori/4821.jpeg"
+             ],
+    "5020":  [
+                 "@delijn_spotter_mori/5020.jpeg"
+             ],
+    "5087":  [
+                 "@delijn_spotter_mori/5087.jpeg"
+             ],
+    "5089":  [
+                 "@delijn_spotter_mori/5089.jpeg"
+             ],
+    "5282":  [
+                 "@delijn_spotter_mori/5282.jpeg"
+             ],
+    "5573":  [
+                 "@delijn_spotter_mori/5573.jpeg"
+             ],
+    "5610":  [
+                 "@delijn_spotter_mori/5610.jpeg"
+             ],
+    "5882":  [
+                 "@delijn_spotter_mori/5882.jpeg"
+             ],
+    "5895":  [
+                 "@delijn_spotter_mori/5895.jpeg"
+             ],
+    "5906":  [
+                 "@delijn_spotter_mori/5906.jpeg"
+             ],
+    "6211":  [
+                 "@delijn_spotter_mori/6211.jpeg"
+             ],
+    "7133":  [
+                 "@delijn_spotter_mori/7133.jpeg"
+             ],
+    "7136":  [
+                 "@delijn_spotter_mori/7136.jpeg"
+             ],
+    "7158":  [
+                 "@delijn_spotter_mori/7158.jpeg"
+             ],
+    "7202":  [
+                 "@delijn_spotter_mori/7202.jpeg"
+             ],
+    "7212":  [
+                 "@delijn_spotter_mori/7212.jpeg"
+             ],
+    "7215":  [
+                 "@delijn_spotter_mori/7215.jpeg"
+             ],
+    "7237":  [
+                 "@delijn_spotter_mori/7237.jpeg"
+             ],
+    "7340":  [
+                 "@delijn_spotter_mori/7340.jpeg"
+             ],
+    "662029":  [
+                   "@delijn_spotter_mori/662029.jpeg"
+               ],
+    "2250":  [
+                 "@delijn_spotter_mori/2250.jpeg"
+             ],
+    "2783":  [
+                 "@delijn_spotter_mori/2783.jpeg"
+             ],
+    "4296":  [
+                 "@delijn_spotter_mori/4296.jpeg"
+             ],
+    "4307":  [
+                 "@delijn_spotter_mori/4307.jpeg"
+             ],
+    "4362":  [
+                 "@delijn_spotter_mori/4362.jpeg"
+             ],
+    "4532":  [
+                 "@delijn_spotter_mori/4532.jpeg"
+             ],
+    "4755":  [
+                 "@delijn_spotter_mori/4755.jpeg"
+             ],
+    "4822":  [
+                 "@delijn_spotter_mori/4822.jpeg"
+             ],
+    "4827":  [
+                 "@delijn_spotter_mori/4827.jpeg"
+             ],
+    "4893":  [
+                 "@delijn_spotter_mori/4893.jpeg"
+             ],
+    "5016":  [
+                 "@delijn_spotter_mori/5016.jpeg"
+             ],
+    "5342":  [
+                 "@delijn_spotter_mori/5342.jpeg"
+             ],
+    "5566":  [
+                 "@delijn_spotter_mori/5566.jpeg"
+             ],
+    "5613":  [
+                 "@delijn_spotter_mori/5613.jpeg"
+             ],
+    "5649":  [
+                 "@delijn_spotter_mori/5649.jpeg"
+             ],
+    "5652":  [
+                 "@delijn_spotter_mori/5652.jpeg"
+             ],
+    "5653":  [
+                 "@delijn_spotter_mori/5653.jpeg"
+             ],
+    "5778":  [
+                 "@delijn_spotter_mori/5778.jpeg"
+             ],
+    "5784":  [
+                 "@delijn_spotter_mori/5784.jpeg"
+             ],
+    "5787":  [
+                 "@delijn_spotter_mori/5787.jpeg"
+             ],
+    "5798":  [
+                 "@delijn_spotter_mori/5798.jpeg"
+             ],
+    "105973":  [
+                   "@delijn_spotter_mori/105973.jpeg"
+               ],
+    "220169":  [
+                   "@delijn_spotter_mori/220169.jpeg"
+               ],
+    "220343":  [
+                   "@delijn_spotter_mori/220343.jpeg"
+               ],
+    "331184":  [
+                   "@delijnspotter2024/331184.jpeg",
+                   "@delijnspotter2024/331184 (2).jpeg",
+                   "@delijnspotter2024/331184 (3).jpeg",
+                   "@delijnspotter2024/331184 (4).jpeg"
+               ],
+    "678069":  [
+                   "@robbiebobbie2024/678069 (2).jpeg",
+                   "@robbiebobbie2024/678069 (3).jpeg",
+                   "@robbiebobbie2024/678069.jpeg"
+               ],
+    "678078":  [
+                   "@robbiebobbie2024/678078 (2).jpeg"
+               ],
+    "678087":  [
+                   "@robbiebobbie2024/678087.jpeg"
+               ],
+    "550710":  [
+                   "Tuur De Rauw/550710.jpeg"
+               ],
+    "635062":  [
+                   "@busspotter_04/635062.jpeg"
+               ],
+    "089024":  [
+                   "@busspotter_04/089024.jpeg"
+               ],
+    "2895":  [
+                 "@busspotter_04/2895.jpeg"
+             ]
 };
 
 function registerOverlayModal(modalEl) {
@@ -1385,7 +2093,6 @@ const ALLOWED_UPDATE_INTERVALS = [10000, 15000, 30000];
 const REQUEST_TIMEOUT_MS = 12000;
 const REALTIME_FETCH_TIMEOUT_MS = 10000;
 const REALTIME_FEED_CACHE_MS = 9000;
-const STARTUP_DATASET_STEP_DELAY_MS = 450;
 const REALTIME_ROUTE_TRAIL_MAX_POINTS = 20;
 const REALTIME_MAP_RECENTER_MIN_DISTANCE_METERS = 120;
 const REALTIME_MAP_RECENTER_MIN_INTERVAL_MS = 15000;
@@ -1622,16 +2329,6 @@ function normalizeSearchText(value) {
     .toLowerCase()
     .replace(/"/g, "")
     .trim();
-}
-
-function sanitizeFileName(value, fallback = "bus") {
-  const cleaned = (value || "")
-    .toString()
-    .replace(/[<>:"/\\|?*\x00-\x1f]/g, "_")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/[. ]+$/g, "");
-  return cleaned || fallback;
 }
 
 function formatInfoTimestamp(timestamp) {
@@ -2146,29 +2843,6 @@ function collectVehicleDisplayRows(bus) {
   }
 
   return rows;
-}
-
-function formatBusFieldValueForDisplay(bus, fieldKey, rawValue) {
-  const value = rawValue == null ? "" : rawValue.toString().trim();
-  const key = fieldKey.toLowerCase();
-
-  if (key.includes("in dienst")) {
-    if (!value || value === "/") return getLabel("busNotYetInService", "Bus nog niet in dienst");
-    return formatDateForUi(value, { year: "numeric", month: "long", day: "numeric" });
-  }
-
-  if (key.includes("uit dienst")) {
-    if (!value || value === "/") return t("notOutOfService");
-    return formatDateForUi(value, { year: "numeric", month: "long", day: "numeric" });
-  }
-
-  if (key.includes("datum")) {
-    if (!value || value === "/") return "";
-    return formatDateForUi(value, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  }
-
-  if (!value || value === "/") return "";
-  return value;
 }
 
 function showCompareModal() {
@@ -3812,10 +4486,41 @@ async function getPhotoExifMetadata(src) {
   if (cached && typeof cached === "object" && !(cached instanceof Promise)) return cached;
   if (cached) return cached;
 
-  const pending = fetch(cacheKey, { cache: "force-cache" })
+  const pending = fetch(cacheKey, {
+    cache: "force-cache",
+    headers: { Range: "bytes=0-262143" }
+  })
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.arrayBuffer();
+      if (response.status === 206 || !response.body?.getReader) return response.arrayBuffer();
+      // Some hosts ignore Range requests. Read only the JPEG header/EXIF prefix
+      // rather than downloading the full original image for its metadata.
+      return (async () => {
+        const reader = response.body.getReader();
+        const chunks = [];
+        const maxBytes = 256 * 1024;
+        let totalBytes = 0;
+        try {
+          while (totalBytes < maxBytes) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const remaining = maxBytes - totalBytes;
+            const chunk = value.byteLength > remaining ? value.subarray(0, remaining) : value;
+            chunks.push(chunk);
+            totalBytes += chunk.byteLength;
+            if (chunk.byteLength < value.byteLength) break;
+          }
+        } finally {
+          await reader.cancel().catch(() => {});
+        }
+        const prefix = new Uint8Array(totalBytes);
+        let offset = 0;
+        chunks.forEach((chunk) => {
+          prefix.set(chunk, offset);
+          offset += chunk.byteLength;
+        });
+        return prefix.buffer;
+      })();
     })
     .then((buffer) => parseExifMetadataFromArrayBuffer(buffer))
     .catch(() => ({ date: "", dateTimestamp: Number.NaN, latitude: NaN, longitude: NaN }))
@@ -3831,29 +4536,14 @@ async function getPhotoExifMetadata(src) {
   return pending;
 }
 
-async function getPhotoCaptureDate(src) {
-  const cacheKey = buildVehiclePhotoRequestUrl(src);
-  if (!cacheKey) return "";
-  const cached = photoCaptureDateCache.get(cacheKey);
-  if (typeof cached === "string") return cached;
-  if (cached) return cached;
-
-  const pending = getPhotoExifMetadata(src)
-    .then((metadata) => metadata?.date || "")
-    .catch(() => "")
-    .then((value) => {
-      photoCaptureDateCache.set(cacheKey, value || "");
-      return value || "";
-    });
-
-  photoCaptureDateCache.set(cacheKey, pending);
-  return pending;
-}
-
 function buildVehiclePhotoEntry(src, maker = "", sortOrder = 0) {
   const normalizedMaker = (maker || "").toString().trim();
+  const displaySrc = src.includes("/media/bus/")
+    ? src.replace("/media/bus/", "/media/bus-optimized/")
+    : src;
   return {
     src,
+    displaySrc,
     caption: "",
     meta: normalizedMaker,
     metaFields: {
@@ -4049,50 +4739,6 @@ function sortVehiclePhotoEntries(entries = []) {
   return [...entries].sort(compareVehiclePhotoEntries);
 }
 
-function mergeVehiclePhotoEntries(...entryGroups) {
-  const mergedEntries = [];
-  const seen = new Set();
-
-  entryGroups
-    .flat()
-    .forEach((entry) => {
-      if (!entry?.src || seen.has(entry.src)) return;
-      seen.add(entry.src);
-      mergedEntries.push(entry);
-    });
-
-  return sortVehiclePhotoEntries(mergedEntries);
-}
-
-function getFallbackPhotoEntries(vehicleId, suffixesOverride = null) {
-  const aliases = getVehiclePhotoAliases(vehicleId);
-  const extensions = ["jpeg", "jpg", "JPG", "png", "webp"];
-  const suffixes = Array.isArray(suffixesOverride) && suffixesOverride.length
-    ? suffixesOverride
-    : ["", ...Array.from({ length: 12 }, (_, index) => ` (${index + 1})`)];
-  const fallbackEntries = [];
-  const seen = new Set();
-  aliases.forEach((alias) => {
-    if (!alias) return;
-    suffixes.forEach((suffix) => {
-      extensions.forEach((extension) => {
-        const fileName = `${alias}${suffix}.${extension}`;
-        KNOWN_PHOTOGRAPHER_FOLDERS.forEach((folderName) => {
-          const src = buildVehiclePhotoFolderPath(folderName, fileName);
-          if (seen.has(src)) return;
-          seen.add(src);
-          fallbackEntries.push(buildVehiclePhotoEntry(src, folderName, fallbackEntries.length));
-        });
-        const rootMediaSrc = buildAppAssetPath(`media/${encodeURIComponent(fileName)}`);
-        if (seen.has(rootMediaSrc)) return;
-        seen.add(rootMediaSrc);
-        fallbackEntries.push(buildVehiclePhotoEntry(rootMediaSrc, "", fallbackEntries.length));
-      });
-    });
-  });
-  return fallbackEntries;
-}
-
 function syncVehiclePhotoEntryMeta(entry) {
   if (!entry) return entry;
   entry.meta = [
@@ -4176,52 +4822,14 @@ async function hydrateVehiclePhotoEntryLocation(entry) {
   return entry.locationResolvePromise;
 }
 
-function probePhotoEntry(entry) {
-  return new Promise((resolve) => {
-    const probe = new Image();
-    probe.decoding = "async";
-    probe.loading = "eager";
-    probe.onload = () => resolve(entry);
-    probe.onerror = () => resolve(null);
-    probe.src = buildVehiclePhotoRequestUrl(entry.src);
-  });
-}
-
 function buildVehiclePhotoRequestUrl(src) {
   if (!src) return "";
   const separator = src.includes("?") ? "&" : "?";
   return `${src}${separator}v=${encodeURIComponent(APP_VERSION)}`;
 }
 
-async function resolvePhotoEntriesFromCandidates(candidates) {
-  if (!Array.isArray(candidates) || !candidates.length) return [];
-  const probedEntries = await Promise.all(candidates.map((entry) => probePhotoEntry(entry)));
-  const matchedEntries = probedEntries.filter(Boolean);
-  if (!matchedEntries.length) return [];
-  const enrichedEntries = await Promise.all(matchedEntries.map((entry) => enrichResolvedPhotoEntry(entry)));
-  return enrichedEntries.filter(Boolean);
-}
-
 async function resolveVehiclePhotoEntries(vehicleId) {
-  const indexedEntries = getIndexedPhotoEntries(vehicleId);
-  if (indexedEntries.length) {
-    const resolvedIndexedEntries = await resolvePhotoEntriesFromCandidates(indexedEntries);
-    if (resolvedIndexedEntries.length) {
-      return mergeVehiclePhotoEntries(resolvedIndexedEntries);
-    }
-  }
-
-  const suffixes = ["", ...Array.from({ length: 12 }, (_, index) => ` (${index + 1})`)];
-  const resolvedEntries = [];
-
-  for (const suffix of suffixes) {
-    const nextEntries = await resolvePhotoEntriesFromCandidates(getFallbackPhotoEntries(vehicleId, [suffix]));
-    if (nextEntries.length) {
-      resolvedEntries.push(...nextEntries);
-    }
-  }
-
-  return sortVehiclePhotoEntries(resolvedEntries);
+  return sortVehiclePhotoEntries(getIndexedPhotoEntries(vehicleId));
 }
 
 function buildVehiclePhotoCopy(entry, vehicleId) {
@@ -4348,7 +4956,7 @@ function renderActiveVehiclePhoto() {
   currentVehiclePhotoIndex = safeIndex;
   const activeEntry = currentVehiclePhotoEntries[safeIndex];
   const copy = buildVehiclePhotoCopy(activeEntry, currentPhotoVehicleId);
-  const nextPhotoUrl = buildVehiclePhotoRequestUrl(activeEntry.src);
+  const nextPhotoUrl = buildVehiclePhotoRequestUrl(activeEntry.displaySrc || activeEntry.src);
   const renderToken = ++vehiclePhotoRenderToken;
   setVehiclePhotoFrameLoading(true, getLabel("photoLoading", "Foto wordt geladen..."));
   vehiclePhotoFrameEl?.classList.remove("is-portrait", "is-landscape");
@@ -4360,6 +4968,10 @@ function renderActiveVehiclePhoto() {
   vehiclePhotoCaptionEl.hidden = !copy.caption;
   renderVehiclePhotoMeta(copy);
   updateVehiclePhotoNavigation();
+  void enrichResolvedPhotoEntry(activeEntry).then(() => {
+    if (renderToken !== vehiclePhotoRenderToken || currentVehiclePhotoEntries[safeIndex] !== activeEntry) return;
+    renderVehiclePhotoMeta(buildVehiclePhotoCopy(activeEntry, currentPhotoVehicleId));
+  }).catch(() => {});
   void hydrateActiveVehiclePhotoLocation(activeEntry, currentPhotoVehicleId, safeIndex);
 
   if (photoImgEl.getAttribute("src") === nextPhotoUrl && photoImgEl.complete && photoImgEl.naturalWidth > 0) {
@@ -4459,15 +5071,6 @@ async function verifyInternetConnection(force = false) {
   return internetVerificationPromise;
 }
 
-function startInternetChecks() {
-  if (networkCheckHandle) clearInterval(networkCheckHandle);
-  networkCheckHandle = window.setInterval(() => {
-    if (!document.hidden) {
-      verifyInternetConnection(true).catch(() => {});
-    }
-  }, NETWORK_CHECK_INTERVAL_MS);
-}
-
 function hideVehiclePhotoCard() {
   vehiclePhotoLookupToken += 1;
   currentPhotoVehicleId = "";
@@ -4550,6 +5153,17 @@ function scheduleVehiclePhotoCardUpdate(vehicleId) {
   }
 
   scheduledPhotoLoadVehicleId = normalizedVehicleId;
+  // Clear the prior vehicle's image immediately; the lookup itself runs next task.
+  currentPhotoVehicleId = "";
+  currentVehiclePhotoEntries = [];
+  currentVehiclePhotoIndex = 0;
+  clearVehiclePhotoImageElement(true);
+  if (vehiclePhotoCaptionEl) {
+    vehiclePhotoCaptionEl.textContent = "";
+    vehiclePhotoCaptionEl.hidden = true;
+  }
+  setVehiclePhotoEmptyStateVisible(false);
+  setVehiclePhotoFrameLoading(true, getLabel("photoLoading", "Foto wordt geladen..."));
   if (scheduledPhotoLoadHandle) return;
 
   const run = () => {
@@ -4560,11 +5174,9 @@ function scheduleVehiclePhotoCardUpdate(vehicleId) {
     void updateVehiclePhotoCard(nextVehicleId);
   };
 
-  if (typeof window.requestIdleCallback === "function") {
-    scheduledPhotoLoadHandle = window.requestIdleCallback(run, { timeout: 1200 });
-  } else {
-    scheduledPhotoLoadHandle = window.setTimeout(run, 220);
-  }
+  // Start the new lookup on the next task so the vehicle details can paint first.
+  // A long idle callback left the previous vehicle's photo visible after searches.
+  scheduledPhotoLoadHandle = window.setTimeout(run, 0);
 }
 
 function parseFlexibleDateParts(rawValue) {
@@ -5807,28 +6419,6 @@ async function updateHalteSuggestions() {
   }
 }
 
-function scoreLocalHalteMatch(stop, normalizedQuery) {
-  const stopCode = cleanText(stop?.stop_code || stop?.stop_id);
-  const stopName = cleanText(stop?.stop_name);
-  const stopDesc = cleanText(stop?.stop_desc);
-  const normalizedCode = normalizeSearchText(stopCode);
-  const normalizedName = normalizeSearchText(stopName);
-  const normalizedDesc = normalizeSearchText(stopDesc);
-  const combined = `${normalizedName} ${normalizedDesc}`.trim();
-
-  if (!normalizedCode && !normalizedName && !normalizedDesc) return Number.POSITIVE_INFINITY;
-  if (normalizedCode === normalizedQuery) return 0;
-  if (normalizedName === normalizedQuery) return 1;
-  if (combined === normalizedQuery) return 2;
-  if (normalizedCode.startsWith(normalizedQuery)) return 3;
-  if (normalizedName.startsWith(normalizedQuery)) return 4;
-  if (combined.startsWith(normalizedQuery)) return 5;
-  if (normalizedCode.includes(normalizedQuery)) return 6;
-  if (normalizedName.includes(normalizedQuery)) return 7;
-  if (combined.includes(normalizedQuery)) return 8;
-  return Number.POSITIVE_INFINITY;
-}
-
 function buildHalteSearchIndex() {
   halteSearchIndex = Array.isArray(stops)
     ? stops.map((stop) => {
@@ -7010,7 +7600,6 @@ window.addEventListener("popstate", () => {
 });
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
-    verifyInternetConnection(true).catch(() => {});
     if (!homeGtfsMapPanelEl?.hidden && !homeGtfsMapHasLoaded) {
       void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart hervatten mislukt", error));
     }
@@ -8168,11 +8757,8 @@ async function laadStops() {
   }
 }
 
-function wait(ms) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
 initAppPreferences();
+hideSplash(180);
 
 function clearInitialHeaderButtonFocus() {
   if (isAndroidTvPlatform || favoritesPanelOpen) return;
@@ -8243,15 +8829,12 @@ function warmUpVehiclesAndDeepLinks() {
 
 function warmUpStaticDatasets() {
   if (staticDatasetsWarmupPromise) return staticDatasetsWarmupPromise;
-  staticDatasetsWarmupPromise = (async () => {
-    await laadVoertuigen();
-    await wait(STARTUP_DATASET_STEP_DELAY_MS);
-    await laadTrips();
-    await wait(STARTUP_DATASET_STEP_DELAY_MS);
-    await laadRoutes();
-    await wait(STARTUP_DATASET_STEP_DELAY_MS);
-    await laadStops();
-  })().finally(() => {
+  staticDatasetsWarmupPromise = Promise.all([
+    laadVoertuigen(),
+    laadTrips(),
+    laadRoutes(),
+    laadStops()
+  ]).finally(() => {
     staticDatasetsWarmupPromise = null;
   });
   return staticDatasetsWarmupPromise;
@@ -8262,7 +8845,7 @@ function scheduleStaticDatasetsWarmup() {
     void warmUpStaticDatasets().catch((error) => {
       console.warn("Warm-up statische databestanden mislukt", error);
     });
-  }, STATIC_DATASET_WARMUP_DELAY_MS);
+  });
 }
 
 warmUpVehiclesAndDeepLinks();
@@ -8403,6 +8986,9 @@ async function zoekAlles(options = {}) {
     `<div class="realtime-loading-inline"><span class="spinner"></span><span class="loading">${t("loading")}</span></div>`,
     `loading:${activeVehicleId}:${settings.language}`
   );
+  // The vehicle record is already on screen. Keep realtime loading inline instead
+  // of covering the whole app while remote feeds and map data finish loading.
+  setPageLoading(false);
   routeTrail = [];
   if (trailLine && map) {
     map.removeLayer(trailLine);
@@ -9266,11 +9852,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js')
     .catch(err => console.error('Service Worker registratie mislukt:', err));
 }
-
-scheduleNonCriticalTask(() => {
-  verifyInternetConnection(true).catch(() => {});
-  startInternetChecks();
-}, 1500);
 
 // Dark scheme preference listener
 const prefersColorScheme = window.matchMedia("(prefers-color-scheme: dark)");

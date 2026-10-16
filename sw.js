@@ -1,12 +1,12 @@
-const CACHE_NAME = 'busbibliotheek-v110';
+const CACHE_NAME = 'busbibliotheek-v112';
 const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20260708-5',
+  '/app.js?v=20261017-2',
   '/manifest.json',
-  '/style.css?v=20260708-5',
-  '/translations.js?v=20260708-5',
+  '/style.css?v=20261017-2',
+  '/translations.js?v=20261017-2',
   '/site-config.js?v=20260708-3',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
@@ -75,13 +75,24 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  const isUncachedVehiclePhotoRequest =
+  const isVehiclePhotoRequest =
     url.origin === self.location.origin &&
     url.pathname.startsWith('/media/') &&
     !['/media/icons/logo.png', '/media/icons/navicon.png', '/media/icons/hansea.png', '/media/icons/favicon.ico', '/media/icons/logo.svg'].includes(url.pathname);
 
-  if (isUncachedVehiclePhotoRequest) {
-    event.respondWith(fetch(request, { cache: 'no-store' }).catch(() => offlineTextResponse));
+  if (isVehiclePhotoRequest) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+          if (response && response.status === 200 && !request.headers.has('range')) {
+            const clone = response.clone();
+            putInCache(request, clone);
+          }
+          return response;
+        }).catch(() => offlineTextResponse);
+      })
+    );
     return;
   }
 
