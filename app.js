@@ -2728,23 +2728,35 @@ function updateDocumentTitle(vehicleId = "") {
     : getLabel("appTitle", "Busbibliotheek");
 }
 
-function updateHeaderVisualRoutePresentation(routeShort = "2", destinationText = "Erasmuslaan", routeColor = "#E40521", routeTextColor = "#FFFFFF") {
+const DEFAULT_HEADER_ROUTE = "95";
+const DEFAULT_HEADER_DESTINATION = "Bussegem";
+const DEFAULT_HEADER_ROUTE_COLOR = "#0072CE";
+const DEFAULT_HEADER_ROUTE_TEXT_COLOR = "#FFFFFF";
+
+function updateHeaderVisualRoutePresentation(
+  routeShort = DEFAULT_HEADER_ROUTE,
+  destinationText = DEFAULT_HEADER_DESTINATION,
+  routeColor = DEFAULT_HEADER_ROUTE_COLOR,
+  routeTextColor = DEFAULT_HEADER_ROUTE_TEXT_COLOR
+) {
   if (headerVisualRouteEl) {
-    const normalizedRouteColor = normalizeRouteColor(routeColor, "#E40521");
+    const normalizedRouteColor = cleanText(routeShort) === DEFAULT_HEADER_ROUTE
+      ? DEFAULT_HEADER_ROUTE_COLOR
+      : normalizeRouteColor(routeColor, DEFAULT_HEADER_ROUTE_COLOR);
     const hex = normalizedRouteColor.replace("#", "");
     const red = Number.parseInt(hex.slice(0, 2), 16) || 0;
     const green = Number.parseInt(hex.slice(2, 4), 16) || 0;
     const blue = Number.parseInt(hex.slice(4, 6), 16) || 0;
     const luminance = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
     const contrastOutline = luminance >= 168 ? "rgba(15, 23, 42, 0.42)" : "rgba(255, 255, 255, 0.74)";
-    headerVisualRouteEl.textContent = cleanText(routeShort) || "2";
+    headerVisualRouteEl.textContent = cleanText(routeShort) || DEFAULT_HEADER_ROUTE;
     headerVisualRouteEl.style.setProperty("--header-banner-line-bg", normalizedRouteColor);
-    headerVisualRouteEl.style.setProperty("--header-banner-line-fg", routeTextColor || "#FFFFFF");
+    headerVisualRouteEl.style.setProperty("--header-banner-line-fg", routeTextColor || DEFAULT_HEADER_ROUTE_TEXT_COLOR);
     headerVisualRouteEl.style.setProperty("--header-banner-line-border", normalizedRouteColor);
     headerVisualRouteEl.style.setProperty("--header-banner-line-outline", contrastOutline);
   }
   if (headerVisualDestinationEl) {
-    const displayDestination = destinationText ? cleanText(destinationText) : "Erasmuslaan";
+    const displayDestination = destinationText ? cleanText(destinationText) : DEFAULT_HEADER_DESTINATION;
     headerVisualDestinationEl.textContent = displayDestination;
   }
 }
@@ -2752,56 +2764,6 @@ function updateHeaderVisualRoutePresentation(routeShort = "2", destinationText =
 function normalizeRouteColor(value, fallback) {
   const raw = (value || "").toString().replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
   return raw.length === 6 ? `#${raw}` : fallback;
-}
-
-function getRandomRouteHeadsign(routeId) {
-  const normalizedRouteId = normalize(routeId);
-  if (!normalizedRouteId || !tripsByRouteId.has(normalizedRouteId)) return "";
-  const routeTrips = tripsByRouteId.get(normalizedRouteId) || [];
-  const validHeadsigns = routeTrips
-    .map((trip) => cleanText(trip.trip_headsign))
-    .filter((headsign) => headsign && headsign.length <= 20);
-  if (!validHeadsigns.length) return "";
-  return validHeadsigns[Math.floor(Math.random() * validHeadsigns.length)];
-}
-
-function getRandomHeaderVisualRouteData() {
-  if (!routes?.length) return null;
-  const availableRoutes = routes.filter((route) => {
-    if (!route) return false;
-    const routeShort = pickFirstText(route.route_short_name, route.route_id);
-    return !!routeShort && !!getRandomRouteHeadsign(route.route_id);
-  });
-  if (!availableRoutes.length) return null;
-  const routeData = availableRoutes[Math.floor(Math.random() * availableRoutes.length)];
-  const routeShort = pickFirstText(routeData.route_short_name, routeData.route_id, "?");
-  const destinationText = getRandomRouteHeadsign(routeData.route_id);
-  return {
-    routeShort,
-    destinationText,
-    routeColor: normalizeRouteColor(routeData.route_color, "#2563eb"),
-    routeTextColor: normalizeRouteColor(routeData.route_text_color, "#ffffff"),
-  };
-}
-
-async function setRandomHeaderVisualRouteFromRoutes() {
-  let routePresentation = getRandomHeaderVisualRouteData();
-  if (!routePresentation) {
-    try {
-      await Promise.all([laadRoutes(), laadTrips()]);
-    } catch {
-      // Ignore route loading failures and keep defaults.
-    }
-    routePresentation = getRandomHeaderVisualRouteData();
-  }
-  if (routePresentation) {
-    updateHeaderVisualRoutePresentation(
-      routePresentation.routeShort,
-      routePresentation.destinationText,
-      routePresentation.routeColor,
-      routePresentation.routeTextColor,
-    );
-  }
 }
 
 function getVehicleDisplayValue(bus, fieldKey, rawValue) {
@@ -3940,8 +3902,8 @@ function setVehiclePhotoEmptyStateVisible(visible) {
   }
   if (vehiclePhotoInfoEl) vehiclePhotoInfoEl.hidden = visible;
   if (vehiclePhotoUploadCtaEl) {
-    vehiclePhotoUploadCtaEl.hidden = false;
-    vehiclePhotoUploadCtaEl.setAttribute("aria-hidden", "false");
+    vehiclePhotoUploadCtaEl.hidden = !visible;
+    vehiclePhotoUploadCtaEl.setAttribute("aria-hidden", String(!visible));
   }
   if (vehiclePhotoEmptyStateEl) {
     vehiclePhotoEmptyStateEl.hidden = !visible;
@@ -5123,10 +5085,6 @@ async function updateVehiclePhotoCard(vehicleId) {
   currentVehiclePhotoIndex = 0;
   vehiclePhotoCardEl.hidden = false;
   vehiclePhotoCardEl.setAttribute("aria-hidden", "false");
-  if (vehiclePhotoUploadCtaEl) {
-    vehiclePhotoUploadCtaEl.hidden = false;
-    vehiclePhotoUploadCtaEl.setAttribute("aria-hidden", "false");
-  }
   setVehiclePhotoEmptyStateVisible(false);
   setVehiclePhotoFrameLoading(true, getLabel("photoLoading", "Foto wordt geladen..."));
   clearVehiclePhotoImageElement(true);
@@ -7183,7 +7141,6 @@ function initAppPreferences() {
   setFavoritesPanel(false);
   hideVehiclePhotoCard();
   renderFavorites();
-  void setRandomHeaderVisualRouteFromRoutes();
   loadFeedStatus();
   updateFavoriteButtonState();
   resultsWrapEl.classList.remove("show");
@@ -8934,6 +8891,7 @@ async function zoekAlles(options = {}) {
     return;
   }
   currentVehicleId = activeVehicleId;
+  updateHeaderVisualRoutePresentation();
   realtimePausedByInactivity = false;
   setHomeGtfsMapVisible(false);
   if (compareVehicleId === currentVehicleId) compareVehicleId = "";
@@ -9695,11 +9653,7 @@ async function updateRealtime(id){
       routeId
     );
     const routeShort = routeShortRaw || "?";
-    const tripHeadsign = pickFirstText(
-      tripData?.trip_headsign,
-      descriptor.headsign,
-      tripData?.trip_short_name
-    );
+    const tripHeadsign = pickFirstText(tripData?.trip_headsign, descriptor.headsign);
     const destinationText = tripHeadsign || "-";
     if (routeShort === "?" || destinationText === "-") {
       console.warn("[busbibliotheek] lijn/bestemming niet gevonden", {
