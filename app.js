@@ -205,11 +205,13 @@ function isTouchPlatform() {
 }
 
 function getViewportWidth() {
-  return window.visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || window.screen?.width || 0;
+  // Use the layout viewport for device/layout classes. visualViewport changes
+  // during pinch zoom on iOS and must not make an iPad flip to phone styling.
+  return window.innerWidth || document.documentElement.clientWidth || window.screen?.width || 0;
 }
 
 function getViewportHeight() {
-  return window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || window.screen?.height || 0;
+  return window.innerHeight || document.documentElement.clientHeight || window.screen?.height || 0;
 }
 
 function isTabletLikeViewport() {
@@ -3311,7 +3313,10 @@ function addPublicTransportTileLayer(mapInstance) {
   const L = window.L;
   const publicTransportLayer = L.tileLayer(PUBLIC_TRANSPORT_TILE_URL, {
     attribution: PUBLIC_TRANSPORT_TILE_ATTRIBUTION,
-    maxZoom: 18
+    maxZoom: 18,
+    updateWhenIdle: true,
+    updateWhenZooming: false,
+    keepBuffer: 1
   });
   let fallbackAdded = false;
   publicTransportLayer.on("tileerror", () => {
@@ -3319,7 +3324,10 @@ function addPublicTransportTileLayer(mapInstance) {
     fallbackAdded = true;
     mapInstance.removeLayer(publicTransportLayer);
     L.tileLayer(FALLBACK_TILE_URL, {
-      attribution: FALLBACK_TILE_ATTRIBUTION
+      attribution: FALLBACK_TILE_ATTRIBUTION,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
+      keepBuffer: 1
     }).addTo(mapInstance);
   });
   return publicTransportLayer.addTo(mapInstance);
@@ -9146,10 +9154,8 @@ async function initMap(lat,lon){
     lastRealtimeMapCenter = { latitude: Number(lat), longitude: Number(lon) };
     lastRealtimeMapCenteredAt = Date.now();
 
-    // Cleaner base map suitable for transit (CartoDB Positron)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &amp; <a href="https://carto.com/">CARTO</a>'
-    }).addTo(map);
+    // Use the same keyless transit map as the overview; CARTO now requires a key.
+    addPublicTransportTileLayer(map);
     refreshRealtimeMapSize();
   }
 }
