@@ -4917,13 +4917,16 @@ function buildVehiclePhotoMetaMarkup(copy) {
 }
 
 function updateVehiclePhotoNavigation() {
-  const hasMultiplePhotos = currentVehiclePhotoEntries.length > 1;
+  const photoCount = currentVehiclePhotoEntries.length;
+  const hasMultiplePhotos = photoCount > 1;
   if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.hidden = !hasMultiplePhotos;
   if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.hidden = !hasMultiplePhotos;
   if (vehiclePhotoCounterEl) {
-    vehiclePhotoCounterEl.hidden = true;
-    vehiclePhotoCounterEl.textContent = "";
-    vehiclePhotoCounterEl.setAttribute("aria-hidden", "true");
+    vehiclePhotoCounterEl.hidden = !hasMultiplePhotos;
+    vehiclePhotoCounterEl.textContent = hasMultiplePhotos
+      ? `${currentVehiclePhotoIndex + 1} / ${photoCount}`
+      : "";
+    vehiclePhotoCounterEl.setAttribute("aria-hidden", String(!hasMultiplePhotos));
   }
 }
 
