@@ -10554,9 +10554,13 @@ footer h3 { color: var(--modern-ink) !important; font-size: 1rem !important; }
   .header-visual-card--primary { right: .7rem !important; bottom: .7rem !important; width: 116px !important; min-height: 68px !important; padding: .65rem !important; }
   .home-gtfs-map-panel, .dashboard-panel, .card, footer { border-radius: 16px !important; }
   .home-gtfs-map-panel { padding: .85rem !important; }
-  .home-gtfs-map-head { flex-direction: row !important; align-items: center !important; }
-  .home-gtfs-map { height: clamp(290px, 58vh, 440px) !important; min-height: 290px !important; border-radius: 12px !important; }
-  #homeGtfsMap.leaflet-container { height: clamp(290px, 58vh, 440px) !important; min-height: 290px !important; }
+  .home-gtfs-map-head { flex-direction: row !important; align-items: center !important; gap: .75rem !important; }
+  .home-gtfs-map-head > div { flex: 1 1 auto !important; min-width: 0 !important; }
+  .home-gtfs-map-head h2 { max-width: 16ch !important; font-size: clamp(1.1rem, 5vw, 1.3rem) !important; }
+  .home-gtfs-map-refresh-btn { flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; min-height: 44px !important; padding: .65rem .9rem !important; white-space: nowrap !important; }
+  .home-gtfs-map-status { margin-bottom: .65rem !important; font-size: .88rem !important; }
+  .home-gtfs-map { height: clamp(280px, 46svh, 390px) !important; min-height: 280px !important; width: 100% !important; }
+  #homeGtfsMap.leaflet-container { height: clamp(280px, 46svh, 390px) !important; min-height: 280px !important; width: 100% !important; }
   .results-wrap.show #resultsGrid { grid-template-columns: minmax(0, 1fr) !important; gap: .75rem !important; }
   #vehiclePhotoCard, #compareCard { grid-column: 1 !important; }
   .card { padding: .95rem !important; }
@@ -10569,11 +10573,110 @@ footer h3 { color: var(--modern-ink) !important; font-size: 1rem !important; }
   .header-bar { padding: .9rem !important; }
   .header-visual-card--primary { width: 102px !important; right: .5rem !important; bottom: .5rem !important; }
   .header-visual-copy { max-width: 54% !important; }
-  .home-gtfs-map-head { align-items: flex-start !important; }
-  .home-gtfs-map-refresh-btn { min-height: 40px !important; padding-inline: .7rem !important; }
+  .home-gtfs-map-head { align-items: center !important; gap: .5rem !important; }
+  .home-gtfs-map-head h2 { font-size: 1.08rem !important; }
+  .home-gtfs-map-refresh-btn { min-height: 44px !important; padding-inline: .65rem !important; font-size: .88rem !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Keep the missing-photo state as one clear card and make the camera mark visible. */
+#vehiclePhotoCard.has-no-photo .vehicle-photo-layout {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#vehiclePhotoCard .vehicle-photo-frame.is-empty {
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  overflow: visible;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty {
+  width: 100%;
+  gap: .75rem;
+  padding: .2rem 0 !important;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: .85rem;
+  background: var(--modern-blue);
+  color: #fff;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty::before {
+  content: none !important;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty .vehicle-photo-upload-cta {
+  width: 100%;
+  gap: .7rem;
+  margin: .15rem 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+#vehiclePhotoCard .vehicle-photo-empty .vehicle-photo-upload-btn {
+  width: auto;
+  min-width: min(100%, 12rem);
+  justify-self: start;
+  background: var(--modern-blue) !important;
+  color: #fff !important;
+}
+
+#appTitleBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .55rem !important;
+}
+
+#appTitleBtn::before {
+  content: "" !important;
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(2.35rem, 5vw, 3.15rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff url("media/icons/logo.png") center / contain no-repeat;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .16);
+}
+
+#splash .logo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: clamp(8.5rem, 40vw, 13.75rem);
+  height: auto;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  padding: .4rem;
+  background: #fff;
+}
+
+#splash .logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 

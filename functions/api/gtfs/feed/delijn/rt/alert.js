@@ -6,7 +6,6 @@ const JSON_HEADERS = {
   "Cache-Control": "no-store"
 };
 
-const DEFAULT_DELIJN_API_KEY = "c8d86e3f6d9d40828e5193af47ee4fef";
 const UPSTREAM_URL = "https://api-management-opendata-production.azure-api.net/api/gtfs/feed/delijn/rt/alert";
 const UPSTREAM_TIMEOUT_MS = 10000;
 const GTFS_ALERTS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -30,7 +29,7 @@ export async function onRequest(context) {
     return jsonResponse({ error: "Ongeldige format-waarde. Gebruik json of protobuf." }, 400);
   }
 
-  const apiKey = (env?.DELIJN_API_KEY || DEFAULT_DELIJN_API_KEY)?.trim();
+  const apiKey = env?.DELIJN_API_KEY?.trim();
   if (!apiKey) {
     return jsonResponse({ error: "Geen De Lijn API-key beschikbaar." }, 500);
   }
@@ -56,7 +55,7 @@ export async function onRequest(context) {
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
         const cachedPayload = getCachedAlertsPayload();
-        if (response.status === 403 && cachedPayload) {
+        if (format === "json" && response.status === 403 && cachedPayload) {
           return jsonResponse({
             ...cachedPayload,
             meta: {

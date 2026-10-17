@@ -24,12 +24,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261017-10">
-<script src="site-config.js?v=20260708-3"></script>
+<link rel="stylesheet" href="style.css?v=20261017-14">
+<script src="site-config.js?v=20261017-14"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261017-11";
+  window.BB_ASSET_VERSION = "20261017-14";
 </script>
 </head>
 <body>
@@ -172,9 +172,15 @@
                   <span aria-hidden="true">&#8250;</span>
                 </button>
                 <div id="vehiclePhotoEmptyState" class="vehicle-photo-empty" hidden aria-hidden="true">
-                  <span id="vehiclePhotoEmptyBadge" class="vehicle-photo-empty-badge">Nog geen foto</span>
-                  <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Nog geen foto beschikbaar van dit voertuig.</strong>
-                  <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb jij wel een foto? Help Busbibliotheek aanvullen via het uploadformulier.</p>
+                  <span class="vehicle-photo-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                  </span>
+                  <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Nog geen foto van voertuig.</strong>
+                  <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb je een foto van deze bus? Deel ze met Busbibliotheek.</p>
+                  <div id="vehiclePhotoUploadCta" class="vehicle-photo-upload-cta" hidden aria-hidden="true">
+                    <p id="vehiclePhotoUploadHint" class="vehicle-photo-upload-hint">Help ons de fotobibliotheek aan te vullen.</p>
+                    <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn vehicle-photo-upload-btn--footer" type="button">Foto insturen</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -182,10 +188,6 @@
               <p id="vehiclePhotoCaption" class="vehicle-photo-caption"></p>
               <div class="vehicle-photo-info">
                 <div id="vehiclePhotoMeta" class="vehicle-photo-meta" hidden aria-hidden="true"></div>
-              </div>
-              <div id="vehiclePhotoUploadCta" class="vehicle-photo-upload-cta" hidden aria-hidden="true">
-                <p id="vehiclePhotoUploadHint" class="vehicle-photo-upload-hint">Heb jij ook een goede foto van dit voertuig? Help Busbibliotheek via het uploadformulier.</p>
-                <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn vehicle-photo-upload-btn--footer" type="button">Open uploadformulier</button>
               </div>
             </aside>
           </div>
@@ -715,7 +717,6 @@
         window.Map &&
         window.URL &&
         window.URLSearchParams &&
-        window.localStorage &&
         window.matchMedia &&
         window.requestAnimationFrame &&
         window.CSS &&

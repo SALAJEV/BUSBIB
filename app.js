@@ -656,7 +656,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.17-2";
+const APP_VERSION = "2026.10.17-14";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2121,7 +2121,7 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
     de: "Fahrzeugnummer",
     pl: "Numer pojazdu",
     es: "Numero de vehiculo",
-    ru: "ÐÐ¾Ð¼ÐµÑ€ Ñ‚Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚Ð°"
+    ru: "\u041d\u043e\u043c\u0435\u0440 \u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442\u0430"
   },
   "gespot?": {
     nl: "Gespot?",
@@ -2130,7 +2130,7 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
     de: "Gesichtet?",
     pl: "Zauwazony?",
     es: "Visto?",
-    ru: "Ð—Ð°Ð¼ÐµÑ‡ÐµÐ½?"
+    ru: "\u0417\u0430\u043c\u0435\u0447\u0435\u043d?"
   },
   "intern nummer": {
     nl: "Intern nummer",
@@ -2139,7 +2139,7 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
     de: "Interne Nummer",
     pl: "Numer wewnetrzny",
     es: "Numero interno",
-    ru: "Ð’Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½Ð¸Ð¹ Ð½Ð¾Ð¼ÐµÑ€"
+    ru: "\u0412\u043d\u0443\u0442\u0440\u0435\u043d\u043d\u0438\u0439 \u043d\u043e\u043c\u0435\u0440"
   },
   vin: {
     nl: "VIN",
@@ -2157,7 +2157,7 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
     de: "Notizen",
     pl: "Uwagi",
     es: "Notas",
-    ru: "Ð—Ð°Ð¼ÐµÑ‚ÐºÐ¸"
+    ru: "\u0417\u0430\u043c\u0435\u0442\u043a\u0438"
   }
 };
 
@@ -3793,20 +3793,20 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   if (vehiclePhotoEmptyBadgeEl) vehiclePhotoEmptyBadgeEl.textContent = getLabel("photoUploadEmptyBadge", "Nog geen foto");
   if (vehiclePhotoEmptyTitleEl) {
     vehiclePhotoEmptyTitleEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyTitle", "Nog geen foto beschikbaar van voertuig {id}."), visibleVehicleId)
-      : getLabel("photoUploadEmptyTitleGeneric", "Nog geen foto beschikbaar van dit voertuig.");
+      ? fillTemplate(getLabel("photoUploadEmptyTitle", "Nog geen foto van voertuig {id}."), visibleVehicleId)
+      : getLabel("photoUploadEmptyTitleGeneric", "Van dit voertuig is nog geen foto beschikbaar.");
   }
   if (vehiclePhotoEmptyTextEl) {
     vehiclePhotoEmptyTextEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyText", "Heb jij wel een goede foto van voertuig {id}? Help Busbibliotheek aanvullen via het uploadformulier."), visibleVehicleId)
-      : getLabel("photoUploadEmptyTextGeneric", "Heb jij wel een goede foto? Help Busbibliotheek aanvullen via het uploadformulier.");
+      ? fillTemplate(getLabel("photoUploadEmptyText", "Heb je een foto van voertuig {id}? Stuur ze naar Busbibliotheek."), visibleVehicleId)
+      : getLabel("photoUploadEmptyTextGeneric", "Heb je een foto van deze bus? Stuur ze naar Busbibliotheek.");
   }
   if (vehiclePhotoUploadHintEl) {
     vehiclePhotoUploadHintEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadSummary", "Help Busbibliotheek aanvullen met een foto van voertuig {id}."), visibleVehicleId)
-      : getLabel("photoUploadSummaryGeneric", "Help Busbibliotheek aanvullen met een foto van dit voertuig.");
+      ? fillTemplate(getLabel("photoUploadSummary", "Help ons voertuig {id} aan de fotobibliotheek toe te voegen."), visibleVehicleId)
+      : getLabel("photoUploadSummaryGeneric", "Help onze fotobibliotheek aan te vullen.");
   }
-  if (vehiclePhotoUploadBtn) vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Open uploadformulier");
+  if (vehiclePhotoUploadBtn) vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Foto insturen");
   if (photoUploadModalTitleEl) photoUploadModalTitleEl.textContent = getLabel("photoUploadTitle", "Foto uploaden");
   if (photoUploadModalSummaryEl) {
     photoUploadModalSummaryEl.textContent = hasSpecificVehicleId
@@ -3890,6 +3890,7 @@ function clearVehiclePhotoImageElement(removeFromDom = false) {
 }
 
 function setVehiclePhotoEmptyStateVisible(visible) {
+  vehiclePhotoCardEl?.classList.toggle("has-no-photo", !!visible);
   if (vehiclePhotoFrameEl) vehiclePhotoFrameEl.classList.toggle("is-empty", !!visible);
   if (visible) setVehiclePhotoFrameLoading(false);
   if (visible) clearVehiclePhotoImageElement(true);

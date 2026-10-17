@@ -28,28 +28,8 @@
       "src": "media/icons/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "media/icons/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "media/icons/logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "categories": ["transportation"],
-  "screenshots": [
-    {
-      "src": "media/icons/logo.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "categories": ["transportation"]
 }

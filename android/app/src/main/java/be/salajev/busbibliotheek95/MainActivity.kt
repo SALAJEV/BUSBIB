@@ -1,6 +1,5 @@
 package be.salajev.busbibliotheek95
 
-import android.Manifest
 import android.app.Activity
 import android.app.DownloadManager
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -76,9 +75,10 @@ class MainActivity : ComponentActivity() {
                 val isDarkTheme = isSystemInDarkTheme()
                 
                 val startUrl = remember {
-                    val intentData = (context as Activity).intent?.dataString
-                    if (intentData != null && intentData.contains("busbibliotheek95.pages.dev")) {
-                        intentData
+                    val deepLink = (context as Activity).intent?.data
+                    if (deepLink != null && deepLink.scheme.equals("https", ignoreCase = true) &&
+                        deepLink.host.equals("busbibliotheek95.pages.dev", ignoreCase = true)) {
+                        deepLink.toString()
                     } else {
                         "https://busbibliotheek95.pages.dev/"
                     }
@@ -93,25 +93,6 @@ class MainActivity : ComponentActivity() {
                             updateStatus = status
                         }
                     }
-                }
-
-                val permissionsToRequest = remember {
-                    mutableListOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            add(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }.toTypedArray()
-                }
-
-                val launcher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestMultiplePermissions()
-                ) { _ -> }
-
-                LaunchedEffect(Unit) {
-                    launcher.launch(permissionsToRequest)
                 }
 
                 val fallbackSiteColor = if (isDarkTheme) Color(0xFF07111F) else Color(0xFFF3F6FB)
@@ -212,7 +193,14 @@ class MainActivity : ComponentActivity() {
             try {
                 val url = URL("https://pub-611b5bc156eb455ba86d9bcece9aea1c.r2.dev/app_version.json")
                 val connection = url.openConnection() as HttpURLConnection
-                val text = connection.inputStream.bufferedReader().use { it.readText() }
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+                connection.requestMethod = "GET"
+                val text = try {
+                    connection.inputStream.bufferedReader().use { it.readText() }
+                } finally {
+                    connection.disconnect()
+                }
                 val json = JSONObject(text)
                 val remoteVersion = json.getString("version")
                 val releaseDateStr = json.getString("release_date")
@@ -411,11 +399,11 @@ fun WebViewScreen(
                         displayZoomControls = false
                         textZoom = 100
                         mediaPlaybackRequiresUserGesture = false
-                        setGeolocationEnabled(true)
-                        allowFileAccess = true
+                        setGeolocationEnabled(false)
+                        allowFileAccess = false
                         allowContentAccess = true
-                        javaScriptCanOpenWindowsAutomatically = true
-                        mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+                        javaScriptCanOpenWindowsAutomatically = false
+                        mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
                         setSupportMultipleWindows(true)
                         
                         if (WebViewFeature.isFeatureSupported(WebViewFeature.SAFE_BROWSING_ENABLE)) {
@@ -558,10 +546,10 @@ fun WebViewScreen(
                             progress = newProgress / 100f
                         }
                         override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
-                            callback?.invoke(origin, true, false)
+                            callback?.invoke(origin, false, false)
                         }
                         override fun onPermissionRequest(request: PermissionRequest?) {
-                            (context as Activity).runOnUiThread { request?.grant(request.resources) }
+                            (context as Activity).runOnUiThread { request?.deny() }
                         }
                         override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
                             android.app.AlertDialog.Builder(context)
@@ -649,12 +637,13 @@ fun WebViewScreen(
                             val uri = request?.url ?: return false
                             val urlString = uri.toString()
                             val host = uri.host ?: ""
+                            val scheme = uri.scheme?.lowercase() ?: return true
                             val mainDomain = "busbibliotheek95.pages.dev"
-                            
-                            if (urlString.startsWith("tel:") || urlString.startsWith("mailto:") || urlString.startsWith("whatsapp:")) {
+
+                            if (scheme in setOf("tel", "mailto", "whatsapp")) {
                                 try { context.startActivity(Intent(Intent.ACTION_VIEW, uri)); return true } catch (_: Exception) { return false }
                             }
-                            if (host.contains("delijn.be") || urlString.contains("delijn://")) {
+                            if (scheme == "delijn" || host == "delijn.be" || host.endsWith(".delijn.be")) {
                                 try {
                                     val intent = Intent(Intent.ACTION_VIEW, uri)
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -662,7 +651,9 @@ fun WebViewScreen(
                                     return true
                                 } catch (_: Exception) { if (urlString.startsWith("delijn://")) return true }
                             }
-                            if (host.isNotEmpty() && !host.endsWith(mainDomain)) {
+                            if (scheme != "https" && scheme != "http") return true
+                            if (host.equals(mainDomain, ignoreCase = true)) return false
+                            if (host.isNotEmpty()) {
                                 Toast.makeText(context, leavingAppMessage, Toast.LENGTH_SHORT).show()
                                 try {
                                     CustomTabsIntent.Builder().setShowTitle(true).setShareState(CustomTabsIntent.SHARE_STATE_ON).build().launchUrl(context, uri)

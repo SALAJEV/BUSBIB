@@ -157,7 +157,7 @@ http://localhost:8000
 ### Belangrijk bij lokaal testen
 
 - Realtime data via `/api` werkt pas correct als de serverless functie beschikbaar is.
-- Zonder geldige `DELIJN_API_KEY` zullen `realtime` en `haltes` niet werken.
+- Zonder geldige `DELIJN_API_KEY` werken realtime-, halte- en GTFS-waarschuwingsverzoeken niet.
 - De Android app verwijst standaard naar de online site, niet automatisch naar een lokale server.
 - De service worker kan browsercache agressief vasthouden. Gebruik bij twijfel een harde refresh of verwijder de site data.
 
@@ -185,7 +185,7 @@ De frontendbestanden in de root kunnen als statische site gedeployed worden:
 DELIJN_API_KEY
 ```
 
-Zonder deze key zullen requests voor `realtime` en `haltes` falen.
+Zonder deze key falen realtime-, halte- en GTFS-waarschuwingsverzoeken. De sleutel staat uitsluitend in de serveromgeving; voeg hem nooit toe aan frontendcode of de Android-app.
 
 ### Versiebeheer van assets
 
@@ -348,7 +348,7 @@ Let op:
 - favorieten en instellingen worden lokaal in de browser bewaard;
 - realtime data en weerdata komen van externe bronnen;
 - voertuigfoto's kunnen EXIF-metadata bevatten;
-- de Android app vraagt locatie- en notificatiepermissies.
+- de Android-app vraagt geen locatie- of notificatiepermissies; downloads gebruiken de bestandskiezer van Android.
 
 Als je dit project publiek deployt, is het verstandig om ook een expliciete privacyverklaring en gebruiksvoorwaarden te onderhouden.
 

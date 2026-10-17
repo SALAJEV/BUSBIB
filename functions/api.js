@@ -35,8 +35,9 @@ export async function onRequest(context) {
 
   try {
     const upstreamUrl = buildUpstreamUrl(requestUrl, resource);
+    const canUseGtfsAlertsJsonCache = resource === "gtfsalerts" && upstreamUrl.searchParams.get("format") === "json";
 
-    if (resource === "gtfsalerts") {
+    if (canUseGtfsAlertsJsonCache) {
       const cachedPayload = getCachedGtfsAlertsPayload();
       if (cachedPayload) {
         return jsonResponse({ ...cachedPayload, meta: { source: "cache", cachedAt: GTFS_ALERTS_CACHE.fetchedAt } }, 200);
@@ -70,8 +71,8 @@ export async function onRequest(context) {
           }
 
           const errorText = await readErrorText(upstreamResponse);
-          if (resource === "gtfsalerts") {
-            const cachedPayload = getCachedGtfsAlertsPayload();
+          if (canUseGtfsAlertsJsonCache) {
+            const cachedPayload = canUseGtfsAlertsJsonCache ? getCachedGtfsAlertsPayload() : null;
             if (cachedPayload) {
               return jsonResponse({ ...cachedPayload, meta: { source: "cache", cachedAt: GTFS_ALERTS_CACHE.fetchedAt } }, 200);
             }
@@ -107,6 +108,12 @@ export async function onRequest(context) {
             throw readError;
           }
         } else if (resource === "gtfsalerts") {
+          if (upstreamUrl.searchParams.get("format") === "protobuf") {
+            const headers = new Headers(JSON_HEADERS);
+            headers.set("Content-Type", "application/x-protobuf");
+            return new Response(upstreamResponse.body, { status: 200, headers });
+          }
+
           try {
             const payloadText = await readWithSizeLimit(upstreamResponse);
             const payload = payloadText ? JSON.parse(payloadText) : {};
@@ -168,11 +175,20 @@ async function getRealtimeFromCache(allowStale = false) {
     const cached = await cache.match(cacheKey);
     if (!cached) return null;
 
-    const isStale = cached.headers.get("X-Busbibliotheek-Realtime-Cache") === "stale";
-    
+    const cachedAt = Date.parse(cached.headers.get("X-Cache-Time") || "");
+    const ageMs = Number.isFinite(cachedAt) ? Math.max(0, Date.now() - cachedAt) : Number.POSITIVE_INFINITY;
+    const freshWindowMs = REALTIME_EDGE_CACHE_TTL_SECONDS * 1000;
+    const maxAgeMs = freshWindowMs + REALTIME_EDGE_STALE_WINDOW_SECONDS * 1000;
+    if (ageMs > maxAgeMs) {
+      await cache.delete(cacheKey);
+      return null;
+    }
+
+    const isStale = ageMs > freshWindowMs;
     if (isStale && !allowStale) return null;
-    
+
     const response = new Response(cached.body, { status: 200, headers: JSON_HEADERS });
+    response.headers.set("X-Busbibliotheek-Realtime-Cache", isStale ? "stale" : "fresh");
     response.headers.set("X-Busbibliotheek-Cache", isStale ? "stale" : "fresh");
     return response;
   } catch {
@@ -302,6 +318,9 @@ function buildUpstreamUrl(requestUrl, resource) {
 
   if (resource === "gtfsalerts") {
     const format = (requestUrl.searchParams.get("format") || "json").toLowerCase();
+    if (format !== "json" && format !== "protobuf") {
+      throw new RequestValidationError("Ongeldige format-waarde. Gebruik json of protobuf.");
+    }
     const upstreamUrl = new URL("https://api-management-opendata-production.azure-api.net/api/gtfs/feed/delijn/rt/alert");
     upstreamUrl.searchParams.set("format", format === "protobuf" ? "protobuf" : "json");
     return upstreamUrl.toString();
@@ -390,7 +409,7 @@ function storeCachedGtfsAlertsPayload(payload) {
 function truncate(value, maxLength) {
   const text = (value || "").toString().trim();
   if (!text || text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength - 1)}…`;
+  return `${text.slice(0, maxLength - 1)}\u2026`;
 }
 
 class RequestValidationError extends Error {}

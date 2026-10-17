@@ -6,36 +6,11 @@ const JSON_HEADERS = {
   "Cache-Control": "no-store"
 };
 
-const DEFAULT_DELIJN_API_KEY = "c8d86e3f6d9d40828e5193af47ee4fef";
 const UPSTREAM_URL = "https://api-management-opendata-production.azure-api.net/api/gtfs/feed/delijn/rt/alert";
 const UPSTREAM_TIMEOUT_MS = 10000;
 const GTFS_ALERTS_CACHE_TTL_MS = 10 * 60 * 1000;
 const GTFS_ALERTS_COOLDOWN_MS = 30 * 1000;
 const GTFS_ALERTS_CACHE = { payload: null, expiresAt: 0, fetchedAt: 0, lastFailureAt: 0, cooldownUntil: 0 };
-const DEFAULT_FALLBACK_ALERTS = [{
-  id: "rs:tec:90a2253b-652d-4c2c-75ed-08dd0a2a52d7",
-  alert: {
-    activePeriod: [{ start: 1734476400, end: 1734562799 }],
-    informedEntity: [{
-      agencyId: "tec",
-      routeId: "gr:tec:L0018-21780",
-      routeType: 3,
-      trip: {
-        tripId: "gt:tec:42999929-L_PA_2024-24_LG_ME-Mercredi-12",
-        routeId: "L0018-21780",
-        startDate: "20241218",
-        startTime: "08:27:00",
-        scheduleRelationship: 3
-      }
-    }],
-    cause: 2,
-    effect: 1,
-    headerText: { translation: [{ language: "en", text: "Cancellations" }] },
-    descriptionText: { translation: [{ language: "en", text: "Disruption : Cancellation trip 18 - line 18" }] },
-    url: { translation: [{ language: "en", text: "https://www.letec.be/Traffic/Detail/90a2253b-652d-4c2c-75ed-08dd0a2a52d7" }] }
-  }
-}];
-
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -54,14 +29,14 @@ export async function onRequest(context) {
     return jsonResponse({ error: "Ongeldige format-waarde. Gebruik json of protobuf." }, 400);
   }
 
-  const apiKey = (env?.DELIJN_API_KEY || DEFAULT_DELIJN_API_KEY)?.trim();
+  const apiKey = env?.DELIJN_API_KEY?.trim();
   if (!apiKey) {
     return jsonResponse({ error: "Geen De Lijn API-key beschikbaar." }, 500);
   }
 
   const cachedPayload = getCachedAlertsPayload();
   if (isInCooldown()) {
-    if (cachedPayload) {
+    if (format === "json" && cachedPayload) {
       return jsonResponse({
         ...cachedPayload,
         meta: {
@@ -72,9 +47,12 @@ export async function onRequest(context) {
       }, 200);
     }
 
-    const fallbackPayload = buildFallbackPayload("rate-limited", "De Lijn API is tijdelijk beperkt. Er wordt geen nieuwe call gedaan tot de cooldown is verlopen.");
-    storeCachedAlertsPayload(fallbackPayload);
-    return jsonResponse(fallbackPayload, 200);
+    if (format === "json") {
+      const fallbackPayload = buildFallbackPayload("rate-limited", "De Lijn API is tijdelijk beperkt. Er wordt geen nieuwe call gedaan tot de cooldown is verlopen.");
+      storeCachedAlertsPayload(fallbackPayload);
+      return jsonResponse(fallbackPayload, 200);
+    }
+    return jsonResponse({ error: "GTFS-alerts zijn tijdelijk niet beschikbaar." }, 503);
   }
 
   try {
@@ -100,7 +78,7 @@ export async function onRequest(context) {
         recordRateLimitFailure(detail, response.status);
         const fallbackPayload = getCachedAlertsPayload();
         if (isQuotaError(detail, response.status)) {
-          if (fallbackPayload) {
+          if (format === "json" && fallbackPayload) {
             return jsonResponse({
               ...fallbackPayload,
               meta: {
@@ -111,9 +89,12 @@ export async function onRequest(context) {
             }, 200);
           }
 
-          const fallbackPayload = buildFallbackPayload("rate-limited", detail.slice(0, 500));
-          storeCachedAlertsPayload(fallbackPayload);
-          return jsonResponse(fallbackPayload, 200);
+          if (format === "json") {
+            const emptyFallback = buildFallbackPayload("rate-limited", detail.slice(0, 500));
+            storeCachedAlertsPayload(emptyFallback);
+            return jsonResponse(emptyFallback, 200);
+          }
+          return jsonResponse({ error: "GTFS-alerts zijn tijdelijk niet beschikbaar.", status: response.status }, 503);
         }
 
         return jsonResponse(
@@ -209,7 +190,7 @@ function isQuotaError(detail, status) {
 
 function buildFallbackPayload(reason, detail) {
   return {
-    alerts: DEFAULT_FALLBACK_ALERTS,
+    alerts: [],
     meta: {
       source: "fallback",
       reason,
