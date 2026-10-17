@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbibliotheek-v139';
+const CACHE_NAME = 'busbibliotheek-v141';
 const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
@@ -6,11 +6,11 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261018-11',
+  '/app.js?v=20261018-13',
   '/manifest.json',
-  '/style.css?v=20261018-11',
-  '/translations.js?v=20261018-11',
-  '/site-config.js?v=20261018-11',
+  '/style.css?v=20261018-13',
+  '/translations.js?v=20261018-13',
+  '/site-config.js?v=20261018-13',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
   '/media/icons/hansea.png',

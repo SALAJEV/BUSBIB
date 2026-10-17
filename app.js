@@ -625,6 +625,7 @@ let homeGtfsMapMarkers = null;
 let homeGtfsMapRefreshHandle = null;
 let homeGtfsMapRequestToken = 0;
 let homeGtfsMapHasLoaded = false;
+let homeGtfsMapStarted = false;
 let homeGtfsMapIsRefreshing = false;
 let homeGtfsMapPausedByInactivity = false;
 let currentPhotoVehicleId = "";
@@ -3500,11 +3501,8 @@ async function refreshHomeGtfsMap(options = {}) {
 
 function startHomeGtfsMapRefresh() {
   if (!homeGtfsMapEl || homeGtfsMapRefreshHandle) return;
-  scheduleNonCriticalTask(() => {
-    void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart warm-up mislukt", error));
-  }, 900);
   homeGtfsMapRefreshHandle = setInterval(() => {
-    if (document.hidden || homeGtfsMapPanelEl?.hidden) return;
+    if (!homeGtfsMapHasLoaded || document.hidden || homeGtfsMapPanelEl?.hidden) return;
     if (Date.now() - lastUserInteractionAt >= HOME_GTFS_MAP_INACTIVITY_LIMIT_MS) {
       pauseHomeGtfsMapForInactivity();
       return;
@@ -6078,8 +6076,8 @@ function applyTranslations() {
   if (homeGtfsMapSummaryEl) homeGtfsMapSummaryEl.remove();
   if (homeGtfsMapRefreshBtn) homeGtfsMapRefreshBtn.textContent = getLabel("refresh", "Vernieuwen");
   if (homeGtfsMapEl) homeGtfsMapEl.setAttribute("aria-label", getLabel("homeGtfsMapAria", "Kaart met alle live GTFS-bussen"));
-  if (homeGtfsMapStatusEl && !homeGtfsMapHasLoaded) {
-    homeGtfsMapStatusEl.textContent = getLabel("homeGtfsMapLoading", "Kaart wordt geladen...");
+  if (homeGtfsMapStatusEl && !homeGtfsMapStarted) {
+    homeGtfsMapStatusEl.textContent = getLabel("homeGtfsMapPrompt", "Klik op Vernieuwen om de live kaart te laden.");
   }
   staticCardTitleEl.textContent = t("staticCard");
   realtimeCardTitleEl.textContent = t("realtimeCard");
@@ -7154,7 +7152,9 @@ function initAppPreferences() {
   setFavoritesPanel(false);
   hideVehiclePhotoCard();
   renderFavorites();
-  loadFeedStatus();
+  scheduleNonCriticalTask(() => {
+    void loadFeedStatus();
+  }, 1500);
   updateFavoriteButtonState();
   resultsWrapEl.classList.remove("show");
   resultsGridEl.classList.remove("show");
@@ -7234,7 +7234,9 @@ dashboardToggleBtn?.addEventListener("click", () => {
   showDashboardSetupModal();
 });
 homeGtfsMapRefreshBtn?.addEventListener("click", () => {
+  homeGtfsMapStarted = true;
   homeGtfsMapPausedByInactivity = false;
+  startHomeGtfsMapRefresh();
   void refreshHomeGtfsMap({ force: true });
 });
 homeGtfsMapEl?.addEventListener("click", (event) => {
@@ -7582,10 +7584,8 @@ window.addEventListener("popstate", () => {
   void applyRouteStateFromLocation();
 });
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) {
-    if (!homeGtfsMapPanelEl?.hidden && !homeGtfsMapHasLoaded) {
-      void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart hervatten mislukt", error));
-    }
+  if (!document.hidden && homeGtfsMapStarted && homeGtfsMapHasLoaded && !homeGtfsMapPanelEl?.hidden) {
+    void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart hervatten mislukt", error));
   }
 });
 
@@ -8827,16 +8827,17 @@ function moveDashboardFocus(step) {
 }
 
 function warmUpVehiclesAndDeepLinks() {
-  void laadVoertuigen()
-    .then(async () => {
-      await applyDeepLinkIfNeeded();
-      await maybeAutoStartDashboardForAndroidTv();
-    })
-    .catch((e) => console.warn("Warm-up voertuigen mislukt", e));
+  scheduleNonCriticalTask(() => {
+    void laadVoertuigen()
+      .then(async () => {
+        await applyDeepLinkIfNeeded();
+        await maybeAutoStartDashboardForAndroidTv();
+      })
+      .catch((e) => console.warn("Warm-up voertuigen mislukt", e));
+  }, 1500);
 }
 
 warmUpVehiclesAndDeepLinks();
-startHomeGtfsMapRefresh();
 
 async function zoekAlles(options = {}) {
   const {
@@ -8999,9 +9000,6 @@ function terug(options = {}) {
   realtimeVehicleCardEl.hidden = true;
   closeBtnEl.style.display = "none";
   setHomeGtfsMapVisible(true);
-  if (!homeGtfsMapHasLoaded) {
-    void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart terug laden mislukt", error));
-  }
   renderRealtimeUnavailableState("", { withTracker: false });
   vasteDataEl.innerHTML = t("noneSelected");
   hideVehiclePhotoCard();
