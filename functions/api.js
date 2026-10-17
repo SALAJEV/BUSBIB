@@ -53,12 +53,13 @@ export async function onRequest(context) {
     
     // Deduplicate concurrent requests to same resource
     const dedupKey = `${resource}:${upstreamUrl}`;
-    if (REQUEST_DEDUP_MAP.has(dedupKey)) {
-      return await REQUEST_DEDUP_MAP.get(dedupKey);
+    const pendingRequest = REQUEST_DEDUP_MAP.get(dedupKey);
+    if (pendingRequest) {
+      return (await pendingRequest).clone();
     }
 
-    // Create promise for this request
-    const requestPromise = (async () => {
+    let requestPromise;
+    requestPromise = (async () => {
       try {
         const upstreamResponse = await fetchUpstream(upstreamUrl, resource, apiKey);
 
@@ -126,15 +127,14 @@ export async function onRequest(context) {
           });
         }
       } finally {
-        REQUEST_DEDUP_MAP.delete(dedupKey);
+        if (REQUEST_DEDUP_MAP.get(dedupKey) === requestPromise) {
+          REQUEST_DEDUP_MAP.delete(dedupKey);
+        }
       }
     })();
 
-    // Store dedup promise briefly
     REQUEST_DEDUP_MAP.set(dedupKey, requestPromise);
-    setTimeout(() => REQUEST_DEDUP_MAP.delete(dedupKey), 100);
-
-    return await requestPromise;
+    return (await requestPromise).clone();
   } catch (error) {
     if (resource === "realtime") {
       const staleCache = await getRealtimeFromCache(true);
@@ -210,7 +210,7 @@ async function readWithSizeLimit(response) {
     }
 
     let received = 0;
-    let result = "";
+    const textChunks = [];
     const decoder = new TextDecoder();
 
     try {
@@ -222,18 +222,17 @@ async function readWithSizeLimit(response) {
         
         // Check size after every chunk
         if (received > MAX_RESPONSE_SIZE_BYTES) {
-          reader.cancel();
+          await reader.cancel();
           throw new Error(`Response exceeds size limit: ${received} bytes > ${MAX_RESPONSE_SIZE_BYTES}`);
         }
 
-        result += decoder.decode(value, { stream: true });
+        textChunks.push(decoder.decode(value, { stream: true }));
       }
 
-      result += decoder.decode(); // Finalize
-      
-      return result;
+      textChunks.push(decoder.decode());
+      return textChunks.join("");
     } catch (error) {
-      reader.cancel();
+      await reader.cancel().catch(() => {});
       throw error;
     }
   } catch (error) {
@@ -392,10 +391,6 @@ function truncate(value, maxLength) {
   const text = (value || "").toString().trim();
   if (!text || text.length <= maxLength) return text;
   return `${text.slice(0, maxLength - 1)}…`;
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 class RequestValidationError extends Error {}

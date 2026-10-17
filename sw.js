@@ -1,12 +1,15 @@
-const CACHE_NAME = 'busbibliotheek-v121';
+const CACHE_NAME = 'busbibliotheek-v123';
+const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
+const PHOTO_CACHE_MAX_ENTRIES = 32;
+const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
 const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261017-10',
+  '/app.js?v=20261017-11',
   '/manifest.json',
   '/style.css?v=20261017-10',
-  '/translations.js?v=20261017-10',
+  '/translations.js?v=20261017-11',
   '/site-config.js?v=20260708-3',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
@@ -17,6 +20,24 @@ const CORE_ASSETS = [
 async function putInCache(requestOrUrl, response) {
   const cache = await caches.open(CACHE_NAME);
   await cache.put(requestOrUrl, response);
+}
+
+function cacheInBackground(event, requestOrUrl, response) {
+  event.waitUntil(putInCache(requestOrUrl, response).catch(() => {}));
+}
+
+async function cacheVehiclePhoto(request, response) {
+  const contentLength = Number(response.headers.get('content-length'));
+  if (!Number.isFinite(contentLength) || contentLength <= 0 || contentLength > PHOTO_CACHE_MAX_BYTES) return;
+  if (!response.headers.get('content-type')?.startsWith('image/')) return;
+
+  const cache = await caches.open(PHOTO_CACHE_NAME);
+  await cache.put(request, response);
+  const requests = await cache.keys();
+  const excessCount = requests.length - PHOTO_CACHE_MAX_ENTRIES;
+  if (excessCount > 0) {
+    await Promise.all(requests.slice(0, excessCount).map((cachedRequest) => cache.delete(cachedRequest)));
+  }
 }
 
 // Install event: cache essential files
@@ -44,7 +65,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName !== PHOTO_CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -82,12 +103,11 @@ self.addEventListener('fetch', event => {
 
   if (isVehiclePhotoRequest) {
     event.respondWith(
-      caches.match(request).then(cached => {
+      caches.open(PHOTO_CACHE_NAME).then(cache => cache.match(request)).then(cached => {
         if (cached) return cached;
         return fetch(request).then(response => {
           if (response && response.status === 200 && !request.headers.has('range')) {
-            const clone = response.clone();
-            putInCache(request, clone);
+            event.waitUntil(cacheVehiclePhoto(request, response.clone()).catch(() => {}));
           }
           return response;
         }).catch(() => offlineTextResponse);
@@ -102,7 +122,7 @@ self.addEventListener('fetch', event => {
       fetch(request, { cache: 'no-store' })
         .then(response => {
           const cloned = response.clone();
-          putInCache(APP_SHELL_CACHE_KEY, cloned);
+          cacheInBackground(event, APP_SHELL_CACHE_KEY, cloned);
           return response;
         })
         .catch(async () => {
@@ -149,7 +169,7 @@ self.addEventListener('fetch', event => {
           // Cache successful responses
           if (response && response.status === 200) {
             const clonedResponse = response.clone();
-            putInCache(request, clonedResponse);
+            cacheInBackground(event, request, clonedResponse);
           }
           return response;
         })
@@ -165,7 +185,7 @@ self.addEventListener('fetch', event => {
           .then(response => {
             if (response && response.status === 200) {
               const clone = response.clone();
-              putInCache(request, clone);
+              cacheInBackground(event, request, clone);
             }
             return response;
           })

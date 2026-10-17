@@ -50,7 +50,6 @@ installBtn?.addEventListener("click", async () => {
   } else if (deferredPrompt) {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`Gebruiker antwoord: ${outcome}`);
     if (outcome === "accepted") {
       rememberInstalledOnThisDevice();
     }
@@ -61,7 +60,6 @@ installBtn?.addEventListener("click", async () => {
   syncInstallButtonVisibility();
 });
 window.addEventListener('appinstalled', () => {
-  console.log('App succesvol geinstalleerd');
   rememberInstalledOnThisDevice();
   hideInstallGuideModal();
   deferredPrompt = null;
