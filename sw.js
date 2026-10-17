@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbibliotheek-v127';
+const CACHE_NAME = 'busbibliotheek-v128';
 const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
@@ -6,23 +6,37 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261017-14',
+  '/app.js?v=20261017-15',
   '/manifest.json',
-  '/style.css?v=20261017-14',
-  '/translations.js?v=20261017-14',
-  '/site-config.js?v=20261017-14',
+  '/style.css?v=20261017-15',
+  '/translations.js?v=20261017-15',
+  '/site-config.js?v=20261017-15',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
   '/media/icons/hansea.png',
   '/media/icons/favicon.ico'
 ];
 
+function isHttpCacheRequest(requestOrUrl) {
+  try {
+    const requestUrl = requestOrUrl instanceof Request
+      ? requestOrUrl.url
+      : new URL(requestOrUrl, self.location.href).href;
+    const protocol = new URL(requestUrl).protocol;
+    return protocol === 'http:' || protocol === 'https:';
+  } catch (_) {
+    return false;
+  }
+}
+
 async function putInCache(requestOrUrl, response) {
+  if (!isHttpCacheRequest(requestOrUrl)) return;
   const cache = await caches.open(CACHE_NAME);
   await cache.put(requestOrUrl, response);
 }
 
 function cacheInBackground(event, requestOrUrl, response) {
+  if (!isHttpCacheRequest(requestOrUrl)) return;
   event.waitUntil(putInCache(requestOrUrl, response).catch(() => {}));
 }
 
@@ -77,6 +91,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
   const offlineTextResponse = new Response('Offline', {
     status: 503,
     statusText: 'Service Unavailable',

@@ -16,7 +16,6 @@
 <link rel="apple-touch-icon" href="media/icons/logo.png">
 <link rel="manifest" href="manifest.json">
 <!-- Preload critical resources -->
-<link rel="preload" href="media/icons/logo.png" as="image">
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -24,19 +23,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261017-14">
-<script src="site-config.js?v=20261017-14"></script>
+<link rel="stylesheet" href="style.css?v=20261017-15">
+<script src="site-config.js?v=20261017-15"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261017-14";
+  window.BB_ASSET_VERSION = "20261017-15";
 </script>
 </head>
 <body>
 <div class="app-shell">
 <div id="splash" role="img" aria-label="Busbibliotheek laden">
   <picture class="logo">
-    <img src="media/icons/logo.png" alt="Busbibliotheek">
+    <img src="media/icons/logo.png" alt="Busbibliotheek" fetchpriority="high" decoding="async">
   </picture>
   <h1 id="splashTitle" class="splash-title">Busbibliotheek</h1>
   <p id="splashCredit" class="splash-credit">Made by Busspotter 95</p>

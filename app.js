@@ -29,6 +29,7 @@ const favoritesTopEl = document.querySelector(".favorites-top");
 const headerActionsEl = document.querySelector(".header-actions");
 const headerSearchRowEl = document.querySelector(".search-row");
 window.addEventListener('beforeinstallprompt', (e) => {
+  // The site has its own install action and calls prompt() after a user click.
   e.preventDefault();
   deferredPrompt = e;
   syncInstallButtonVisibility();
@@ -655,7 +656,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.17-14";
+const APP_VERSION = "2026.10.17-15";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -3837,7 +3838,9 @@ function ensureVehiclePhotoImageElement() {
   imageEl.id = "vehiclePhotoImg";
   imageEl.className = "vehicle-photo-image";
   imageEl.alt = "";
-  imageEl.loading = "lazy";
+  // This image is only created after the user opens a vehicle; load it immediately.
+  imageEl.loading = "eager";
+  imageEl.fetchPriority = "high";
   imageEl.decoding = "async";
   vehiclePhotoFrameEl.insertBefore(imageEl, vehiclePhotoNextBtn || vehiclePhotoEmptyStateEl || null);
   vehiclePhotoImgEl = imageEl;
@@ -6614,6 +6617,20 @@ function setFavoritesPanel(open) {
     syncInteractiveOverlayState();
     return;
   }
+  if (!open && favoritesBackdropEl.contains(document.activeElement)) {
+    const savedTarget = favoritesPanelRestoreFocusEl;
+    const focusTarget =
+      savedTarget instanceof HTMLElement &&
+      savedTarget.isConnected &&
+      !favoritesBackdropEl.contains(savedTarget)
+        ? savedTarget
+        : favoritesToggleBtn;
+    try {
+      focusTarget.focus({ preventScroll: true });
+    } catch (_) {
+      focusTarget.focus();
+    }
+  }
   if (shouldOpen === favoritesPanelOpen) {
     if (!shouldOpen) {
       favoritesPanelEl.setAttribute("aria-hidden", "true");
@@ -9073,7 +9090,7 @@ function toonVasteData(id){
     if (row.isHansea) {
       waardeMarkup = `
         <span class="hansea-number-display">
-          <img src="media/icons/hansea.png" alt="Hansea" class="hansea-logo" loading="lazy" decoding="async">
+          <img src="media/icons/hansea.png" alt="Hansea" class="hansea-logo" loading="eager" decoding="async">
           <span>${escapeHtml(row.value)}</span>
         </span>
       `;
