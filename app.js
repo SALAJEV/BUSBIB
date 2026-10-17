@@ -677,7 +677,6 @@ let realtimeFeedCacheData = null;
 let realtimeFeedCacheFetchedAt = 0;
 let realtimeFeedCachePromise = null;
 let realtimeFeedDerivedCache = null;
-let staticDatasetsWarmupPromise = null;
 let lastWeatherCacheKey = "";
 let lastWeatherData = null;
 let lastWeatherCoordinates = null;
@@ -3464,13 +3463,8 @@ async function refreshHomeGtfsMap(options = {}) {
   homeGtfsMapRefreshBtn?.setAttribute("disabled", "disabled");
 
   try {
-    const [, , , data] = await Promise.all([
+    const [, data] = await Promise.all([
       voertuigen.length === 0 ? laadVoertuigen() : Promise.resolve(),
-      trips.length === 0 || routes.length === 0 ? Promise.all([
-        trips.length === 0 ? laadTrips() : Promise.resolve(),
-        routes.length === 0 ? laadRoutes() : Promise.resolve()
-      ]) : Promise.resolve(),
-      stopsById.size === 0 ? laadStops() : Promise.resolve(),
       fetchRealtimeFeed({ force })
     ]);
     if (requestToken !== homeGtfsMapRequestToken) return;
@@ -8841,29 +8835,7 @@ function warmUpVehiclesAndDeepLinks() {
     .catch((e) => console.warn("Warm-up voertuigen mislukt", e));
 }
 
-function warmUpStaticDatasets() {
-  if (staticDatasetsWarmupPromise) return staticDatasetsWarmupPromise;
-  staticDatasetsWarmupPromise = Promise.all([
-    laadVoertuigen(),
-    laadTrips(),
-    laadRoutes(),
-    laadStops()
-  ]).finally(() => {
-    staticDatasetsWarmupPromise = null;
-  });
-  return staticDatasetsWarmupPromise;
-}
-
-function scheduleStaticDatasetsWarmup() {
-  scheduleNonCriticalTask(() => {
-    void warmUpStaticDatasets().catch((error) => {
-      console.warn("Warm-up statische databestanden mislukt", error);
-    });
-  });
-}
-
 warmUpVehiclesAndDeepLinks();
-scheduleStaticDatasetsWarmup();
 startHomeGtfsMapRefresh();
 
 async function zoekAlles(options = {}) {

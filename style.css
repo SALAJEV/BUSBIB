@@ -4,22 +4,22 @@
   --visual-viewport-height: 100dvh;
   --visual-viewport-offset-top: 0px;
   --keyboard-offset: 0px;
-  --page: #f2f5f3;
-  --page-top: #f8faf8;
+  --page: #f2f5f8;
+  --page-top: #f8fafc;
   --bg: var(--page);
   --bg-gradient-top: var(--page-top);
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-soft: #f5f8f6;
-  --surface-tint: #edf7f1;
-  --ink: #172821;
-  --muted: #62736b;
-  --faint: #89978f;
-  --line: #dfe8e2;
-  --line-strong: #cbd9d0;
-  --accent: #07884f;
-  --accent-hover: #066c40;
-  --accent-soft: #e4f3ea;
+  --surface-soft: #f5f7fa;
+  --surface-tint: #edf3f9;
+  --ink: #1b2733;
+  --muted: #657382;
+  --faint: #8b97a3;
+  --line: #e0e6ed;
+  --line-strong: #ccd5df;
+  --accent: #477eaf;
+  --accent-hover: #376b9a;
+  --accent-soft: #e8f0f8;
   --accent-ink: #ffffff;
   --danger: #bd3d3a;
   --warning: #98640b;
@@ -34,8 +34,14 @@
   --radius-xl: 28px;
   --content-width: 1240px;
   --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
-  --header-surface-a: color-mix(in srgb, var(--accent) 62%, #17211b);
-  --header-surface-b: color-mix(in srgb, var(--accent) 42%, #101a17);
+  --header-surface-a: color-mix(in srgb, var(--accent) 62%, #18212b);
+  --header-surface-b: color-mix(in srgb, var(--accent) 42%, #101720);
+  --page-pattern: repeating-linear-gradient(
+    135deg,
+    transparent 0 46px,
+    color-mix(in srgb, var(--accent) 6%, transparent) 46px 47px
+  );
+  --page-pattern-size: auto;
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--page);
@@ -64,10 +70,10 @@
   --faint: #899b8f;
   --line: #34473b;
   --line-strong: #496052;
-  --accent: #54c889;
-  --accent-hover: #6ed69b;
-  --accent-soft: #254b36;
-  --accent-ink: #102019;
+  --accent: #79a9d5;
+  --accent-hover: #94bce0;
+  --accent-soft: #25384c;
+  --accent-ink: #111a23;
   --danger: #ff817c;
   --warning: #f2c66e;
   --overlay: rgba(0, 0, 0, 0.68);
@@ -81,36 +87,70 @@
   --accent: #2875c7;
   --accent-hover: #1f5fa5;
   --accent-soft: #e7f1fc;
+  --page-pattern: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 8%, transparent) 1.2px,
+    transparent 1.6px
+  );
+  --page-pattern-size: 28px 28px;
 }
 
 :root[data-color-theme="green"] {
   --accent: #07884f;
   --accent-hover: #066c40;
   --accent-soft: #e4f3ea;
+  --page-pattern: repeating-linear-gradient(
+    90deg,
+    transparent 0 34px,
+    color-mix(in srgb, var(--accent) 7%, transparent) 34px 35px
+  );
 }
 
 :root[data-color-theme="yellow"] {
   --accent: #b07800;
   --accent-hover: #8e6000;
   --accent-soft: #fbf2d9;
+  --page-pattern: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--accent) 8%, transparent) 0 2px,
+    transparent 2.5px
+  );
+  --page-pattern-size: 42px 42px;
 }
 
 :root[data-color-theme="orange"] {
   --accent: #c35a18;
   --accent-hover: #9e4814;
   --accent-soft: #fcece2;
+  --page-pattern: repeating-linear-gradient(
+    45deg,
+    transparent 0 20px,
+    color-mix(in srgb, var(--accent) 7%, transparent) 20px 21px,
+    transparent 21px 40px
+  );
 }
 
 :root[data-color-theme="red"] {
   --accent: #c23f48;
   --accent-hover: #9f3038;
   --accent-soft: #f9e8e9;
+  --page-pattern: repeating-radial-gradient(
+    circle at 0 0,
+    transparent 0 20px,
+    color-mix(in srgb, var(--accent) 7%, transparent) 21px 22px,
+    transparent 23px 42px
+  );
 }
 
 :root[data-color-theme="purple"] {
   --accent: #7652ba;
   --accent-hover: #5e4097;
   --accent-soft: #f0eafd;
+  --page-pattern: repeating-linear-gradient(
+    30deg,
+    transparent 0 35px,
+    color-mix(in srgb, var(--accent) 7%, transparent) 35px 36px
+  );
 }
 
 :root[data-theme="dark"] {
@@ -126,7 +166,7 @@
   --muted: color-mix(in srgb, var(--accent) 9%, #b0b3ba);
   --faint: color-mix(in srgb, var(--accent) 8%, #898d96);
   --accent-soft: color-mix(in srgb, var(--accent) 22%, #20232a);
-  --accent-ink: #101b15;
+  --accent-ink: #111a23;
   --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
   --header-surface-a: color-mix(in srgb, var(--accent) 62%, #171a20);
   --header-surface-b: color-mix(in srgb, var(--accent) 42%, #101317);
@@ -178,7 +218,7 @@
     --faint: color-mix(in srgb, var(--accent) 8%, #898d96);
     --line: color-mix(in srgb, var(--accent) 17%, #343840);
     --line-strong: color-mix(in srgb, var(--accent) 23%, #494d56);
-    --accent-ink: #102019;
+    --accent-ink: #111a23;
     --danger: #ff817c;
     --warning: #f2c66e;
     --overlay: rgba(0, 0, 0, 0.68);
@@ -209,8 +249,10 @@ body {
   min-height: var(--app-height);
   margin: 0;
   background:
-    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 34rem),
+    var(--page-pattern),
+    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 34rem),
     linear-gradient(180deg, var(--page-top), var(--page) 34rem);
+  background-size: var(--page-pattern-size), auto, auto;
   color: var(--ink);
   font-size: 15px;
   line-height: 1.55;
@@ -941,18 +983,275 @@ footer {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: minmax(280px, 0.88fr) minmax(0, 1.12fr);
+  gap: 18px;
   align-items: start;
 }
 
 .card {
-  padding: 20px;
+  min-width: 0;
+  padding: clamp(17px, 2.1vw, 25px);
   overflow: hidden;
 }
 
 .card h2 {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
+  padding-left: 12px;
+  border-left: 3px solid var(--accent);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: clamp(1.12rem, 1.7vw, 1.35rem);
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+#staticVehicleCard,
+#realtimeVehicleCard {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
+  box-shadow: var(--shadow-md);
+}
+
+#staticVehicleCard {
+  background:
+    linear-gradient(155deg, var(--surface-raised), var(--surface) 68%);
+}
+
+#realtimeVehicleCard {
+  background:
+    linear-gradient(155deg, var(--surface-raised), var(--surface) 74%);
+}
+
+.vehicle-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  margin: 0 0 10px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: var(--radius-md);
+  background: var(--surface-tint);
+}
+
+.voertuignummer-display {
+  min-width: 0;
+  margin: 0;
+  color: var(--accent);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.065em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.vehicle-favorite-btn {
+  display: inline-grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-left: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1.45rem;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.vehicle-favorite-btn:hover,
+.vehicle-favorite-btn.is-favorite {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.vehicle-type {
+  display: inline-flex;
+  max-width: 100%;
+  margin: 0 0 16px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+#vasteData table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+#vasteData tr + tr th,
+#vasteData tr + tr td {
+  border-top: 1px solid var(--line);
+}
+
+#vasteData th,
+#vasteData td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+#vasteData th {
+  width: 42%;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+#vasteData td {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.hansea-number-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.hansea-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.ig-btn-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.ig-btn-wrap .btn {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+}
+
+.btn--instagram,
+.btn--story {
+  border-color: var(--line-strong);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.btn--instagram:hover,
+.btn--story:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.realtime-summary-card {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: var(--radius-md);
+  background: var(--surface-tint);
+}
+
+.route-destination-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.route-destination-row.route-link:hover .destination-text {
+  color: var(--accent);
+}
+
+.line-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 48px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--line-badge-bg, var(--accent));
+  color: var(--line-badge-fg, var(--accent-ink));
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.destination-text {
+  min-width: 0;
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.realtime-meta-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.current-stop-row,
+.realtime-block-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+
+.current-stop-link,
+.realtime-block-id strong {
+  color: var(--ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.delay-status {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.delay-late {
+  background: color-mix(in srgb, var(--warning) 13%, var(--surface));
+  color: var(--warning);
+}
+
+.delay-early {
+  background: color-mix(in srgb, #2875c7 12%, var(--surface));
+  color: #2875c7;
 }
 
 #vasteData,
@@ -967,6 +1266,12 @@ footer {
 
 .loading {
   padding: 11px 0;
+}
+
+#realtimeVehicleCard #map {
+  height: clamp(300px, 36vw, 430px);
+  margin-top: 0;
+  border-radius: var(--radius-md);
 }
 
 #lastUpdate {
@@ -1882,6 +2187,10 @@ body.site-disabled {
 @media (max-width: 900px) {
   .header-bar {
     grid-template-columns: minmax(0, 1fr) minmax(220px, 0.78fr);
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .header-intro {
