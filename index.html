@@ -23,12 +23,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261017-15">
-<script src="site-config.js?v=20261017-15"></script>
+<link rel="stylesheet" href="style.css?v=20261018-10">
+<script src="site-config.js?v=20261018-10"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261017-15";
+  window.BB_ASSET_VERSION = "20261018-10";
 </script>
 </head>
 <body>
@@ -46,8 +46,9 @@
   </div>  <div id="photoDelayBanner" class="tracking-status-banner" hidden aria-hidden="true" role="status">
     <span id="photoDelayBannerText" class="tracking-status-banner__text">Foto's worden later online gezet.</span>
   </div>  <div class="header-bar">
-    <div class="header-intro">
+    <div class="header-intro">  
       <button id="appTitleBtn" class="title-home-btn" type="button">
+        <img class="title-home-logo" src="media/icons/logo.png" alt="" aria-hidden="true">
         <h1 id="appTitle">Busbibliotheek</h1>
       </button>
       <div class="header-copy">
@@ -142,12 +143,12 @@
       </button>
     </div>
     <div class="grid" id="resultsGrid">
-      <div class="card">
+      <div id="staticVehicleCard" class="card" hidden>
         <h2 id="staticCardTitle">Voertuiginformatie</h2>
         <div id="vasteData">Geen voertuig geselecteerd.</div>
       </div>
 
-      <div class="card">
+      <div id="realtimeVehicleCard" class="card" hidden>
         <h2 id="realtimeCardTitle">Realtimegegevens</h2>
         <div id="realtime" class="loading">Geen gegevens beschikbaar.</div>
         <div id="weatherBlock" class="weather-block" hidden aria-hidden="true"></div>

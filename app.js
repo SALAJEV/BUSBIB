@@ -396,6 +396,8 @@ const languageOptPlEl = document.getElementById("languageOptPl");
 const languageOptEsEl = document.getElementById("languageOptEs");
 const languageOptRuEl = document.getElementById("languageOptRu");
 const dashboardTitleEl = document.getElementById("dashboardTitle");
+const staticVehicleCardEl = document.getElementById("staticVehicleCard");
+const realtimeVehicleCardEl = document.getElementById("realtimeVehicleCard");
 const staticCardTitleEl = document.getElementById("staticCardTitle");
 const realtimeCardTitleEl = document.getElementById("realtimeCardTitle");
 const photoCardTitleEl = document.getElementById("photoCardTitle");
@@ -2738,9 +2740,7 @@ function updateHeaderVisualRoutePresentation(
   routeTextColor = DEFAULT_HEADER_ROUTE_TEXT_COLOR
 ) {
   if (headerVisualRouteEl) {
-    const normalizedRouteColor = cleanText(routeShort) === DEFAULT_HEADER_ROUTE
-      ? DEFAULT_HEADER_ROUTE_COLOR
-      : normalizeRouteColor(routeColor, DEFAULT_HEADER_ROUTE_COLOR);
+    const normalizedRouteColor = normalizeRouteColor(routeColor, DEFAULT_HEADER_ROUTE_COLOR);
     const hex = normalizedRouteColor.replace("#", "");
     const red = Number.parseInt(hex.slice(0, 2), 16) || 0;
     const green = Number.parseInt(hex.slice(2, 4), 16) || 0;
@@ -5948,6 +5948,7 @@ function applyTheme(theme) {
   const normalizedTheme = getEffectiveThemeSetting(theme, settings.colorTheme);
   if (normalizedTheme === "auto") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", normalizedTheme);
+  homeGtfsMapMarkers?.eachLayer((layer) => layer.redraw?.());
   syncThemeControlState();
   updateSystemUiThemeColor();
 }
@@ -5971,6 +5972,7 @@ function applyColorTheme(colorTheme) {
   const root = document.documentElement;
   const normalized = normalizeColorTheme(colorTheme);
   root.setAttribute("data-color-theme", normalized);
+  homeGtfsMapMarkers?.eachLayer((layer) => layer.redraw?.());
   syncThemeControlState();
   updateSystemUiThemeColor();
 }
@@ -6000,7 +6002,10 @@ function updateSystemUiThemeColor() {
 
 window.updateSystemUiThemeColor = updateSystemUiThemeColor;
 prefersDarkScheme.addEventListener?.("change", () => {
-  if (settings.theme === "auto") updateSystemUiThemeColor();
+  if (settings.theme === "auto") {
+    homeGtfsMapMarkers?.eachLayer((layer) => layer.redraw?.());
+    updateSystemUiThemeColor();
+  }
 });
 
 window.addEventListener("resize", debounce(syncHeaderActionPlacement, 120), { passive: true });
@@ -7159,6 +7164,8 @@ function initAppPreferences() {
   updateFavoriteButtonState();
   resultsWrapEl.classList.remove("show");
   resultsGridEl.classList.remove("show");
+  staticVehicleCardEl.hidden = true;
+  realtimeVehicleCardEl.hidden = true;
   closeBtnEl.style.display = "none";
   setRealtimeMapVisibility(false);
   lastUpdateEl.hidden = true;
@@ -8287,6 +8294,8 @@ function getHomeGtfsCanvasLayerClass() {
       this._snapshots = snapshots;
       this._icon = new Image();
       this._iconLoaded = false;
+      this._tintedIcon = null;
+      this._tintedIconColor = "";
       this._icon.onload = () => {
         this._iconLoaded = true;
         this._redraw();
@@ -8322,6 +8331,28 @@ function getHomeGtfsCanvasLayerClass() {
         this._reset();
       });
     },
+    redraw() {
+      this._tintedIcon = null;
+      this._tintedIconColor = "";
+      this._redraw();
+    },
+    _getTintedIcon() {
+      const color = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+      if (!color) return this._icon;
+      if (this._tintedIcon && this._tintedIconColor === color) return this._tintedIcon;
+      const tintedIcon = document.createElement("canvas");
+      tintedIcon.width = this._icon.naturalWidth;
+      tintedIcon.height = this._icon.naturalHeight;
+      const context = tintedIcon.getContext("2d");
+      if (!context) return this._icon;
+      context.drawImage(this._icon, 0, 0);
+      context.globalCompositeOperation = "source-in";
+      context.fillStyle = color;
+      context.fillRect(0, 0, tintedIcon.width, tintedIcon.height);
+      this._tintedIcon = tintedIcon;
+      this._tintedIconColor = color;
+      return tintedIcon;
+    },
     _reset() {
       if (!this._map || !this._canvas) return;
       const size = this._map.getSize();
@@ -8346,13 +8377,14 @@ function getHomeGtfsCanvasLayerClass() {
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
       const half = iconSize / 2;
       const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
+      const icon = this._getTintedIcon();
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
         ctx.save();
         ctx.translate(point.x, point.y);
         ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
-        ctx.drawImage(this._icon, -half, -iconSize, iconSize, iconSize);
+        ctx.drawImage(icon, -half, -iconSize, iconSize, iconSize);
         ctx.restore();
       });
     },
@@ -8905,6 +8937,8 @@ async function zoekAlles(options = {}) {
     return;
   }
   currentVehicleId = activeVehicleId;
+  staticVehicleCardEl.hidden = false;
+  realtimeVehicleCardEl.hidden = false;
   updateHeaderVisualRoutePresentation();
   realtimePausedByInactivity = false;
   setHomeGtfsMapVisible(false);
@@ -8989,6 +9023,8 @@ function terug(options = {}) {
   } = options;
   resultsGridEl.classList.remove("show");
   resultsWrapEl.classList.remove("show");
+  staticVehicleCardEl.hidden = true;
+  realtimeVehicleCardEl.hidden = true;
   closeBtnEl.style.display = "none";
   setHomeGtfsMapVisible(true);
   if (!homeGtfsMapHasLoaded) {
