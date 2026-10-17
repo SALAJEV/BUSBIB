@@ -411,7 +411,6 @@ const vehiclePhotoCaptionEl = document.getElementById("vehiclePhotoCaption");
 const vehiclePhotoUploadCtaEl = document.getElementById("vehiclePhotoUploadCta");
 const vehiclePhotoUploadHintEl = document.getElementById("vehiclePhotoUploadHint");
 const vehiclePhotoEmptyStateEl = document.getElementById("vehiclePhotoEmptyState");
-const vehiclePhotoEmptyBadgeEl = document.getElementById("vehiclePhotoEmptyBadge");
 const vehiclePhotoEmptyTitleEl = document.getElementById("vehiclePhotoEmptyTitle");
 const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText");
 const vehiclePhotoUploadBtn = document.getElementById("vehiclePhotoUploadBtn");
@@ -3790,7 +3789,6 @@ function updateVehiclePhotoTexts() {
 function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   const visibleVehicleId = getVehicleDisplayId(vehicleId);
   const hasSpecificVehicleId = !!visibleVehicleId;
-  if (vehiclePhotoEmptyBadgeEl) vehiclePhotoEmptyBadgeEl.textContent = getLabel("photoUploadEmptyBadge", "Nog geen foto");
   if (vehiclePhotoEmptyTitleEl) {
     vehiclePhotoEmptyTitleEl.textContent = hasSpecificVehicleId
       ? fillTemplate(getLabel("photoUploadEmptyTitle", "Nog geen foto van voertuig {id}."), visibleVehicleId)
