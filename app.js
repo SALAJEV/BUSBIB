@@ -158,6 +158,8 @@ const intervalSelect = document.getElementById("intervalSelect");
 const themeSelect = document.getElementById("themeSelect");
 const colorThemeSelect = document.getElementById("colorThemeSelect");
 const languageSelect = document.getElementById("languageSelect");
+const showHomeRealtimeMapToggle = document.getElementById("showHomeRealtimeMapToggle");
+const showHomeRealtimeMapLabelEl = document.getElementById("showHomeRealtimeMapLabel");
 const intervalOpt10El = document.getElementById("intervalOpt10");
 const intervalOpt15El = document.getElementById("intervalOpt15");
 const intervalOpt30El = document.getElementById("intervalOpt30");
@@ -2071,6 +2073,7 @@ let settings = {
   colorTheme: "classic",
   language: "nl",
   dashboardVehicleIds: [],
+  showHomeRealtimeMap: true,
   hasCompletedOnboarding: false
 };
 const HALTE_CODE_REGEX = /^[1-5]\d{5}$/;
@@ -3259,9 +3262,10 @@ function setHomeGtfsMapStatus(message, tone = "") {
 
 function setHomeGtfsMapVisible(visible) {
   if (!homeGtfsMapPanelEl) return;
-  homeGtfsMapPanelEl.hidden = !visible;
-  homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!visible));
-  if (visible && homeGtfsMap) {
+  const shouldShow = visible && settings.showHomeRealtimeMap;
+  homeGtfsMapPanelEl.hidden = !shouldShow;
+  homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!shouldShow));
+  if (shouldShow && homeGtfsMap) {
     window.setTimeout(() => homeGtfsMap.invalidateSize(), 0);
   }
 }
@@ -3452,7 +3456,7 @@ function resumeHomeGtfsMapAfterInteraction() {
 }
 
 async function refreshHomeGtfsMap(options = {}) {
-  if (!homeGtfsMapPanelEl || !homeGtfsMapEl) return;
+  if (!homeGtfsMapPanelEl || !homeGtfsMapEl || !settings.showHomeRealtimeMap) return;
   homeGtfsMapStarted = true;
   const { force = false } = options;
   if (homeGtfsMapIsRefreshing) return;
@@ -5636,6 +5640,7 @@ function loadSettings() {
     settings.colorTheme = normalizeColorTheme(settings.colorTheme);
     settings.language = normalizeLanguage(settings.language);
     settings.dashboardVehicleIds = normalizeDashboardVehicleIds(settings.dashboardVehicleIds);
+    settings.showHomeRealtimeMap = typeof parsed.showHomeRealtimeMap === "boolean" ? parsed.showHomeRealtimeMap : true;
     settings.hasCompletedOnboarding = typeof parsed.hasCompletedOnboarding === "boolean" ? parsed.hasCompletedOnboarding : true;
     window.settings = settings;
   } catch (e) {
@@ -5872,6 +5877,7 @@ function createDefaultSettings(language = DEFAULT_LANG) {
     colorTheme: "classic",
     language: normalizeLanguage(language),
     dashboardVehicleIds: [],
+    showHomeRealtimeMap: true,
     hasCompletedOnboarding: false
   };
 }
@@ -5881,6 +5887,7 @@ function syncPrimarySettingsControls() {
   if (themeSelect) themeSelect.value = settings.theme;
   if (colorThemeSelect) colorThemeSelect.value = settings.colorTheme;
   if (languageSelect) languageSelect.value = settings.language;
+  if (showHomeRealtimeMapToggle) showHomeRealtimeMapToggle.checked = settings.showHomeRealtimeMap;
 }
 
 function syncFirstRunSetupControls() {
@@ -6032,6 +6039,9 @@ function applyTranslations() {
   voertuigInput.placeholder = t("vehiclePlaceholder");
   favoritesTitleEl.textContent = t("favorites");
   settingsTitleEl.textContent = t("settings");
+  if (showHomeRealtimeMapLabelEl) {
+    showHomeRealtimeMapLabelEl.textContent = getLabel("showHomeRealtimeMap", "Realtime kaart op startscherm");
+  }
   if (settingsInfoBtn) settingsInfoBtn.textContent = getLabel("infoTitle", "Info");
   intervalLabelEl.textContent = t("interval");
   themeLabelEl.textContent = t("theme");
@@ -7155,6 +7165,7 @@ function initAppPreferences() {
   syncStalkModeAvailability();
   setFavoritesPanel(false);
   hideVehiclePhotoCard();
+  setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
   renderFavorites();
   scheduleNonCriticalTask(() => {
     void loadFeedStatus();
@@ -7341,6 +7352,16 @@ intervalSelect.addEventListener("change", () => {
   restartRealtimeRefresh();
   if (dashboardVehicleIds.length && !dashboardPanelEl.hidden) {
     void openDashboardPanel();
+  }
+});
+showHomeRealtimeMapToggle?.addEventListener("change", () => {
+  settings.showHomeRealtimeMap = showHomeRealtimeMapToggle.checked;
+  saveSettings();
+  setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
+  if (settings.showHomeRealtimeMap) {
+    homeGtfsMapStarted = true;
+    startHomeGtfsMapRefresh();
+    void refreshHomeGtfsMap({ force: true });
   }
 });
 themeSelect.addEventListener("change", () => {
@@ -8808,9 +8829,11 @@ function moveDashboardFocus(step) {
 
 function warmUpVehiclesAndDeepLinks() {
   scheduleNonCriticalTask(() => {
-    homeGtfsMapStarted = true;
-    startHomeGtfsMapRefresh();
-    void refreshHomeGtfsMap({ force: true }).catch((error) => console.warn("GTFS-overzichtskaart warm-up mislukt", error));
+    if (settings.showHomeRealtimeMap) {
+      homeGtfsMapStarted = true;
+      startHomeGtfsMapRefresh();
+      void refreshHomeGtfsMap({ force: true }).catch((error) => console.warn("GTFS-overzichtskaart warm-up mislukt", error));
+    }
     void laadVoertuigen()
       .then(async () => {
         await applyDeepLinkIfNeeded();

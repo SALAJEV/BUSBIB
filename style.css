@@ -99,6 +99,7 @@
   --accent: #07884f;
   --accent-hover: #066c40;
   --accent-soft: #e4f3ea;
+  --page-pattern-size: 48px 48px;
   --page-pattern: repeating-linear-gradient(
     90deg,
     transparent 0 34px,
@@ -112,16 +113,18 @@
   --accent-soft: #fbf2d9;
   --page-pattern: radial-gradient(
     circle at 50% 50%,
-    color-mix(in srgb, var(--accent) 8%, transparent) 0 2px,
-    transparent 2.5px
+    transparent 0 7px,
+    color-mix(in srgb, var(--accent) 5%, transparent) 7.5px 8.5px,
+    transparent 9px
   );
-  --page-pattern-size: 42px 42px;
+  --page-pattern-size: 44px 44px;
 }
 
 :root[data-color-theme="orange"] {
   --accent: #c35a18;
   --accent-hover: #9e4814;
   --accent-soft: #fcece2;
+  --page-pattern-size: 56px 56px;
   --page-pattern: repeating-linear-gradient(
     45deg,
     transparent 0 20px,
@@ -134,44 +137,68 @@
   --accent: #c23f48;
   --accent-hover: #9f3038;
   --accent-soft: #f9e8e9;
-  --page-pattern: repeating-radial-gradient(
-    circle at 0 0,
-    transparent 0 20px,
-    color-mix(in srgb, var(--accent) 7%, transparent) 21px 22px,
-    transparent 23px 42px
+  --page-pattern: repeating-conic-gradient(
+    from 15deg at 50% 50%,
+    transparent 0deg 28deg,
+    color-mix(in srgb, var(--accent) 3.5%, transparent) 28deg 29deg,
+    transparent 29deg 60deg
   );
+  --page-pattern-size: 64px 64px;
 }
 
 :root[data-color-theme="purple"] {
   --accent: #7652ba;
   --accent-hover: #5e4097;
   --accent-soft: #f0eafd;
-  --page-pattern: repeating-linear-gradient(
-    30deg,
-    transparent 0 35px,
-    color-mix(in srgb, var(--accent) 7%, transparent) 35px 36px
-  );
+  --page-pattern:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 30px,
+      color-mix(in srgb, var(--accent) 4%, transparent) 30px 31px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 30px,
+      color-mix(in srgb, var(--accent) 4%, transparent) 30px 31px
+    );
+  --page-pattern-size: 84px 84px, 84px 84px;
 }
 
 :root[data-color-theme="classic"] {
-  --accent: #58778c;
-  --accent-hover: #435f72;
-  --accent-soft: #e8eef1;
-  --warning: #a78343;
+  --accent: #426f91;
+  --accent-hover: #315a78;
+  --accent-soft: #e9f0f5;
+  --accent-ink: #ffffff;
+  --warning: #987638;
+  --header-surface-a: #304f6b;
+  --header-surface-b: #263f56;
   --page-pattern:
-    repeating-linear-gradient(
-      135deg,
-      transparent 0 47px,
-      color-mix(in srgb, var(--accent) 4%, transparent) 47px 48px,
-      transparent 48px 96px
+    linear-gradient(
+      0deg,
+      transparent calc(100% - 1px),
+      color-mix(in srgb, var(--accent) 3%, transparent) 100%
+    ),
+    linear-gradient(
+      90deg,
+      transparent calc(100% - 1px),
+      color-mix(in srgb, var(--accent) 3%, transparent) 100%
     ),
     radial-gradient(
       circle,
-      color-mix(in srgb, #b99b63 7%, transparent) 1px,
+      color-mix(in srgb, #c6a24f 5%, transparent) 1px,
       transparent 1.5px
     );
-  --page-pattern-size: 96px 96px, 32px 32px;
+  --page-pattern-size: 80px 80px, 80px 80px, 32px 32px;
 }
+
+:root[data-color-theme="classic"] .card h2 {
+  border-left-color: #c6a24f;
+}
+
+:root[data-color-theme="classic"] .header-visual-kicker {
+  color: #ead79f;
+}
+
 
 :root[data-theme="dark"] {
   --page: color-mix(in srgb, var(--accent) 10%, #101317);
@@ -249,6 +276,14 @@
     --header-surface-a: color-mix(in srgb, var(--accent) 62%, #171a20);
     --header-surface-b: color-mix(in srgb, var(--accent) 42%, #101317);
   }
+}
+
+:root[data-color-theme="classic"] .card h2 {
+  border-left-color: #c6a24f;
+}
+
+:root[data-color-theme="classic"] .header-visual-kicker {
+  color: #ead79f;
 }
 
 * {
@@ -392,6 +427,7 @@ p {
 
 .container {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 12px;
   width: min(var(--content-width), calc(100% - 48px));
@@ -406,6 +442,10 @@ p {
 .container > .results-wrap,
 .container > footer {
   margin-block: 0;
+}
+
+.container > footer {
+  margin-top: auto;
 }
 
 .tracking-status-banner {
@@ -2335,6 +2375,21 @@ footer p {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.settings-card--toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-card--toggle input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .settings-card select,
