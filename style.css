@@ -153,6 +153,26 @@
   );
 }
 
+:root[data-color-theme="classic"] {
+  --accent: #58778c;
+  --accent-hover: #435f72;
+  --accent-soft: #e8eef1;
+  --warning: #a78343;
+  --page-pattern:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 47px,
+      color-mix(in srgb, var(--accent) 4%, transparent) 47px 48px,
+      transparent 48px 96px
+    ),
+    radial-gradient(
+      circle,
+      color-mix(in srgb, #b99b63 7%, transparent) 1px,
+      transparent 1.5px
+    );
+  --page-pattern-size: 96px 96px, 32px 32px;
+}
+
 :root[data-theme="dark"] {
   --page: color-mix(in srgb, var(--accent) 10%, #101317);
   --page-top: color-mix(in srgb, var(--accent) 14%, #171a1f);
