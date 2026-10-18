@@ -6074,7 +6074,11 @@ function applyTranslations() {
   if (dashboardMapEl) dashboardMapEl.setAttribute("aria-label", getLabel("dashboardMapAria", "Kaart met live voertuigen"));
   if (homeGtfsMapTitleEl) homeGtfsMapTitleEl.textContent = getLabel("homeGtfsMapTitle", "Realtime kaart");
   if (homeGtfsMapSummaryEl) homeGtfsMapSummaryEl.remove();
-  if (homeGtfsMapRefreshBtn) homeGtfsMapRefreshBtn.textContent = getLabel("refresh", "Vernieuwen");
+  if (homeGtfsMapRefreshBtn) {
+    const refreshLabel = getLabel("refresh", "Vernieuwen");
+    homeGtfsMapRefreshBtn.setAttribute("aria-label", refreshLabel);
+    homeGtfsMapRefreshBtn.title = refreshLabel;
+  }
   if (homeGtfsMapEl) homeGtfsMapEl.setAttribute("aria-label", getLabel("homeGtfsMapAria", "Kaart met alle live GTFS-bussen"));
   if (homeGtfsMapStatusEl && !homeGtfsMapStarted) {
     homeGtfsMapStatusEl.textContent = getLabel("homeGtfsMapPrompt", "Klik op Vernieuwen om de live kaart te laden.");
@@ -8071,7 +8075,7 @@ function debounce(func, wait) {
   };
 }
 
-function getMissingVehicleSuggestionCopy(query = "") {
+function getMissingVehicleSuggestionCopy() {
   return {
     badge: getLabel("missingVehicleBadge", "Niet gevonden"),
     title: getLabel("missingVehicleTitle", "Dit voertuig ontbreekt in onze database."),
@@ -8080,11 +8084,19 @@ function getMissingVehicleSuggestionCopy(query = "") {
   };
 }
 
-function createMissingVehicleCallout(query = "", options = {}) {
+function createMissingVehicleCallout(options = {}) {
   const { compact = false, onReport = null } = options;
-  const copy = getMissingVehicleSuggestionCopy(query);
+  const copy = getMissingVehicleSuggestionCopy();
   const wrapper = document.createElement("div");
   wrapper.className = compact ? "missing-vehicle-callout missing-vehicle-callout--compact" : "missing-vehicle-callout";
+
+  const iconEl = document.createElement("span");
+  iconEl.className = "missing-vehicle-icon";
+  iconEl.setAttribute("aria-hidden", "true");
+  iconEl.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 10.8v5.1M12 7.8h.01"></path></svg>';
+
+  const copyEl = document.createElement("div");
+  copyEl.className = "missing-vehicle-copy";
 
   const badgeEl = document.createElement("span");
   badgeEl.className = "missing-vehicle-badge";
@@ -8097,6 +8109,7 @@ function createMissingVehicleCallout(query = "", options = {}) {
   const textEl = document.createElement("p");
   textEl.className = "missing-vehicle-text";
   textEl.textContent = copy.text;
+  copyEl.append(badgeEl, titleEl, textEl);
 
   const actionsEl = document.createElement("div");
   actionsEl.className = "missing-vehicle-actions";
@@ -8114,11 +8127,11 @@ function createMissingVehicleCallout(query = "", options = {}) {
   });
 
   actionsEl.append(reportBtn);
-  wrapper.append(badgeEl, titleEl, textEl, actionsEl);
+  wrapper.append(iconEl, copyEl, actionsEl);
   return wrapper;
 }
 
-function renderMissingVehicleSuggestionList(listEl, inputEl, query = "") {
+function renderMissingVehicleSuggestionList(listEl, inputEl) {
   if (!listEl || !inputEl) return;
   listEl.innerHTML = "";
   listEl.dataset.activeIndex = "-1";
@@ -8129,7 +8142,7 @@ function renderMissingVehicleSuggestionList(listEl, inputEl, query = "") {
   rowEl.className = "vehicle-suggestion-empty-row";
   rowEl.tabIndex = -1;
   rowEl.setAttribute("role", "presentation");
-  rowEl.appendChild(createMissingVehicleCallout(query, {
+  rowEl.appendChild(createMissingVehicleCallout({
     compact: true,
     onReport: () => {
       hideSuggestionList(listEl);
@@ -8141,10 +8154,10 @@ function renderMissingVehicleSuggestionList(listEl, inputEl, query = "") {
   positionSuggestionList(listEl, inputEl);
 }
 
-function renderMissingVehicleStaticState(query = "") {
+function renderMissingVehicleStaticState() {
   if (!vasteDataEl) return;
   vasteDataEl.innerHTML = "";
-  vasteDataEl.appendChild(createMissingVehicleCallout(query, {
+  vasteDataEl.appendChild(createMissingVehicleCallout({
     onReport: () => {
       showReportModal();
     }
@@ -8389,7 +8402,7 @@ function renderSuggestionList(listEl, inputEl, onSelect) {
 
   if (!results.length) {
     if (inputEl.id === "voertuignummer" && query && vehicleSuggestionIndex.length) {
-      renderMissingVehicleSuggestionList(listEl, inputEl, query);
+      renderMissingVehicleSuggestionList(listEl, inputEl);
       return;
     }
     listEl.hidden = true;
@@ -9039,7 +9052,7 @@ function toonVasteData(id){
   const bus = findBusById(id);
 
   if(!bus){
-    renderMissingVehicleStaticState(id);
+    renderMissingVehicleStaticState();
     hideVehiclePhotoCard();
     return;
   }

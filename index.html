@@ -23,12 +23,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261018-18">
+<link rel="stylesheet" href="style.css?v=20261018-26">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261018-18";
+  window.BB_ASSET_VERSION = "20261018-26";
 </script>
 </head>
 <body>
@@ -105,7 +105,12 @@
       <div>
         <h2 id="homeGtfsMapTitle">Realtime kaart</h2>
       </div>
-      <button id="homeGtfsMapRefreshBtn" class="btn home-gtfs-map-refresh-btn" type="button">Vernieuwen</button>
+      <button id="homeGtfsMapRefreshBtn" class="home-gtfs-map-refresh-btn" type="button" aria-label="Vernieuwen" title="Vernieuwen">
+        <svg class="refresh-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M20 11a8 8 0 0 0-14.9-4M4 4v4h4"></path>
+          <path d="M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"></path>
+        </svg>
+      </button>
     </div>
     <div id="homeGtfsMapStatus" class="home-gtfs-map-status" role="status">Klik op Vernieuwen om de live kaart te laden.</div>
     <div id="homeGtfsMap" class="home-gtfs-map" aria-label="Kaart met alle live GTFS-bussen"></div>

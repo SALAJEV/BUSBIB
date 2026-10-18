@@ -391,9 +391,21 @@ p {
 }
 
 .container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: min(var(--content-width), calc(100% - 48px));
   margin-inline: auto;
   padding: 28px 0 32px;
+}
+
+.container > .tracking-status-banner,
+.container > .header-bar,
+.container > .home-gtfs-map-panel,
+.container > .dashboard-panel,
+.container > .results-wrap,
+.container > footer {
+  margin-block: 0;
 }
 
 .tracking-status-banner {
@@ -634,6 +646,10 @@ textarea::placeholder {
   gap: 12px;
 }
 
+.menu-inline-search .header-side {
+  gap: 0;
+}
+
 .header-actions {
   display: flex;
   justify-content: flex-end;
@@ -689,7 +705,7 @@ textarea::placeholder {
   flex: 1;
   align-items: center;
   min-height: 138px;
-  padding: 22px;
+  padding: 24px 28px;
   overflow: hidden;
   isolation: isolate;
   border-radius: var(--radius-xl);
@@ -884,6 +900,62 @@ footer {
   margin-bottom: 13px;
 }
 
+.home-gtfs-map-refresh-btn {
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.home-gtfs-map-refresh-btn:hover:not(:disabled) {
+  transform: rotate(-12deg);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.home-gtfs-map-refresh-btn:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.home-gtfs-map-refresh-btn:disabled {
+  cursor: wait;
+  background: var(--accent-soft);
+}
+
+.refresh-icon {
+  display: block;
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
+.home-gtfs-map-refresh-btn:disabled .refresh-icon {
+  animation: refresh-spin 900ms linear infinite;
+}
+
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .home-gtfs-map-head h2,
 .dashboard-panel-header h2,
 .card h2,
@@ -1049,6 +1121,7 @@ footer {
 
 #staticVehicleCard,
 #realtimeVehicleCard {
+  align-self: stretch;
   border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
   box-shadow: var(--shadow-md);
 }
@@ -1056,6 +1129,148 @@ footer {
 #staticVehicleCard {
   background:
     linear-gradient(155deg, var(--surface-raised), var(--surface) 68%);
+}
+
+.missing-vehicle-callout {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--line));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--warning) 8%, var(--surface)), var(--surface) 72%);
+}
+
+.missing-vehicle-icon {
+  display: grid;
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--warning) 22%, var(--line));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  color: var(--warning);
+}
+
+.missing-vehicle-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.missing-vehicle-copy {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.missing-vehicle-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--warning) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  color: var(--warning);
+  font-size: 0.73rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.missing-vehicle-title {
+  display: block;
+  color: var(--ink);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.missing-vehicle-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.missing-vehicle-actions {
+  grid-column: 2;
+  margin-top: 12px;
+}
+
+.missing-vehicle-action {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 13px;
+  border: 1px solid var(--accent);
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.87rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.missing-vehicle-action:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.missing-vehicle-action:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.missing-vehicle-callout--compact {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 0 10px;
+  padding: 11px;
+  border-radius: 12px;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-title {
+  font-size: 0.87rem;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-text {
+  font-size: 0.82rem;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-actions {
+  margin-top: 8px;
+}
+
+.missing-vehicle-callout--compact .missing-vehicle-action {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
 }
 
 #realtimeVehicleCard {
@@ -2709,21 +2924,7 @@ body.site-disabled {
   }
 
   .header-visual {
-    min-height: 122px;
-    padding: 17px;
-    border-radius: var(--radius-lg);
-    grid-template-columns: minmax(0, 1fr) minmax(112px, 0.85fr);
-    gap: 12px;
-  }
-
-  .header-visual-copy {
-    max-width: none;
-  }
-
-  .header-visual-card {
-    width: 100%;
-    min-height: 82px;
-    padding: 10px 11px;
+    display: none;
   }
 
   .home-gtfs-map-panel,
@@ -2900,33 +3101,6 @@ body.site-disabled {
 
   .header-intro {
     padding: 17px 14px;
-  }
-
-  .header-visual {
-    min-height: 116px;
-    padding: 14px;
-    grid-template-columns: minmax(0, 1fr) minmax(102px, 0.82fr);
-    gap: 9px;
-  }
-
-  .header-visual-copy {
-    gap: 4px;
-  }
-
-  .header-visual-kicker {
-    font-size: 0.62rem;
-    letter-spacing: 0.09em;
-  }
-
-  .header-visual-copy strong {
-    font-size: 0.88rem;
-  }
-
-  .header-visual-card {
-    width: 100%;
-    min-height: 74px;
-    padding: 8px 9px;
-    gap: 6px;
   }
 
   .home-gtfs-map-panel,
