@@ -6935,11 +6935,13 @@ function loadFavorites() {
 
 function saveFavorites() {
   try {
-    if (!window.localStorage) return;
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    if (window.localStorage) {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    }
   } catch (e) {
     console.warn("Favorites opslaan mislukt", e);
   }
+  homeGtfsMapMarkers?.eachLayer((layer) => layer.redraw?.());
 }
 
 function renderFavorites() {
@@ -8290,8 +8292,7 @@ function getHomeGtfsCanvasLayerClass() {
       this._snapshots = snapshots;
       this._icon = new Image();
       this._iconLoaded = false;
-      this._tintedIcon = null;
-      this._tintedIconColor = "";
+      this._tintedIcons = new Map();
       this._icon.onload = () => {
         this._iconLoaded = true;
         this._redraw();
@@ -8328,14 +8329,11 @@ function getHomeGtfsCanvasLayerClass() {
       });
     },
     redraw() {
-      this._tintedIcon = null;
-      this._tintedIconColor = "";
       this._redraw();
     },
-    _getTintedIcon() {
-      const color = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+    _getTintedIcon(color) {
       if (!color) return this._icon;
-      if (this._tintedIcon && this._tintedIconColor === color) return this._tintedIcon;
+      if (this._tintedIcons.has(color)) return this._tintedIcons.get(color);
       const tintedIcon = document.createElement("canvas");
       tintedIcon.width = this._icon.naturalWidth;
       tintedIcon.height = this._icon.naturalHeight;
@@ -8345,8 +8343,7 @@ function getHomeGtfsCanvasLayerClass() {
       context.globalCompositeOperation = "source-in";
       context.fillStyle = color;
       context.fillRect(0, 0, tintedIcon.width, tintedIcon.height);
-      this._tintedIcon = tintedIcon;
-      this._tintedIconColor = color;
+      this._tintedIcons.set(color, tintedIcon);
       return tintedIcon;
     },
     _reset() {
@@ -8373,10 +8370,17 @@ function getHomeGtfsCanvasLayerClass() {
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
       const half = iconSize / 2;
       const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
-      const icon = this._getTintedIcon();
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
+        const vehicleId = normalizeLookup(getHomeGtfsMapVehicleLinkId(snapshot));
+        const visibleVehicleId = normalizeLookup(getVisibleVehicleId(snapshot.vehicleId || ""));
+        const isFavorite = favorites.some((favoriteId) =>
+          normalizeLookup(favoriteId) === vehicleId ||
+          normalizeLookup(getVisibleVehicleId(favoriteId)) === visibleVehicleId
+        );
+        const icon = this._getTintedIcon(isFavorite ? "#168a52" : accentColor);
         ctx.save();
         ctx.translate(point.x, point.y);
         ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
