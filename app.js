@@ -109,7 +109,7 @@ function syncPhotoDelayBanner() {
 }
 
 // Constants
-const BASE_URL = "https://pub-611b5bc156eb455ba86d9bcece9aea1c.r2.dev";
+const BASE_URL = `${window.location.origin}/dataset`;
 const API_URL = `${window.location.origin}/api`;
 const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/script.py";
 const APK_DOWNLOAD_URL = `${window.location.origin}/android/app/release/app-release.apk`;
@@ -659,7 +659,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.17-15";
+const APP_VERSION = "2026.10.18-2";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2369,6 +2369,20 @@ function parseVehiclesSourceUpdatedAt(text = "") {
 
 function showInfoModal() {
   if (!infoModalEl || !infoModalBodyEl) return;
+  renderInfoModalContent();
+  openOverlayModal(infoModalEl, { focusTarget: infoModalCloseBtn });
+
+  void Promise.all([
+    laadVoertuigen(),
+    fetchRealtimeFeed().catch((error) => {
+      console.warn("Realtime status voor site-info kon niet worden opgehaald", error);
+      return null;
+    })
+  ]).then(renderInfoModalContent);
+}
+
+function renderInfoModalContent() {
+  if (!infoModalBodyEl) return;
   const rows = [
     {
       label: getLabel("infoWebsiteVersion", "Websiteversie"),
@@ -2411,27 +2425,20 @@ function showInfoModal() {
       if (row.icon === "github") {
         valueEl.classList.add("info-value--github");
 
-        const blackIconEl = document.createElement("img");
-        blackIconEl.className = "info-value-icon info-value-icon--light";
-        blackIconEl.src = "media/icons/github_black.png";
-        blackIconEl.alt = "";
-        blackIconEl.width = 16;
-        blackIconEl.height = 16;
-        blackIconEl.loading = "lazy";
-        blackIconEl.decoding = "async";
-
-        const whiteIconEl = document.createElement("img");
-        whiteIconEl.className = "info-value-icon info-value-icon--dark";
-        whiteIconEl.src = "media/icons/github_white.png";
-        whiteIconEl.alt = "";
-        whiteIconEl.width = 16;
-        whiteIconEl.height = 16;
-        whiteIconEl.loading = "lazy";
-        whiteIconEl.decoding = "async";
+        const iconEl = document.createElement("img");
+        iconEl.className = "info-value-icon";
+        iconEl.src = getResolvedThemeMode() === "dark"
+          ? "media/icons/github_white.png"
+          : "media/icons/github_black.png";
+        iconEl.alt = "";
+        iconEl.width = 18;
+        iconEl.height = 18;
+        iconEl.loading = "lazy";
+        iconEl.decoding = "async";
 
         const textEl = document.createElement("span");
         textEl.textContent = row.value;
-        valueEl.append(blackIconEl, whiteIconEl, textEl);
+        valueEl.append(iconEl, textEl);
       } else {
         valueEl.textContent = row.value;
       }
@@ -2444,7 +2451,6 @@ function showInfoModal() {
   });
 
   infoModalBodyEl.appendChild(listEl);
-  openOverlayModal(infoModalEl, { focusTarget: infoModalCloseBtn });
 }
 
 function hideInfoModal() {
@@ -3455,6 +3461,7 @@ function resumeHomeGtfsMapAfterInteraction() {
 
 async function refreshHomeGtfsMap(options = {}) {
   if (!homeGtfsMapPanelEl || !homeGtfsMapEl) return;
+  homeGtfsMapStarted = true;
   const { force = false } = options;
   if (homeGtfsMapIsRefreshing) return;
   if (homeGtfsMapPausedByInactivity && !force) return;
@@ -5670,6 +5677,7 @@ async function fetchRealtimeFeed(options = {}) {
   const requestPromise = fetchWithTimeout(realtimeUrl.toString(), { cache: "no-store" }, REALTIME_FETCH_TIMEOUT_MS)
     .then((response) => response.json())
     .then((data) => {
+      dataLoadTimestamps.realtime = Date.now();
       if (!isScopedRequest) {
         realtimeFeedCacheData = data;
         realtimeFeedCacheFetchedAt = Date.now();
@@ -8828,6 +8836,9 @@ function moveDashboardFocus(step) {
 
 function warmUpVehiclesAndDeepLinks() {
   scheduleNonCriticalTask(() => {
+    homeGtfsMapStarted = true;
+    startHomeGtfsMapRefresh();
+    void refreshHomeGtfsMap({ force: true }).catch((error) => console.warn("GTFS-overzichtskaart warm-up mislukt", error));
     void laadVoertuigen()
       .then(async () => {
         await applyDeepLinkIfNeeded();

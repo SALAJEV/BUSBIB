@@ -2179,9 +2179,37 @@ body.site-disabled {
   display: inline-block;
   width: 18px;
   height: 18px;
-  margin-right: 5px;
   vertical-align: middle;
   object-fit: contain;
+}
+
+.info-value-icon--light,
+.info-value-icon--dark {
+  display: none;
+}
+
+:root:not([data-resolved-theme="dark"]) .info-value-icon--light,
+:root[data-resolved-theme="dark"] .info-value-icon--dark {
+  display: inline-block;
+}
+
+.info-value--github {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.info-value--github:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.info-value--github:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 @media (max-width: 900px) {
