@@ -1093,12 +1093,9 @@ footer {
   height: 44px;
   place-items: center;
   overflow: visible;
-  border: 2px solid var(--surface);
-  border-radius: 50%;
-  background: var(--surface);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent) 72%, #ffffff),
-    0 3px 12px rgba(14, 25, 38, 0.38);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .bus-div-icon__img {
@@ -1107,7 +1104,6 @@ footer {
   height: 36px;
   object-fit: contain;
   transform-origin: center;
-  filter: drop-shadow(0 1px 1px rgba(10, 30, 50, 0.32));
 }
 
 .dashboard-map-wrap {

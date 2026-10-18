@@ -3787,18 +3787,18 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   const hasSpecificVehicleId = !!visibleVehicleId;
   if (vehiclePhotoEmptyTitleEl) {
     vehiclePhotoEmptyTitleEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyTitle", "Nog geen foto van voertuig {id}."), visibleVehicleId)
+      ? fillTemplate(getLabel("photoUploadEmptyTitle", "Van voertuig {id} is nog geen foto beschikbaar."), visibleVehicleId)
       : getLabel("photoUploadEmptyTitleGeneric", "Van dit voertuig is nog geen foto beschikbaar.");
   }
   if (vehiclePhotoEmptyTextEl) {
     vehiclePhotoEmptyTextEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyText", "Heb je een foto van voertuig {id}? Stuur ze naar Busbibliotheek."), visibleVehicleId)
-      : getLabel("photoUploadEmptyTextGeneric", "Heb je een foto van deze bus? Stuur ze naar Busbibliotheek.");
+      ? fillTemplate(getLabel("photoUploadEmptyText", "Heb je een foto van deze bus? Stuur ze in via het formulier."), visibleVehicleId)
+      : getLabel("photoUploadEmptyTextGeneric", "Heb je een foto van deze bus? Stuur ze in via het formulier.");
   }
   if (vehiclePhotoUploadHintEl) {
     vehiclePhotoUploadHintEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadSummary", "Help ons voertuig {id} aan de fotobibliotheek toe te voegen."), visibleVehicleId)
-      : getLabel("photoUploadSummaryGeneric", "Help onze fotobibliotheek aan te vullen.");
+      ? fillTemplate(getLabel("photoUploadSummary", "Met jouw foto maken we de fotobibliotheek van voertuig {id} compleet."), visibleVehicleId)
+      : getLabel("photoUploadSummaryGeneric", "Met jouw foto help je onze fotobibliotheek compleet te maken.");
   }
   if (vehiclePhotoUploadBtn) vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Foto insturen");
   if (photoUploadModalTitleEl) photoUploadModalTitleEl.textContent = getLabel("photoUploadTitle", "Foto uploaden");
@@ -8292,7 +8292,6 @@ function getHomeGtfsCanvasLayerClass() {
       this._snapshots = snapshots;
       this._icon = new Image();
       this._iconLoaded = false;
-      this._tintedIcons = new Map();
       this._icon.onload = () => {
         this._iconLoaded = true;
         this._redraw();
@@ -8331,21 +8330,6 @@ function getHomeGtfsCanvasLayerClass() {
     redraw() {
       this._redraw();
     },
-    _getTintedIcon(color) {
-      if (!color) return this._icon;
-      if (this._tintedIcons.has(color)) return this._tintedIcons.get(color);
-      const tintedIcon = document.createElement("canvas");
-      tintedIcon.width = this._icon.naturalWidth;
-      tintedIcon.height = this._icon.naturalHeight;
-      const context = tintedIcon.getContext("2d");
-      if (!context) return this._icon;
-      context.drawImage(this._icon, 0, 0);
-      context.globalCompositeOperation = "source-in";
-      context.fillStyle = color;
-      context.fillRect(0, 0, tintedIcon.width, tintedIcon.height);
-      this._tintedIcons.set(color, tintedIcon);
-      return tintedIcon;
-    },
     _reset() {
       if (!this._map || !this._canvas) return;
       const size = this._map.getSize();
@@ -8368,23 +8352,15 @@ function getHomeGtfsCanvasLayerClass() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size.x, size.y);
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
-      const half = iconSize / 2;
+      const iconWidth = iconSize * (this._icon.naturalWidth / this._icon.naturalHeight);
       const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
-      const accentColor = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
-        const vehicleId = normalizeLookup(getHomeGtfsMapVehicleLinkId(snapshot));
-        const visibleVehicleId = normalizeLookup(getVisibleVehicleId(snapshot.vehicleId || ""));
-        const isFavorite = favorites.some((favoriteId) =>
-          normalizeLookup(favoriteId) === vehicleId ||
-          normalizeLookup(getVisibleVehicleId(favoriteId)) === visibleVehicleId
-        );
-        const icon = this._getTintedIcon(isFavorite ? "#168a52" : accentColor);
         ctx.save();
         ctx.translate(point.x, point.y);
         ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
-        ctx.drawImage(icon, -half, -iconSize, iconSize, iconSize);
+        ctx.drawImage(this._icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
         ctx.restore();
       });
     },
