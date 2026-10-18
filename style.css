@@ -680,6 +680,64 @@ textarea::placeholder {
   background: var(--accent-soft);
 }
 
+.primary-suggestion-list {
+  padding: 8px;
+  border-color: var(--line-strong);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  box-shadow: 0 16px 40px color-mix(in srgb, #101820 18%, transparent);
+}
+
+.primary-suggestion-list .vehicle-suggestion-item {
+  display: grid;
+  grid-template-columns: minmax(68px, auto) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.primary-suggestion-list .vehicle-suggestion-primary {
+  display: inline-flex;
+  min-width: 68px;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: 0.015em;
+  line-height: 1.15;
+}
+
+.primary-suggestion-list .vehicle-suggestion-secondary {
+  min-width: 0;
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.primary-suggestion-list .vehicle-suggestion-item:hover,
+.primary-suggestion-list .vehicle-suggestion-item.is-active {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 68%, var(--surface));
+}
+
+.primary-suggestion-list .vehicle-suggestion-item:hover .vehicle-suggestion-primary,
+.primary-suggestion-list .vehicle-suggestion-item.is-active .vehicle-suggestion-primary {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+  background: var(--surface);
+}
+
 .header-side {
   display: flex;
   flex-direction: column;
