@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbibliotheek-v165';
+const CACHE_NAME = 'busbibliotheek-v166';
 const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
@@ -6,13 +6,14 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261018-37',
+  '/app.js?v=20261018-38',
   '/manifest.json',
-  '/style.css?v=20261018-37',
-  '/translations.js?v=20261018-37',
+  '/style.css?v=20261018-38',
+  '/translations.js?v=20261018-38',
   '/site-config.js?v=20261018-13',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
+  '/media/icons/navicon_green.png',
   '/media/icons/hansea.png',
   '/media/icons/favicon.ico'
 ];
@@ -114,7 +115,7 @@ self.addEventListener('fetch', event => {
   const isVehiclePhotoRequest =
     url.origin === self.location.origin &&
     url.pathname.startsWith('/media/') &&
-    !['/media/icons/logo.png', '/media/icons/navicon.png', '/media/icons/hansea.png', '/media/icons/favicon.ico', '/media/icons/logo.svg'].includes(url.pathname);
+    !['/media/icons/logo.png', '/media/icons/navicon.png', '/media/icons/navicon_green.png', '/media/icons/hansea.png', '/media/icons/favicon.ico', '/media/icons/logo.svg'].includes(url.pathname);
 
   if (isVehiclePhotoRequest) {
     event.respondWith(

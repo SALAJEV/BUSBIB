@@ -3434,6 +3434,10 @@ async function renderHomeGtfsMap(snapshots) {
   }, 0);
 }
 
+function redrawHomeGtfsMapMarkers() {
+  homeGtfsMapMarkers?.eachLayer((layer) => layer.redraw?.());
+}
+
 function getHomeGtfsMapRefreshIntervalMs() {
   return isIosPlatform ? Math.max(HOME_GTFS_MAP_REFRESH_MS, 60000) : HOME_GTFS_MAP_REFRESH_MS;
 }
@@ -7020,6 +7024,7 @@ function toggleFavorite(explicitId = "") {
   saveFavorites();
   renderFavorites();
   updateFavoriteButtonState();
+  redrawHomeGtfsMapMarkers();
 }
 
 function saveFavoriteOrderFromDom() {
@@ -7086,6 +7091,7 @@ function removeFavorite(id) {
   saveFavorites();
   renderFavorites();
   updateFavoriteButtonState();
+  redrawHomeGtfsMapMarkers();
 }
 
 function restartRealtimeRefresh() {
@@ -8291,12 +8297,16 @@ function getHomeGtfsCanvasLayerClass() {
       L.setOptions(this, options);
       this._snapshots = snapshots;
       this._icon = new Image();
+      this._favoriteIcon = new Image();
       this._iconLoaded = false;
       this._icon.onload = () => {
         this._iconLoaded = true;
         this._redraw();
       };
+      this._favoriteIcon.onload = () => this._redraw();
+      this._favoriteIcon.onerror = () => console.warn("Groene navicon kon niet geladen worden");
       this._icon.src = "media/icons/navicon.png";
+      this._favoriteIcon.src = "media/icons/navicon_green.png";
     },
     onAdd(mapInstance) {
       this._map = mapInstance;
@@ -8352,15 +8362,22 @@ function getHomeGtfsCanvasLayerClass() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size.x, size.y);
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
-      const iconWidth = iconSize * (this._icon.naturalWidth / this._icon.naturalHeight);
       const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
+        const vehicleId = normalizeLookup(getHomeGtfsMapVehicleLinkId(snapshot));
+        const isFavorite = vehicleId && favorites.some((favoriteId) =>
+          normalizeLookup(getVisibleVehicleId(favoriteId)) === vehicleId
+        );
+        const icon = isFavorite && this._favoriteIcon.complete && this._favoriteIcon.naturalWidth
+          ? this._favoriteIcon
+          : this._icon;
+        const iconWidth = iconSize * (icon.naturalWidth / icon.naturalHeight);
         ctx.save();
         ctx.translate(point.x, point.y);
         ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
-        ctx.drawImage(this._icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
+        ctx.drawImage(icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
         ctx.restore();
       });
     },
