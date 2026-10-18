@@ -917,6 +917,29 @@ footer {
   margin-top: 16px;
 }
 
+.bus-div-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  overflow: visible;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent) 72%, #ffffff),
+    0 3px 12px rgba(14, 25, 38, 0.38);
+}
+
+.bus-div-icon__img {
+  display: block;
+  width: 31px;
+  height: 36px;
+  object-fit: contain;
+  transform-origin: center;
+  filter: drop-shadow(0 1px 1px rgba(10, 30, 50, 0.32));
+}
+
 .dashboard-map-wrap {
   min-width: 0;
   margin-bottom: 16px;
@@ -1302,10 +1325,281 @@ footer {
 
 .weather-block {
   margin-top: 14px;
-  padding: 14px;
+  padding: 0;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-soft);
+}
+
+.weather-card {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  background:
+    linear-gradient(110deg, color-mix(in srgb, var(--accent) 7%, var(--surface)), var(--surface));
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.weather-card:hover {
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface));
+}
+
+.weather-card:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.weather-card-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.weather-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, currentColor 12%, var(--surface));
+  color: var(--accent);
+}
+
+.weather-svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.weather-svg--sun {
+  color: #c78000;
+}
+
+.weather-svg--moon {
+  color: #667ac0;
+}
+
+.weather-svg--cloud,
+.weather-svg--fog {
+  color: #63758a;
+}
+
+.weather-svg--partly {
+  color: #bc8500;
+}
+
+.weather-svg--drizzle,
+.weather-svg--rain {
+  color: #2875c7;
+}
+
+.weather-svg--snow {
+  color: #3286a7;
+}
+
+.weather-svg--storm {
+  color: #a16a00;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--sun,
+:root[data-resolved-theme="dark"] .weather-svg--partly {
+  color: #ffd166;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--moon {
+  color: #b8c4ff;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--cloud,
+:root[data-resolved-theme="dark"] .weather-svg--fog {
+  color: #c1cedb;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--drizzle,
+:root[data-resolved-theme="dark"] .weather-svg--rain {
+  color: #8fc4ff;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--snow {
+  color: #8de0f4;
+}
+
+:root[data-resolved-theme="dark"] .weather-svg--storm {
+  color: #ffd166;
+}
+
+.weather-copy {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weather-title {
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.weather-source {
+  color: var(--muted);
+  font-size: 0.83rem;
+  line-height: 1.35;
+}
+
+.weather-source-meta {
+  color: var(--faint);
+  font-size: 0.75rem;
+}
+
+.weather-card-side {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+}
+
+.weather-temperature {
+  color: var(--ink);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.weather-temperature--inline {
+  font-size: 1.2rem;
+}
+
+.weather-card-chevron {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+}
+
+.weather-svg--arrow {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.weather-modal-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(120deg, var(--accent-soft), var(--surface));
+}
+
+.weather-modal-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+}
+
+.weather-svg--hero {
+  width: 40px;
+  height: 40px;
+  stroke-width: 1.65;
+}
+
+.weather-modal-hero-copy,
+.weather-modal-temp {
+  display: grid;
+  gap: 4px;
+}
+
+.weather-modal-hero-copy strong {
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 1.1rem;
+}
+
+.weather-modal-hero-copy span,
+.weather-modal-temp span,
+.weather-modal-source {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.weather-modal-temp {
+  justify-items: end;
+  text-align: right;
+}
+
+.weather-modal-temp strong {
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.weather-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.weather-detail-card {
+  display: grid;
+  justify-items: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-soft);
+}
+
+.weather-detail-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.weather-svg--detail {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.9;
+}
+
+.weather-detail-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.weather-detail-value {
+  color: var(--ink);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 0.98rem;
+  overflow-wrap: anywhere;
+}
+
+.weather-modal-source {
+  margin: 12px 2px 0;
 }
 
 .compare-card,
@@ -1376,7 +1670,11 @@ footer {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background:
-    linear-gradient(135deg, var(--surface-soft), var(--surface-tint));
+    radial-gradient(ellipse at 50% 45%, #3b4652, #202832 76%);
+}
+
+.vehicle-photo-frame.is-empty {
+  background: linear-gradient(135deg, var(--surface-soft), var(--surface-tint));
 }
 
 .vehicle-photo-image {
@@ -1384,6 +1682,7 @@ footer {
   width: 100%;
   max-height: min(68vh, 680px);
   object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.2));
 }
 
 .vehicle-photo-loader {
@@ -1407,9 +1706,31 @@ footer {
   padding: 0;
   transform: translateY(-50%);
   border-radius: 50%;
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  box-shadow: var(--shadow-sm);
-  font-size: 1.8rem;
+  border-color: color-mix(in srgb, var(--line-strong) 78%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+.photo-nav-btn:hover {
+  transform: translateY(-50%) scale(1.06);
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.photo-nav-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.photo-nav-icon {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .photo-nav-btn--prev {
@@ -1482,6 +1803,71 @@ footer {
   gap: 8px;
   color: var(--muted);
   font-size: 0.88rem;
+}
+
+.vehicle-photo-meta-card {
+  display: grid;
+  gap: 10px;
+}
+
+.vehicle-photo-meta-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.vehicle-photo-meta-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.vehicle-photo-meta-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.vehicle-photo-meta-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vehicle-photo-meta-label {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.vehicle-photo-meta-value {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.vehicle-photo-meta-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.vehicle-photo-meta-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .dashboard-panel {
@@ -2383,6 +2769,40 @@ body.site-disabled {
 
   .vehicle-photo-image {
     max-height: 56vh;
+  }
+
+  .weather-card {
+    padding: 12px;
+  }
+
+  .weather-card-main {
+    gap: 10px;
+  }
+
+  .weather-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .weather-source-meta {
+    display: none;
+  }
+
+  .weather-modal-hero {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .weather-modal-temp {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .weather-modal-temp strong {
+    font-size: 1.4rem;
   }
 
   .vehicle-photo-side-panel {

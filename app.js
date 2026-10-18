@@ -117,7 +117,6 @@ const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
 const REPORT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform";
 const CONTACT_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/contact";
 const SOURCES_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/sources";
-const ZONE01_HERCULES_SEARCH_URL = "https://www.zone01.be/hercules/resultaten";
 const DE_LIJN_VEHICLE_TRACKING_URL = "https://vehicletracking.delijn.be";
 const LEAFLET_CSS_URL = "https://unpkg.com/leaflet/dist/leaflet.css";
 const LEAFLET_JS_URL = "https://unpkg.com/leaflet/dist/leaflet.js";
@@ -2988,13 +2987,7 @@ async function applyRouteStateFromLocation() {
   closeTransientOverlays();
 
   try {
-    if (routeState.bus) {
-      if (voertuigen.length === 0) await laadVoertuigen();
-      if (!resolveVehicleSearch(routeState.bus).bus) {
-        terug({ historyMode: "replace", scrollBehavior: "auto" });
-        return;
-      }
-    }
+    if (routeState.bus && voertuigen.length === 0) await laadVoertuigen();
 
     if (routeState.bus) {
       const shouldLoadVehicle =
@@ -3005,8 +2998,7 @@ async function applyRouteStateFromLocation() {
         setVehicleInputResolvedId(voertuigInput, routeState.bus);
         await zoekAlles({
           queryOverride: routeState.bus,
-          historyMode: "replace",
-          openZone01OnMissing: false
+          historyMode: "replace"
         });
       } else {
         updateDocumentTitle(routeState.bus);
@@ -5457,7 +5449,7 @@ function getWeatherPresentation(weatherCode, isDay = 1) {
 }
 
 function getWeatherIconMarkup(iconKey, extraClass = "") {
-  const className = ["weather-svg", extraClass].filter(Boolean).join(" ");
+  const className = ["weather-svg", `weather-svg--${iconKey}`, extraClass].filter(Boolean).join(" ");
   const icons = {
     sun: `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3"></path></svg>`,
     moon: `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.2a8.8 8.8 0 1 0 5.3 15.6A9.7 9.7 0 0 1 15.5 3.2Z"></path></svg>`,
@@ -7203,17 +7195,12 @@ voertuigInput.addEventListener("keydown", (event) => {
       !!suggestieLijst &&
       !suggestieLijst.hidden &&
       Number(suggestieLijst.dataset.activeIndex || -1) >= 0;
-    const shouldOpenZone01 =
-      !hasResolvedVehicle &&
-      !!query &&
-      !isSpecialVehicleCommand(query) &&
-      !!suggestieLijst?.dataset.zone01Url;
     if (hasResolvedVehicle) {
       event.preventDefault();
       setVehicleInputResolvedId(voertuigInput, resolved.vehicleId || normalize(query));
       voertuigInput.value = getVehicleDisplayId(resolved.vehicleId || query);
       dismissPrimaryVehicleSearchInput({ closeKeyboard: true });
-      zoekAlles({ queryOverride: resolved.vehicleId || query, openZone01OnMissing: false, closeKeyboard: true });
+      zoekAlles({ queryOverride: resolved.vehicleId || query, closeKeyboard: true });
       return;
     }
     if (hasActiveSuggestion && suggestieLijst?.dataset.mode !== "missing-vehicle") {
@@ -7224,12 +7211,6 @@ voertuigInput.addEventListener("keydown", (event) => {
         activeSuggestionEl.click();
         return;
       }
-    }
-    if (shouldOpenZone01) {
-      event.preventDefault();
-      dismissPrimaryVehicleSearchInput({ closeKeyboard: true });
-      openExternalUrl(suggestieLijst.dataset.zone01Url, { forceSameTab: true });
-      return;
     }
     event.preventDefault();
     dismissPrimaryVehicleSearchInput({ closeKeyboard: true });
@@ -8043,12 +8024,6 @@ function getSuggestionResults(query = "", limit = 8) {
   return matches;
 }
 
-function buildZone01HerculesSearchUrl(query = "") {
-  const params = new URLSearchParams();
-  params.set("q", normalize(query));
-  return `${ZONE01_HERCULES_SEARCH_URL}?${params.toString()}`;
-}
-
 function renderRealtimeUnavailableState(vehicleId = "", options = {}) {
   const { withTracker = false, reason = "" } = options;
   const visibleVehicleId = getVehicleDisplayId(vehicleId || currentVehicleId || "") || vehicleId || "";
@@ -8100,10 +8075,8 @@ function getMissingVehicleSuggestionCopy(query = "") {
   return {
     badge: getLabel("missingVehicleBadge", "Niet gevonden"),
     title: getLabel("missingVehicleTitle", "Dit voertuig ontbreekt in onze database."),
-    text: getLabel("missingVehicleText", "Meld het ons via het formulier onderaan en zoek dit voertuig in Hercules op Zone 01."),
-    reportCta: getLabel("missingVehicleReportCta", "Meld via formulier"),
-    zone01Cta: getLabel("missingVehicleZone01CtaGeneric", "Zoek op Zone 01"),
-    zone01Url: buildZone01HerculesSearchUrl(query)
+    text: getLabel("missingVehicleText", "Meld het ons via het formulier onderaan."),
+    reportCta: getLabel("missingVehicleReportCta", "Meld via formulier")
   };
 }
 
@@ -8140,28 +8113,16 @@ function createMissingVehicleCallout(query = "", options = {}) {
     if (typeof onReport === "function") onReport();
   });
 
-  const zone01Link = document.createElement("a");
-  zone01Link.className = "missing-vehicle-action missing-vehicle-action--external";
-  zone01Link.href = copy.zone01Url;
-  zone01Link.target = "_blank";
-  zone01Link.rel = "noopener noreferrer";
-  zone01Link.textContent = copy.zone01Cta;
-  zone01Link.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-  });
-
-  actionsEl.append(reportBtn, zone01Link);
+  actionsEl.append(reportBtn);
   wrapper.append(badgeEl, titleEl, textEl, actionsEl);
   return wrapper;
 }
 
 function renderMissingVehicleSuggestionList(listEl, inputEl, query = "") {
   if (!listEl || !inputEl) return;
-  const zone01Url = buildZone01HerculesSearchUrl(query);
   listEl.innerHTML = "";
   listEl.dataset.activeIndex = "-1";
   listEl.dataset.mode = "missing-vehicle";
-  listEl.dataset.zone01Url = zone01Url;
   listEl.setAttribute("role", "group");
   listEl.setAttribute("aria-live", "polite");
   const rowEl = document.createElement("li");
@@ -8196,7 +8157,6 @@ function hideSuggestionList(listEl) {
   listEl.hidden = true;
   listEl.removeAttribute("aria-live");
   delete listEl.dataset.mode;
-  delete listEl.dataset.zone01Url;
   if (listEl.dataset.floating === "1") {
     listEl.style.removeProperty("top");
     listEl.style.removeProperty("left");
@@ -8281,8 +8241,8 @@ function getBusIcon() {
   busIcon = window.L.divIcon({
     className: "bus-div-icon",
     html: '<img class="bus-div-icon__img" src="media/icons/navicon.png" alt="Bus"/>',
-    iconSize: [36, 36],
-    iconAnchor: [18, 36]
+    iconSize: [44, 44],
+    iconAnchor: [22, 22]
   });
   return busIcon;
 }
@@ -8425,7 +8385,6 @@ function renderSuggestionList(listEl, inputEl, onSelect) {
   listEl.dataset.activeIndex = "-1";
   listEl.removeAttribute("aria-live");
   delete listEl.dataset.mode;
-  delete listEl.dataset.zone01Url;
   listEl.setAttribute("role", "listbox");
 
   if (!results.length) {
@@ -8854,7 +8813,6 @@ async function zoekAlles(options = {}) {
   const {
     queryOverride = "",
     historyMode = routeNavigationLocked ? "replace" : "push",
-    openZone01OnMissing = true,
     closeKeyboard = false,
     showLoading = true
   } = options;
@@ -8914,12 +8872,6 @@ async function zoekAlles(options = {}) {
   const resolved = resolveVehicleQuery(query, getVehicleInputResolvedId(voertuigInput));
   const activeVehicleId = resolved.vehicleId || normalize(query);
   const bus = resolved.bus;
-  if (!bus && openZone01OnMissing && !isSpecialVehicleCommand(query)) {
-    hideSuggestionList(suggestieLijst);
-    setPageLoading(false);
-    openExternalUrl(buildZone01HerculesSearchUrl(query), { forceSameTab: true });
-    return;
-  }
   currentVehicleId = activeVehicleId;
   staticVehicleCardEl.hidden = false;
   realtimeVehicleCardEl.hidden = false;

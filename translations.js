@@ -53,10 +53,8 @@ nl: {
   noFixed: "Geen voertuiggegevens gevonden.",
   missingVehicleBadge: "Niet gevonden",
   missingVehicleTitle: "Dit voertuig ontbreekt in onze database.",
-  missingVehicleText: "Meld het ons via het formulier onderaan en zoek dit voertuig in Hercules op Zone 01.",
+  missingVehicleText: "Meld het ons via het formulier onderaan.",
   missingVehicleReportCta: "Meld via formulier",
-  missingVehicleZone01Cta: "Zoek {id} op Zone 01",
-  missingVehicleZone01CtaGeneric: "Zoek op Zone 01",
   noFavoritesYet: "Nog geen favorieten toegevoegd.",
   vehiclePlaceholder: "Zoekopdracht",
   notOutOfService: "Bus nog in dienst",
@@ -188,10 +186,8 @@ en: {
   noFixed: "No vehicle data found.",
   missingVehicleBadge: "Not found",
   missingVehicleTitle: "This vehicle is missing from our database.",
-  missingVehicleText: "Report it via the form below and search this vehicle in Hercules on Zone 01.",
+  missingVehicleText: "Report it via the form below.",
   missingVehicleReportCta: "Report via form",
-  missingVehicleZone01Cta: "Search {id} on Zone 01",
-  missingVehicleZone01CtaGeneric: "Search on Zone 01",
   noFavoritesYet: "No favorites yet.",
   vehiclePlaceholder: "Enter vehicle number or plate",
   notOutOfService: "In service",
@@ -704,10 +700,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   dashboardVehicleUnknown: "Ce numero de vehicule n'existe pas.",
   missingVehicleBadge: "Introuvable",
   missingVehicleTitle: "Ce vehicule manque dans notre base de donnees.",
-  missingVehicleText: "Signalez-le via le formulaire ci-dessous et recherchez ce vehicule dans Hercules sur Zone 01.",
+  missingVehicleText: "Signalez-le via le formulaire ci-dessous.",
   missingVehicleReportCta: "Signaler via le formulaire",
-  missingVehicleZone01Cta: "Rechercher {id} sur Zone 01",
-  missingVehicleZone01CtaGeneric: "Rechercher sur Zone 01",
   photoAlt: "Photo du vehicule {id}",
   photoCaption: "Vehicule {id}"
 });
@@ -738,10 +732,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   dashboardVehicleUnknown: "Diese Fahrzeugnummer existiert nicht.",
   missingVehicleBadge: "Nicht gefunden",
   missingVehicleTitle: "Dieses Fahrzeug fehlt in unserer Datenbank.",
-  missingVehicleText: "Melden Sie es uber das Formular unten und suchen Sie dieses Fahrzeug in Hercules auf Zone 01.",
+  missingVehicleText: "Melden Sie es uber das Formular unten.",
   missingVehicleReportCta: "Per Formular melden",
-  missingVehicleZone01Cta: "{id} auf Zone 01 suchen",
-  missingVehicleZone01CtaGeneric: "Auf Zone 01 suchen",
   photoAlt: "Foto von Fahrzeug {id}",
   photoCaption: "Fahrzeug {id}"
 });
@@ -759,10 +751,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   dashboardVehicleUnknown: "Taki numer pojazdu nie istnieje.",
   missingVehicleBadge: "Nie znaleziono",
   missingVehicleTitle: "Tego pojazdu brakuje w naszej bazie danych.",
-  missingVehicleText: "Zglos go przez ponizszy formularz i wyszukaj ten pojazd w Hercules na Zone 01.",
+  missingVehicleText: "Zglos go przez ponizszy formularz.",
   missingVehicleReportCta: "Zglos przez formularz",
-  missingVehicleZone01Cta: "Szukaj {id} na Zone 01",
-  missingVehicleZone01CtaGeneric: "Szukaj na Zone 01",
   photoAlt: "Zdjecie pojazdu {id}",
   photoCaption: "Pojazd {id}"
 });
@@ -780,10 +770,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   dashboardVehicleUnknown: "Este numero de vehiculo no existe.",
   missingVehicleBadge: "No encontrado",
   missingVehicleTitle: "Este vehiculo falta en nuestra base de datos.",
-  missingVehicleText: "Avisanos mediante el formulario de abajo y busca este vehiculo en Hercules en Zone 01.",
+  missingVehicleText: "Avisanos mediante el formulario de abajo.",
   missingVehicleReportCta: "Avisar por formulario",
-  missingVehicleZone01Cta: "Buscar {id} en Zone 01",
-  missingVehicleZone01CtaGeneric: "Buscar en Zone 01",
   photoAlt: "Foto del vehiculo {id}",
   photoCaption: "Vehiculo {id}"
 });
@@ -801,10 +789,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   dashboardVehicleUnknown: "Takogo nomera transporta ne sushchestvuet.",
   missingVehicleBadge: "Ne naydeno",
   missingVehicleTitle: "Etogo transporta net v nashey baze dannykh.",
-  missingVehicleText: "Soobshchite ob etom cherez formu nizhe i naydite etot transport v Hercules na Zone 01.",
+  missingVehicleText: "Soobshchite ob etom cherez formu nizhe.",
   missingVehicleReportCta: "Soobshchit' cherez formu",
-  missingVehicleZone01Cta: "Iskat' {id} na Zone 01",
-  missingVehicleZone01CtaGeneric: "Iskat' na Zone 01",
   photoAlt: "Foto transporta {id}",
   photoCaption: "Transport {id}"
 });
