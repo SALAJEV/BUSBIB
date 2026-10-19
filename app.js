@@ -7845,7 +7845,7 @@ voertuigInput.addEventListener("keydown", (event) => {
       zoekAlles({ queryOverride: resolved.vehicleId || query, closeKeyboard: true });
       return;
     }
-    if (hasActiveSuggestion && suggestieLijst?.dataset.mode !== "missing-vehicle") {
+    if (hasActiveSuggestion) {
       event.preventDefault();
       const activeIndex = Number(suggestieLijst.dataset.activeIndex || -1);
       const activeSuggestionEl = suggestieLijst.querySelector(`[data-index="${activeIndex}"]`);
@@ -8826,85 +8826,6 @@ function debounce(func, wait) {
   };
 }
 
-function getMissingVehicleSuggestionCopy() {
-  return {
-    badge: getLabel("missingVehicleBadge", "Niet gevonden"),
-    title: getLabel("missingVehicleTitle", "Dit voertuig ontbreekt in onze database."),
-    text: getLabel("missingVehicleText", "Meld het ons via het formulier onderaan."),
-    reportCta: getLabel("missingVehicleReportCta", "Meld via formulier")
-  };
-}
-
-function createMissingVehicleCallout(options = {}) {
-  const { compact = false, onReport = null } = options;
-  const copy = getMissingVehicleSuggestionCopy();
-  const wrapper = document.createElement("div");
-  wrapper.className = compact ? "missing-vehicle-callout missing-vehicle-callout--compact" : "missing-vehicle-callout";
-
-  const iconEl = document.createElement("span");
-  iconEl.className = "missing-vehicle-icon";
-  iconEl.setAttribute("aria-hidden", "true");
-  iconEl.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 10.8v5.1M12 7.8h.01"></path></svg>';
-
-  const copyEl = document.createElement("div");
-  copyEl.className = "missing-vehicle-copy";
-
-  const badgeEl = document.createElement("span");
-  badgeEl.className = "missing-vehicle-badge";
-  badgeEl.textContent = copy.badge;
-
-  const titleEl = document.createElement("strong");
-  titleEl.className = "missing-vehicle-title";
-  titleEl.textContent = copy.title;
-
-  const textEl = document.createElement("p");
-  textEl.className = "missing-vehicle-text";
-  textEl.textContent = copy.text;
-  copyEl.append(badgeEl, titleEl, textEl);
-
-  const actionsEl = document.createElement("div");
-  actionsEl.className = "missing-vehicle-actions";
-
-  const reportBtn = document.createElement("button");
-  reportBtn.type = "button";
-  reportBtn.className = "missing-vehicle-action";
-  reportBtn.textContent = copy.reportCta;
-  reportBtn.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-  });
-  reportBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    if (typeof onReport === "function") onReport();
-  });
-
-  actionsEl.append(reportBtn);
-  wrapper.append(iconEl, copyEl, actionsEl);
-  return wrapper;
-}
-
-function renderMissingVehicleSuggestionList(listEl, inputEl) {
-  if (!listEl || !inputEl) return;
-  listEl.innerHTML = "";
-  listEl.dataset.activeIndex = "-1";
-  listEl.dataset.mode = "missing-vehicle";
-  listEl.setAttribute("role", "group");
-  listEl.setAttribute("aria-live", "polite");
-  const rowEl = document.createElement("li");
-  rowEl.className = "vehicle-suggestion-empty-row";
-  rowEl.tabIndex = -1;
-  rowEl.setAttribute("role", "presentation");
-  rowEl.appendChild(createMissingVehicleCallout({
-    compact: true,
-    onReport: () => {
-      hideSuggestionList(listEl);
-      showReportModal();
-    }
-  }));
-  listEl.appendChild(rowEl);
-  listEl.hidden = false;
-  positionSuggestionList(listEl, inputEl);
-}
-
 function renderMissingVehicleStaticState() {
   if (!vasteDataEl) return;
   vasteDataEl.innerHTML = "";
@@ -9080,38 +9001,91 @@ function getHomeGtfsCanvasLayerClass() {
       ctx.clearRect(0, 0, size.x, size.y);
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
       const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
+      const clusterSize = this._map.getZoom() < 10 ? 56 : 36;
+      const clusters = new Map();
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
         const vehicleId = normalizeLookup(getHomeGtfsMapVehicleLinkId(snapshot));
-        const isFavorite = vehicleId && favorites.some((favoriteId) =>
+        const isFavorite = !!vehicleId && favorites.some((favoriteId) =>
           normalizeLookup(getVisibleVehicleId(favoriteId)) === vehicleId
         );
-        const icon = isFavorite && this._favoriteIcon.complete && this._favoriteIcon.naturalWidth
-          ? this._favoriteIcon
-          : this._icon;
-        const iconWidth = iconSize * (icon.naturalWidth / icon.naturalHeight);
-        ctx.save();
-        ctx.translate(point.x, point.y);
-        ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
-        ctx.drawImage(icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
-        ctx.restore();
+        const key = `${Math.floor(point.x / clusterSize)}:${Math.floor(point.y / clusterSize)}`;
+        let cluster = clusters.get(key);
+        if (!cluster) {
+          cluster = { x: 0, y: 0, latitude: 0, longitude: 0, snapshots: [], hasFavorite: false };
+          clusters.set(key, cluster);
+        }
+        cluster.x += point.x;
+        cluster.y += point.y;
+        cluster.latitude += snapshot.latitude;
+        cluster.longitude += snapshot.longitude;
+        cluster.snapshots.push(snapshot);
+        cluster.hasFavorite = cluster.hasFavorite || isFavorite;
+      });
+
+      this._clusters = Array.from(clusters.values());
+      this._clusters.forEach((cluster) => {
+        const count = cluster.snapshots.length;
+        const x = cluster.x / count;
+        const y = cluster.y / count;
+        if (count === 1) {
+          const snapshot = cluster.snapshots[0];
+          const icon = cluster.hasFavorite && this._favoriteIcon.complete && this._favoriteIcon.naturalWidth
+            ? this._favoriteIcon
+            : this._icon;
+          const iconWidth = iconSize * (icon.naturalWidth / icon.naturalHeight);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
+          ctx.drawImage(icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
+          ctx.restore();
+          return;
+        }
+
+        const radius = Math.min(21, 13 + String(count).length * 2);
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = cluster.hasFavorite ? "#16834a" : "#176b91";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(String(count), x, y);
       });
     },
     _handleClick(event) {
       if (!this._map || !event?.containerPoint) return;
-      let closestSnapshot = null;
+      let closestCluster = null;
       let closestDistance = Infinity;
-      const hitRadius = isTouchPlatform() ? 24 : 18;
-      this._snapshots.forEach((snapshot) => {
-        const point = this._map.latLngToContainerPoint([snapshot.latitude, snapshot.longitude]);
+      (this._clusters || []).forEach((cluster) => {
+        const point = L.point(cluster.x / cluster.snapshots.length, cluster.y / cluster.snapshots.length);
         const distance = point.distanceTo(event.containerPoint);
         if (distance < closestDistance) {
           closestDistance = distance;
-          closestSnapshot = snapshot;
+          closestCluster = cluster;
         }
       });
-      if (!closestSnapshot || closestDistance > hitRadius) return;
+      const hitRadius = Math.max(isTouchPlatform() ? 24 : 18, closestCluster?.snapshots.length > 1 ? 24 : 0);
+      if (!closestCluster || closestDistance > hitRadius) return;
+      if (closestCluster.snapshots.length > 1 && this._map.getZoom() < 16) {
+        this._map.setView(
+          [closestCluster.latitude / closestCluster.snapshots.length, closestCluster.longitude / closestCluster.snapshots.length],
+          Math.min(16, this._map.getZoom() + 2),
+          { animate: false }
+        );
+        return;
+      }
+      const closestSnapshot = closestCluster.snapshots.reduce((closest, snapshot) => {
+        const point = this._map.latLngToContainerPoint([snapshot.latitude, snapshot.longitude]);
+        const distance = point.distanceTo(event.containerPoint);
+        return !closest || distance < closest.distance ? { snapshot, distance } : closest;
+      }, null)?.snapshot;
+      if (!closestSnapshot) return;
       L.popup({
         closeButton: true,
         maxWidth: 280,
@@ -9136,10 +9110,6 @@ function renderSuggestionList(listEl, inputEl, onSelect) {
   listEl.setAttribute("role", "listbox");
 
   if (!results.length) {
-    if (inputEl.id === "voertuignummer" && query && vehicleSuggestionIndex.length) {
-      renderMissingVehicleSuggestionList(listEl, inputEl);
-      return;
-    }
     listEl.hidden = true;
     return;
   }
@@ -9261,10 +9231,13 @@ function positionSuggestionList(listEl, inputEl) {
   if (!listEl || !inputEl || listEl.dataset.floating !== "1") return;
   const rect = inputEl.getBoundingClientRect();
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth || rect.width;
-  const left = Math.max(12, Math.min(rect.left, viewportWidth - rect.width - 12));
+  const availableWidth = Math.max(0, viewportWidth - 24);
+  const preferredWidth = inputEl.id === "voertuignummer" ? Math.max(rect.width, 280) : rect.width;
+  const width = Math.min(preferredWidth, availableWidth);
+  const left = Math.max(12, Math.min(rect.left, viewportWidth - width - 12));
   listEl.style.top = `${Math.round(rect.bottom + 6)}px`;
   listEl.style.left = `${Math.round(left)}px`;
-  listEl.style.width = `${Math.round(Math.min(rect.width, viewportWidth - 24))}px`;
+  listEl.style.width = `${Math.round(width)}px`;
 }
 
 function bindVehicleSuggestions(inputEl, onSelect) {
