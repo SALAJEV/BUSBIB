@@ -3818,6 +3818,7 @@ function buildVehicleMapPopup(snapshot) {
   const owner = ownerText && ownerText !== "/" ? ownerText : "-";
   const destinationText = cleanText(snapshot.destinationText);
   const destination = destinationText && destinationText !== "/" ? destinationText : "-";
+  const routeShort = cleanText(snapshot.routeShort) || "—";
   const currentStopText = cleanText(snapshot.currentStopName);
   const currentStop = currentStopText && currentStopText !== "/"
     ? currentStopText
@@ -3828,11 +3829,13 @@ function buildVehicleMapPopup(snapshot) {
     <a class="vehicle-map-popup" href="${escapeHtml(vehicleUrl || "#")}" data-home-gtfs-vehicle-id="${escapeHtml(vehicleLinkId)}">
       <div class="vehicle-map-popup-head">
         <strong>${escapeHtml(snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
-        <span class="line-badge" style="--line-badge-bg:${escapeHtml(routeColor)};--line-badge-fg:${escapeHtml(routeTextColor)};">${escapeHtml(snapshot.routeShort || "—")}</span>
+      </div>
+      <div class="route-destination-row vehicle-map-popup-route">
+        <span class="line-badge" style="--line-badge-bg:${escapeHtml(routeColor)};--line-badge-fg:${escapeHtml(routeTextColor)};">${escapeHtml(routeShort)}</span>
+        <strong class="destination-text">${escapeHtml(destination)}</strong>
       </div>
       <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("vehicleModelLabel", "Model"))}</span><strong>${escapeHtml(vehicleModel)}</strong></div>
       <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("vehicleOwnerLabel", "Eigenaar"))}</span><strong>${escapeHtml(owner)}</strong></div>
-      <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("destinationLabel", "Bestemming"))}</span><strong>${escapeHtml(destination)}</strong></div>
       <div class="vehicle-map-popup-row"><span>${escapeHtml(t("currentStop"))}</span><strong>${escapeHtml(currentStop)}</strong></div>
       ${updatedText ? `<div class="vehicle-map-popup-row"><span>${escapeHtml(t("lastUpdate"))}</span><strong>${escapeHtml(updatedText)}</strong></div>` : ""}
     </a>
@@ -3974,8 +3977,7 @@ function getHomeGtfsMapSnapshot(vehicleId, entity, derivedData = null) {
   const routeId = pickFirstText(tripData?.route_id, provisionalRouteId, getRouteKeyFromTripId(tripId));
   const routeData = findRouteDataByRouteId(routeId, tripId);
   const currentStopContext = tripUpdate ? getCurrentStopContext(payload, tripUpdate) : { stopId: "", source: "unavailable" };
-  const currentStop = getStopByStopId(currentStopContext.stopId);
-  const currentStopName = cleanText(currentStop?.stop_name || currentStopContext.stopId || "");
+  const currentStopName = getStopDisplayName(currentStopContext.stopId);
   const timestamp = getEntityRealtimeTimestamp(entity);
   const routeColorRaw = (routeData?.route_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
   const routeTextColorRaw = (routeData?.route_text_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
@@ -3992,8 +3994,10 @@ function getHomeGtfsMapSnapshot(vehicleId, entity, derivedData = null) {
     routeShort: pickFirstText(routeData?.route_short_name, descriptor.routeShortName, routeId) || "",
     routeColor: routeColorRaw.length === 6 ? `#${routeColorRaw}` : "#2563eb",
     routeTextColor: routeTextColorRaw.length === 6 ? `#${routeTextColorRaw}` : "#ffffff",
-    destinationText: pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name) || "",
-    currentStopName: currentStopName || getLabel("unknownStop", "Onbekende halte"),
+    destinationText: getDestinationDisplayName(
+      pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name)
+    ),
+    currentStopName,
     updatedAt: timestamp
   };
 }
@@ -4083,8 +4087,11 @@ async function refreshHomeGtfsMap(options = {}) {
   homeGtfsMapRefreshBtn?.setAttribute("disabled", "disabled");
 
   try {
-    const [, data] = await Promise.all([
+    const [, , , , data] = await Promise.all([
       voertuigen.length === 0 ? laadVoertuigen() : Promise.resolve(),
+      trips.length === 0 ? laadTrips() : Promise.resolve(),
+      routes.length === 0 ? laadRoutes() : Promise.resolve(),
+      stopsById.size === 0 ? laadStops() : Promise.resolve(),
       fetchRealtimeFeed({ force })
     ]);
     if (requestToken !== homeGtfsMapRequestToken) return;
@@ -4242,11 +4249,11 @@ function getRoutePresentationFromRealtime(id, realtimeSource, bus) {
   const routeId = pickFirstText(tripData?.route_id, provisionalRouteId, getRouteKeyFromTripId(tripId));
   const routeData = findRouteDataByRouteId(routeId, tripId);
   const routeShort = pickFirstText(routeData?.route_short_name, descriptor.routeShortName, routeId) || "?";
-  const destinationText = pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name) || "-";
+  const destinationText = getDestinationDisplayName(
+    pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name)
+  ) || "-";
   const currentStopContext = getCurrentStopContext(v, tripUpdate);
-  const currentStopId = currentStopContext.stopId;
-  const currentStop = getStopByStopId(currentStopId);
-  const currentStopName = cleanText(currentStop?.stop_name || currentStopId || "") || getLabel("unknownStop", "Onbekende halte");
+  const currentStopName = getStopDisplayName(currentStopContext.stopId);
   const routeColorRaw = (routeData?.route_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
   const routeTextColorRaw = (routeData?.route_text_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
 
@@ -9596,10 +9603,10 @@ async function laadStops() {
 
       stopsById.clear();
       stops.forEach((stop) => {
-        const stopId = normalize(stop.stop_id);
-        const stopCode = normalize(stop.stop_code);
+        const stopId = normalizeLookup(stop.stop_id);
+        const stopCode = normalizeLookup(stop.stop_code);
         if (stopId) stopsById.set(stopId, stop);
-        if (stopCode) stopsById.set(stopCode, stop);
+        if (stopCode && !stopsById.has(stopCode)) stopsById.set(stopCode, stop);
       });
     } catch (error) {
       console.warn("Stops laden mislukt; gebruik lege state.", error);
@@ -10419,9 +10426,24 @@ function getCurrentStopContext(vehiclePayload, tripUpdate) {
 }
 
 function getStopByStopId(stopId) {
-  const normalized = normalize(stopId);
+  const normalized = normalizeLookup(stopId);
   if (!normalized) return null;
   return stopsById.get(normalized) || null;
+}
+
+function getStopDisplayName(stopId) {
+  return cleanText(getStopByStopId(stopId)?.stop_name) ||
+    getLabel("unknownStop", "Onbekende halte");
+}
+
+function getDestinationDisplayName(destination) {
+  const normalized = cleanText(destination);
+  if (!normalized) return "";
+  const stopName = cleanText(getStopByStopId(normalized)?.stop_name);
+  if (stopName) return stopName;
+  return /^\d{4,6}$/.test(normalized)
+    ? getLabel("unknownStop", "Onbekende halte")
+    : normalized;
 }
 
 async function updateRealtime(id){
@@ -10497,7 +10519,7 @@ async function updateRealtime(id){
     const currentStopContext = canUseTripUpdateStop ? getCurrentStopContext(v, tripUpdate) : { stopId: "", source: "unavailable" };
     const currentStopId = currentStopContext.stopId;
     const currentStop = getStopByStopId(currentStopId);
-    const currentStopName = (currentStop?.stop_name || currentStopId || "-").toString().trim() || "-";
+    const currentStopName = getStopDisplayName(currentStopId);
     const currentStopUrlRaw = (currentStop?.stop_url || "").toString().trim();
     const currentStopUrl = /^https?:\/\//i.test(currentStopUrlRaw) ? currentStopUrlRaw : "";
 
@@ -10521,7 +10543,7 @@ async function updateRealtime(id){
     );
     const routeShort = routeShortRaw || "?";
     const tripHeadsign = pickFirstText(tripData?.trip_headsign, descriptor.headsign);
-    const destinationText = tripHeadsign || "-";
+    const destinationText = getDestinationDisplayName(tripHeadsign) || "-";
     if (routeShort === "?" || destinationText === "-") {
       console.warn("[busbibliotheek] lijn/bestemming niet gevonden", {
         vehicleId: normalizedRequestedId,
