@@ -138,6 +138,7 @@ const REALTIME_PERSISTED_CACHE_KEY = "bb_realtime_feed_cache_v1";
 const REALTIME_PERSISTED_MAX_AGE_MS = 3 * 60 * 1000;
 const DASHBOARD_MAX_VEHICLES = 9;
 const HOME_GTFS_MAP_REFRESH_MS = 30000;
+const ALLOWED_HOME_MAP_REFRESH_INTERVALS_SEC = [30, 60, 120];
 const HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE = 48;
 const HOME_GTFS_MAP_CENTER = [51.037778, 4.240556];
 const HOME_GTFS_MAP_ZOOM = 9;
@@ -163,6 +164,12 @@ const colorThemeSelect = document.getElementById("colorThemeSelect");
 const languageSelect = document.getElementById("languageSelect");
 const showHomeRealtimeMapToggle = document.getElementById("showHomeRealtimeMapToggle");
 const showHomeRealtimeMapLabelEl = document.getElementById("showHomeRealtimeMapLabel");
+const homeMapIntervalSelect = document.getElementById("homeMapIntervalSelect");
+const homeMapInterval30OptEl = document.getElementById("homeMapInterval30Opt");
+const textScaleSelect = document.getElementById("textScaleSelect");
+const highContrastToggle = document.getElementById("highContrastToggle");
+const reduceMotionToggle = document.getElementById("reduceMotionToggle");
+const settingsResetBtn = document.getElementById("settingsResetBtn");
 const intervalOpt10El = document.getElementById("intervalOpt10");
 const intervalOpt15El = document.getElementById("intervalOpt15");
 const intervalOpt30El = document.getElementById("intervalOpt30");
@@ -388,9 +395,23 @@ const moreFunctionsTitleEl = document.getElementById("moreFunctionsTitle");
 const closeBtnTextEl = document.getElementById("closeBtnText");
 const favoritesTitleEl = document.getElementById("favoritesTitle");
 const settingsTitleEl = document.getElementById("settingsTitle");
+const settingsSummaryEl = document.getElementById("settingsSummary");
+const settingsAppearanceTitleEl = document.getElementById("settingsAppearanceTitle");
+const settingsRealtimeTitleEl = document.getElementById("settingsRealtimeTitle");
+const settingsAccessTitleEl = document.getElementById("settingsAccessTitle");
+const settingsLanguageTitleEl = document.getElementById("settingsLanguageTitle");
 const intervalLabelEl = document.getElementById("intervalLabel");
 const themeLabelEl = document.getElementById("themeLabel");
 const languageLabelEl = document.getElementById("languageLabel");
+const textScaleLabelEl = document.getElementById("textScaleLabel");
+const highContrastLabelEl = document.getElementById("highContrastLabel");
+const reduceMotionLabelEl = document.getElementById("reduceMotionLabel");
+const homeMapIntervalLabelEl = document.getElementById("homeMapIntervalLabel");
+const homeMapInterval60OptEl = document.getElementById("homeMapInterval60Opt");
+const homeMapInterval120OptEl = document.getElementById("homeMapInterval120Opt");
+const textScaleNormalOptEl = document.getElementById("textScaleNormalOpt");
+const textScaleLargeOptEl = document.getElementById("textScaleLargeOpt");
+const textScaleLargestOptEl = document.getElementById("textScaleLargestOpt");
 const timeFormatSelect = document.getElementById("timeFormatSelect");
 const timeFormatLabelEl = document.getElementById("timeFormatLabel");
 const timeFormat24hOptEl = document.getElementById("timeFormat24hOpt");
@@ -2100,10 +2121,14 @@ let pageLoadingActive = false;
 let firstRunCurrentStep = 0;
 let settings = {
   intervalMs: 10000,
+  homeMapRefreshIntervalSec: 30,
   theme: "auto",
   colorTheme: "classic",
   language: "nl",
   timeFormat: "24h",
+  textScale: "normal",
+  highContrast: false,
+  reduceMotion: false,
   dashboardVehicleIds: [],
   showHomeRealtimeMap: true,
   hasCompletedOnboarding: false
@@ -2129,6 +2154,7 @@ const FALLBACK_LANG = "en";
 const ALLOWED_LANGUAGES = ["nl", "fr", "en", "de", "pl", "es", "ru"];
 const ALLOWED_COLOR_THEMES = ["classic", "blue", "green", "yellow", "orange", "red", "purple"];
 const ALLOWED_UPDATE_INTERVALS = [10000, 15000, 30000];
+const ALLOWED_TEXT_SCALES = ["normal", "large", "largest"];
 const REQUEST_TIMEOUT_MS = 12000;
 const REALTIME_FETCH_TIMEOUT_MS = 10000;
 const REALTIME_FEED_CACHE_MS = 9000;
@@ -2203,6 +2229,16 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
 function normalizeUpdateIntervalMs(intervalMs) {
   const value = Number(intervalMs);
   return ALLOWED_UPDATE_INTERVALS.includes(value) ? value : 10000;
+}
+
+function normalizeHomeMapRefreshIntervalSec(intervalSec) {
+  const value = Number(intervalSec);
+  if (!ALLOWED_HOME_MAP_REFRESH_INTERVALS_SEC.includes(value)) return isIosPlatform ? 60 : 30;
+  return isIosPlatform ? Math.max(value, 60) : value;
+}
+
+function normalizeTextScale(textScale) {
+  return ALLOWED_TEXT_SCALES.includes(textScale) ? textScale : "normal";
 }
 
 function normalizeDashboardVehicleIds(ids) {
@@ -4006,7 +4042,16 @@ function redrawHomeGtfsMapMarkers() {
 }
 
 function getHomeGtfsMapRefreshIntervalMs() {
-  return isIosPlatform ? Math.max(HOME_GTFS_MAP_REFRESH_MS, 60000) : HOME_GTFS_MAP_REFRESH_MS;
+  const intervalMs = settings.homeMapRefreshIntervalSec * 1000 || HOME_GTFS_MAP_REFRESH_MS;
+  return isIosPlatform ? Math.max(intervalMs, 60000) : intervalMs;
+}
+
+function restartHomeGtfsMapRefresh() {
+  if (homeGtfsMapRefreshHandle) {
+    clearInterval(homeGtfsMapRefreshHandle);
+    homeGtfsMapRefreshHandle = null;
+  }
+  if (settings.showHomeRealtimeMap) startHomeGtfsMapRefresh();
 }
 
 function pauseHomeGtfsMapForInactivity() {
@@ -6219,13 +6264,23 @@ function loadSettings() {
     if (!window.localStorage) return;
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return;
+    const parsedValue = JSON.parse(raw);
+    if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
+      console.warn("Ongeldige instellingen genegeerd");
+      return;
+    }
     hasStoredSettings = true;
-    const parsed = JSON.parse(raw);
+    const parsed = parsedValue;
     settings = { ...settings, ...parsed };
+    settings.intervalMs = normalizeUpdateIntervalMs(settings.intervalMs);
+    settings.homeMapRefreshIntervalSec = normalizeHomeMapRefreshIntervalSec(settings.homeMapRefreshIntervalSec);
     settings.theme = settings.theme === "light" || settings.theme === "dark" || settings.theme === "auto" ? settings.theme : "auto";
     settings.colorTheme = normalizeColorTheme(settings.colorTheme);
     settings.language = normalizeLanguage(settings.language);
     settings.timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
+    settings.textScale = normalizeTextScale(settings.textScale);
+    settings.highContrast = settings.highContrast === true;
+    settings.reduceMotion = settings.reduceMotion === true;
     settings.dashboardVehicleIds = normalizeDashboardVehicleIds(settings.dashboardVehicleIds);
     settings.showHomeRealtimeMap = typeof parsed.showHomeRealtimeMap === "boolean" ? parsed.showHomeRealtimeMap : true;
     settings.hasCompletedOnboarding = typeof parsed.hasCompletedOnboarding === "boolean" ? parsed.hasCompletedOnboarding : true;
@@ -6460,10 +6515,14 @@ function detectPreferredLanguage() {
 function createDefaultSettings(language = DEFAULT_LANG) {
   return {
     intervalMs: 10000,
+    homeMapRefreshIntervalSec: isIosPlatform ? 60 : 30,
     theme: "auto",
     colorTheme: "classic",
     language: normalizeLanguage(language),
     timeFormat: "24h",
+    textScale: "normal",
+    highContrast: false,
+    reduceMotion: false,
     dashboardVehicleIds: [],
     showHomeRealtimeMap: true,
     hasCompletedOnboarding: false
@@ -6477,6 +6536,50 @@ function syncPrimarySettingsControls() {
   if (languageSelect) languageSelect.value = settings.language;
   if (timeFormatSelect) timeFormatSelect.value = settings.timeFormat;
   if (showHomeRealtimeMapToggle) showHomeRealtimeMapToggle.checked = settings.showHomeRealtimeMap;
+  if (homeMapIntervalSelect) {
+    homeMapIntervalSelect.value = String(settings.homeMapRefreshIntervalSec);
+    homeMapIntervalSelect.disabled = !settings.showHomeRealtimeMap;
+  }
+  if (homeMapInterval30OptEl) homeMapInterval30OptEl.disabled = isIosPlatform;
+  if (textScaleSelect) textScaleSelect.value = settings.textScale;
+  if (highContrastToggle) highContrastToggle.checked = settings.highContrast;
+  if (reduceMotionToggle) reduceMotionToggle.checked = settings.reduceMotion;
+}
+
+async function resetSettingsPreferences() {
+  const confirmed = await showAppConfirm(
+    getLabel(
+      "settingsResetConfirm",
+      "De standaardvoorkeuren herstellen? Je taal, weergave- en realtimevoorkeuren worden teruggezet. Je favorieten en ingestelde stalkvoertuigen blijven behouden."
+    ),
+    {
+      title: getLabel("settingsReset", "Voorkeuren herstellen"),
+      confirmLabel: getLabel("dialogOk", "OK")
+    }
+  );
+  if (!confirmed) return;
+
+  const nextSettings = createDefaultSettings(detectPreferredLanguage());
+  nextSettings.dashboardVehicleIds = [...dashboardVehicleIds];
+  nextSettings.hasCompletedOnboarding = settings.hasCompletedOnboarding;
+  settings = nextSettings;
+  window.settings = settings;
+  updateIntervalMs = settings.intervalMs;
+  syncPrimarySettingsControls();
+  applyTheme(settings.theme);
+  applyColorTheme(settings.colorTheme);
+  applyAccessibilitySettings();
+  applyTranslations();
+  refreshVisibleLocalizedState();
+  renderFavorites();
+  saveSettings();
+  restartRealtimeRefresh();
+  setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
+  restartHomeGtfsMapRefresh();
+  if (settings.showHomeRealtimeMap && getCurrentRouteState().view === "home") {
+    homeGtfsMapStarted = true;
+    void refreshHomeGtfsMap({ force: true }).catch((error) => console.warn("Realtimekaart vernieuwen na voorkeurenreset mislukt", error));
+  }
 }
 
 function syncFirstRunSetupControls() {
@@ -6567,6 +6670,13 @@ function applyColorTheme(colorTheme) {
   updateSystemUiThemeColor();
 }
 
+function applyAccessibilitySettings() {
+  const root = document.documentElement;
+  root.setAttribute("data-text-scale", normalizeTextScale(settings.textScale));
+  root.setAttribute("data-high-contrast", String(settings.highContrast === true));
+  root.setAttribute("data-reduce-motion", String(settings.reduceMotion === true));
+}
+
 function updateSystemUiThemeColor() {
   const root = document.documentElement;
   const css = getComputedStyle(document.documentElement);
@@ -6629,6 +6739,12 @@ function applyTranslations() {
   voertuigInput.placeholder = t("vehiclePlaceholder");
   favoritesTitleEl.textContent = t("favorites");
   settingsTitleEl.textContent = t("settings");
+  if (settingsSummaryEl) settingsSummaryEl.textContent = getLabel("settingsSummary", "Stem de app af op jouw voorkeuren en manier van kijken.");
+  if (settingsAppearanceTitleEl) settingsAppearanceTitleEl.textContent = getLabel("settingsAppearance", "Weergave");
+  if (settingsRealtimeTitleEl) settingsRealtimeTitleEl.textContent = getLabel("settingsRealtime", "Realtime");
+  if (settingsAccessTitleEl) settingsAccessTitleEl.textContent = getLabel("settingsAccessibility", "Toegankelijkheid");
+  if (settingsLanguageTitleEl) settingsLanguageTitleEl.textContent = t("language");
+  if (settingsResetBtn) settingsResetBtn.textContent = getLabel("settingsReset", "Voorkeuren herstellen");
   if (showHomeRealtimeMapLabelEl) {
     showHomeRealtimeMapLabelEl.textContent = getLabel("showHomeRealtimeMap", "Realtime kaart op startscherm");
   }
@@ -6637,6 +6753,16 @@ function applyTranslations() {
   themeLabelEl.textContent = t("theme");
   colorThemeLabelEl.textContent = t("colorTheme");
   languageLabelEl.textContent = t("language");
+  if (textScaleLabelEl) textScaleLabelEl.textContent = getLabel("textScale", "Tekengrootte");
+  if (highContrastLabelEl) highContrastLabelEl.textContent = getLabel("highContrast", "Hoog contrast");
+  if (reduceMotionLabelEl) reduceMotionLabelEl.textContent = getLabel("reduceMotion", "Minder beweging");
+  if (homeMapIntervalLabelEl) homeMapIntervalLabelEl.textContent = getLabel("homeMapInterval", "Kaart verversen");
+  if (textScaleNormalOptEl) textScaleNormalOptEl.textContent = getLabel("textScaleNormal", "Normaal");
+  if (textScaleLargeOptEl) textScaleLargeOptEl.textContent = getLabel("textScaleLarge", "Groot");
+  if (textScaleLargestOptEl) textScaleLargestOptEl.textContent = getLabel("textScaleLargest", "Extra groot");
+  if (homeMapInterval30OptEl) homeMapInterval30OptEl.textContent = `30 ${t("intervalSeconds")}`;
+  if (homeMapInterval60OptEl) homeMapInterval60OptEl.textContent = getLabel("oneMinute", "1 minuut");
+  if (homeMapInterval120OptEl) homeMapInterval120OptEl.textContent = getLabel("twoMinutes", "2 minuten");
   if (timeFormatLabelEl) timeFormatLabelEl.textContent = t("timeFormat");
   if (timeFormat24hOptEl) timeFormat24hOptEl.textContent = t("timeFormat24h");
   if (timeFormat12hOptEl) timeFormat12hOptEl.textContent = t("timeFormat12h");
@@ -7788,6 +7914,7 @@ function initAppPreferences() {
   syncPrimarySettingsControls();
   applyTheme(settings.theme);
   applyColorTheme(settings.colorTheme);
+  applyAccessibilitySettings();
   applyTranslations();
   syncStalkModeAvailability();
   setFavoritesPanel(false);
@@ -7998,13 +8125,39 @@ intervalSelect.addEventListener("change", () => {
 });
 showHomeRealtimeMapToggle?.addEventListener("change", () => {
   settings.showHomeRealtimeMap = showHomeRealtimeMapToggle.checked;
+  if (homeMapIntervalSelect) homeMapIntervalSelect.disabled = !settings.showHomeRealtimeMap;
   saveSettings();
   setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
+  restartHomeGtfsMapRefresh();
   if (settings.showHomeRealtimeMap) {
     homeGtfsMapStarted = true;
-    startHomeGtfsMapRefresh();
     void refreshHomeGtfsMap({ force: true });
   }
+});
+homeMapIntervalSelect?.addEventListener("change", () => {
+  settings.homeMapRefreshIntervalSec = normalizeHomeMapRefreshIntervalSec(homeMapIntervalSelect.value);
+  homeMapIntervalSelect.value = String(settings.homeMapRefreshIntervalSec);
+  saveSettings();
+  restartHomeGtfsMapRefresh();
+});
+textScaleSelect?.addEventListener("change", () => {
+  settings.textScale = normalizeTextScale(textScaleSelect.value);
+  textScaleSelect.value = settings.textScale;
+  applyAccessibilitySettings();
+  saveSettings();
+});
+highContrastToggle?.addEventListener("change", () => {
+  settings.highContrast = highContrastToggle.checked;
+  applyAccessibilitySettings();
+  saveSettings();
+});
+reduceMotionToggle?.addEventListener("change", () => {
+  settings.reduceMotion = reduceMotionToggle.checked;
+  applyAccessibilitySettings();
+  saveSettings();
+});
+settingsResetBtn?.addEventListener("click", () => {
+  void resetSettingsPreferences();
 });
 themeSelect.addEventListener("change", () => {
   settings.theme = themeSelect.value;
@@ -9722,7 +9875,7 @@ function terug(options = {}) {
   updateUrlState(historyMode);
   updateDocumentTitle("");
   hideSuggestionList(suggestieLijst);
-  window.scrollTo({ top: 0, behavior: scrollBehavior });
+  window.scrollTo({ top: 0, behavior: settings.reduceMotion ? "auto" : scrollBehavior });
 }
 
 function findBusById(id) {

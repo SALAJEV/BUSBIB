@@ -23,12 +23,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261019-1">
+<link rel="stylesheet" href="style.css?v=20261019-6">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261019-1";
+  window.BB_ASSET_VERSION = "20261019-6";
 </script>
 </head>
 <body>
@@ -273,63 +273,121 @@
       </div>
     </section>
     <section class="more-panel-section settings-panel-section">
-      <div class="more-panel-section-head">
+      <div class="settings-panel-intro">
         <h4 id="settingsTitle">Instellingen</h4>
+        <p id="settingsSummary">Stem de app af op jouw voorkeuren en manier van kijken.</p>
       </div>
-      <div class="settings-grid">
-        <div class="settings-card">
-          <label for="intervalSelect" id="intervalLabel">Update-interval</label>
-          <select id="intervalSelect">
-            <option value="10000" selected id="intervalOpt10">10 seconden</option>
-            <option value="15000" id="intervalOpt15">15 seconden</option>
-            <option value="30000" id="intervalOpt30">30 seconden</option>
-          </select>
-        </div>
-        <div class="settings-card">
-          <label for="themeSelect" id="themeLabel">Thema</label>
-          <select id="themeSelect">
-            <option value="auto" id="themeAutoOpt">Automatisch</option>
-            <option value="light" id="themeLightOpt">Licht</option>
-            <option value="dark" id="themeDarkOpt">Donker</option>
-          </select>
-        </div>
-        <div class="settings-card">
-          <label for="colorThemeSelect" id="colorThemeLabel">Kleurthema</label>
-          <select id="colorThemeSelect">
-            <option value="classic" id="colorClassicOpt" selected>Standaard</option>
-            <option value="blue" id="colorBlueOpt">Blauw</option>
-            <option value="green" id="colorGreenOpt">Groen</option>
-            <option value="yellow" id="colorYellowOpt">Geel</option>
-            <option value="orange" id="colorOrangeOpt">Oranje</option>
-            <option value="red" id="colorRedOpt">Rood</option>
-            <option value="purple" id="colorPurpleOpt">Paars</option>
-          </select>
-        </div>
-        <div class="settings-card">
-          <label for="languageSelect" id="languageLabel">Taal</label>
-          <select id="languageSelect">
-            <option value="nl" id="languageOptNl">Nederlands</option>
-            <option value="fr" id="languageOptFr">Fran&ccedil;ais</option>
-            <option value="en" id="languageOptEn">English</option>
-            <option value="de" id="languageOptDe">Deutsch</option>
-            <option value="pl" id="languageOptPl">Polski</option>
-            <option value="es" id="languageOptEs">Espa&ntilde;ol</option>
-            <option value="ru" id="languageOptRu">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
-          </select>
-        </div>
-        <div class="settings-card">
-          <label for="timeFormatSelect" id="timeFormatLabel">Tijdnotatie</label>
-          <select id="timeFormatSelect">
-            <option value="24h" id="timeFormat24hOpt">24 uur</option>
-            <option value="12h" id="timeFormat12hOpt">12 uur</option>
-          </select>
-        </div>
-        <div class="settings-card settings-card--toggle">
-          <label for="showHomeRealtimeMapToggle" id="showHomeRealtimeMapLabel">Realtime kaart op startscherm</label>
-          <input id="showHomeRealtimeMapToggle" type="checkbox" checked>
-        </div>
+      <div class="settings-categories">
+        <section class="settings-category" aria-labelledby="settingsAppearanceTitle">
+          <div class="settings-category-heading">
+            <span class="settings-category-index" aria-hidden="true">01</span>
+            <h5 id="settingsAppearanceTitle">Weergave</h5>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <label for="themeSelect" id="themeLabel">Thema</label>
+              <select id="themeSelect">
+                <option value="auto" id="themeAutoOpt">Automatisch</option>
+                <option value="light" id="themeLightOpt">Licht</option>
+                <option value="dark" id="themeDarkOpt">Donker</option>
+              </select>
+            </div>
+            <div class="settings-card">
+              <label for="colorThemeSelect" id="colorThemeLabel">Kleurthema</label>
+              <select id="colorThemeSelect">
+                <option value="classic" id="colorClassicOpt" selected>Standaard</option>
+                <option value="blue" id="colorBlueOpt">Blauw</option>
+                <option value="green" id="colorGreenOpt">Groen</option>
+                <option value="yellow" id="colorYellowOpt">Geel</option>
+                <option value="orange" id="colorOrangeOpt">Oranje</option>
+                <option value="red" id="colorRedOpt">Rood</option>
+                <option value="purple" id="colorPurpleOpt">Paars</option>
+              </select>
+            </div>
+            <div class="settings-card">
+              <label for="textScaleSelect" id="textScaleLabel">Tekengrootte</label>
+              <select id="textScaleSelect">
+                <option value="normal" id="textScaleNormalOpt">Normaal</option>
+                <option value="large" id="textScaleLargeOpt">Groot</option>
+                <option value="largest" id="textScaleLargestOpt">Extra groot</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        <section class="settings-category" aria-labelledby="settingsRealtimeTitle">
+          <div class="settings-category-heading">
+            <span class="settings-category-index" aria-hidden="true">02</span>
+            <h5 id="settingsRealtimeTitle">Realtime</h5>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <label for="intervalSelect" id="intervalLabel">Update-interval voertuig</label>
+              <select id="intervalSelect">
+                <option value="10000" selected id="intervalOpt10">10 seconden</option>
+                <option value="15000" id="intervalOpt15">15 seconden</option>
+                <option value="30000" id="intervalOpt30">30 seconden</option>
+              </select>
+            </div>
+            <div class="settings-card">
+              <label for="timeFormatSelect" id="timeFormatLabel">Tijdnotatie</label>
+              <select id="timeFormatSelect">
+                <option value="24h" id="timeFormat24hOpt">24 uur</option>
+                <option value="12h" id="timeFormat12hOpt">12 uur</option>
+              </select>
+            </div>
+            <label class="settings-card settings-card--toggle" for="showHomeRealtimeMapToggle">
+              <span id="showHomeRealtimeMapLabel">Realtime kaart op startscherm</span>
+              <input id="showHomeRealtimeMapToggle" type="checkbox" checked>
+            </label>
+            <div class="settings-card">
+              <label for="homeMapIntervalSelect" id="homeMapIntervalLabel">Kaart verversen</label>
+              <select id="homeMapIntervalSelect">
+                <option value="30" id="homeMapInterval30Opt">30 seconden</option>
+                <option value="60" id="homeMapInterval60Opt">1 minuut</option>
+                <option value="120" id="homeMapInterval120Opt">2 minuten</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        <section class="settings-category" aria-labelledby="settingsAccessTitle">
+          <div class="settings-category-heading">
+            <span class="settings-category-index" aria-hidden="true">03</span>
+            <h5 id="settingsAccessTitle">Toegankelijkheid</h5>
+          </div>
+          <div class="settings-grid settings-grid--toggles">
+            <label class="settings-card settings-card--toggle" for="highContrastToggle">
+              <span id="highContrastLabel">Hoog contrast</span>
+              <input id="highContrastToggle" type="checkbox">
+            </label>
+            <label class="settings-card settings-card--toggle" for="reduceMotionToggle">
+              <span id="reduceMotionLabel">Minder beweging</span>
+              <input id="reduceMotionToggle" type="checkbox">
+            </label>
+          </div>
+        </section>
+        <section class="settings-category" aria-labelledby="settingsLanguageTitle">
+          <div class="settings-category-heading">
+            <span class="settings-category-index" aria-hidden="true">04</span>
+            <h5 id="settingsLanguageTitle">Taal</h5>
+          </div>
+          <div class="settings-grid settings-grid--single">
+            <div class="settings-card">
+              <label for="languageSelect" id="languageLabel">Taal</label>
+              <select id="languageSelect">
+                <option value="nl" id="languageOptNl">Nederlands</option>
+                <option value="fr" id="languageOptFr">Fran&ccedil;ais</option>
+                <option value="en" id="languageOptEn">English</option>
+                <option value="de" id="languageOptDe">Deutsch</option>
+                <option value="pl" id="languageOptPl">Polski</option>
+                <option value="es" id="languageOptEs">Espa&ntilde;ol</option>
+                <option value="ru" id="languageOptRu">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+              </select>
+            </div>
+          </div>
+        </section>
       </div>
       <div class="settings-actions">
+        <button id="settingsResetBtn" class="btn more-secondary-btn" type="button">Voorkeuren herstellen</button>
         <button id="settingsInfoBtn" class="btn more-secondary-btn" type="button">Info</button>
       </div>
       <p id="feedStatus" class="settings-feed-status" hidden></p>
