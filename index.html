@@ -269,6 +269,7 @@
       <div class="more-action-grid">
         <button id="dashboardToggleBtn" class="btn" type="button" title="Stalk modus">Stalk modus</button>
         <button id="halteSearchToggleBtn" class="btn more-secondary-btn" type="button" title="Halte zoeken" aria-label="Halte zoeken">Halte zoeken</button>
+        <button id="lineSearchToggleBtn" class="btn more-secondary-btn" type="button">Lijn zoeken</button>
       </div>
     </section>
     <section class="more-panel-section settings-panel-section">
@@ -592,6 +593,29 @@
       </div>
       <p id="haltSearchHelp" class="halte-module-help">Als je op zoeken drukt, kom je op de site van De Lijn terecht.</p>
       <p id="haltecodeError" class="halte-module-error" hidden>Voer een haltecode of haltenaam in.</p>
+    </div>
+  </div>
+</div>
+
+<div id="lineSearchModal" class="pdf-modal" hidden role="dialog" aria-modal="true" aria-labelledby="lineSearchTitle">
+  <div class="pdf-modal-card line-search-modal-card">
+    <div class="pdf-modal-header">
+      <div>
+        <h3 id="lineSearchTitle">Lijn zoeken</h3>
+        <p id="lineSearchSummary" class="pdf-modal-summary">Zoek op lijnnummer, routenaam of lijncode om actieve ritten en voertuigen te bekijken.</p>
+      </div>
+      <button id="lineSearchCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
+    </div>
+    <div class="pdf-modal-body line-search-body">
+      <form id="lineSearchForm" class="line-search-form">
+        <label for="lineSearchInput" id="lineSearchInputLabel">Lijnnummer, routenaam of lijncode</label>
+        <div class="line-search-controls">
+          <input id="lineSearchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Bijvoorbeeld 95, Bussegem of route_id">
+          <button id="lineSearchSubmitBtn" class="btn" type="submit">Zoek lijn</button>
+        </div>
+      </form>
+      <p id="lineSearchStatus" class="line-search-status" role="status" aria-live="polite">Voer een lijnnummer, routenaam of lijncode in.</p>
+      <div id="lineSearchResults" class="line-search-results"></div>
     </div>
   </div>
 </div>

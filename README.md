@@ -34,6 +34,7 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen, heeft e
 ## Belangrijkste functies
 
 - Zoeken op voertuignummer, nummerplaat of intern nummer.
+- Lijnen zoeken op lijnnummer, routenaam of `route_id`, met actuele ritten en bijbehorende bussen.
 - Live voertuigtracking via De Lijn realtime data.
 - Realtime kaartweergave met Leaflet en OpenStreetMap/CARTO tiles.
 - Weerkaart op basis van de huidige voertuiglocatie via Open-Meteo.
