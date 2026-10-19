@@ -687,7 +687,8 @@ textarea::placeholder {
   z-index: 1200;
 }
 
-.vehicle-map-popup-shell .leaflet-popup-content-wrapper {
+.vehicle-map-popup-shell .leaflet-popup-content-wrapper,
+.home-gtfs-map-popup-shell .leaflet-popup-content-wrapper {
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 15px;
@@ -695,13 +696,15 @@ textarea::placeholder {
   box-shadow: var(--shadow-md);
 }
 
-.vehicle-map-popup-shell .leaflet-popup-content {
-  width: 280px !important;
+.vehicle-map-popup-shell .leaflet-popup-content,
+.home-gtfs-map-popup-shell .leaflet-popup-content {
+  width: min(280px, calc(100vw - 48px)) !important;
   max-width: calc(100vw - 48px);
   margin: 0;
 }
 
-.vehicle-map-popup-shell .leaflet-popup-tip {
+.vehicle-map-popup-shell .leaflet-popup-tip,
+.home-gtfs-map-popup-shell .leaflet-popup-tip {
   background: var(--surface-raised);
 }
 
@@ -755,10 +758,6 @@ textarea::placeholder {
 }
 
 @media (max-width: 480px) {
-  .vehicle-map-popup-shell .leaflet-popup-content {
-    width: 250px !important;
-  }
-
   .vehicle-map-popup {
     gap: 8px;
     padding: 11px;
