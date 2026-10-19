@@ -4280,3 +4280,61 @@ body.site-disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+.dashboard-panel[hidden] {
+  display: none;
+}
+
+.dashboard-panel {
+  position: fixed;
+  z-index: 900;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0;
+}
+
+.dashboard-panel-header {
+  flex: 0 0 auto;
+}
+
+.dashboard-panel-content {
+  display: grid;
+  flex: 1 0 auto;
+  gap: 14px;
+}
+
+.dashboard-map-wrap {
+  margin: 0;
+}
+
+.dashboard-map {
+  height: min(56vh, 600px);
+  min-height: 260px;
+}
+
+@media (max-width: 680px) {
+  .dashboard-panel {
+    gap: 10px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .dashboard-panel-content {
+    gap: 10px;
+  }
+
+  .dashboard-map {
+    height: min(48vh, 440px);
+    min-height: 220px;
+  }
+}

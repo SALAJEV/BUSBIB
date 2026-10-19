@@ -138,6 +138,7 @@ const REALTIME_PERSISTED_CACHE_KEY = "bb_realtime_feed_cache_v1";
 const REALTIME_PERSISTED_MAX_AGE_MS = 3 * 60 * 1000;
 const DASHBOARD_MAX_VEHICLES = 9;
 const HOME_GTFS_MAP_REFRESH_MS = 30000;
+const HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE = 48;
 const HOME_GTFS_MAP_CENTER = [51.037778, 4.240556];
 const HOME_GTFS_MAP_ZOOM = 9;
 const HOME_GTFS_MAP_INACTIVITY_LIMIT_MS = 8 * 60 * 1000;
@@ -622,6 +623,7 @@ let stops = [];
 let voertuigenLoadPromise = null;
 const stopsById = new Map();
 const tripsById = new Map();
+const tripsByIdTail = new Map();
 const tripsByRouteId = new Map();
 const tripsByRouteKey = new Map();
 const routesById = new Map();
@@ -645,6 +647,7 @@ let lastWeatherRenderKey = "";
 let compareEditTarget = "compare";
 let dashboardVehicleIds = [];
 let dashboardRefreshHandle = null;
+let dashboardRefreshInProgress = false;
 let dashboardMap = null;
 let dashboardMapMarkers = null;
 let homeGtfsMap = null;
@@ -4041,13 +4044,21 @@ async function refreshHomeGtfsMap(options = {}) {
     ]);
     if (requestToken !== homeGtfsMapRequestToken) return;
     const derivedData = getRealtimeFeedDerivedData(data);
-    const snapshots = Array.from(derivedData.gpsEntityByVehicleId.entries())
-      .map(([vehicleId, entity]) => getHomeGtfsMapSnapshot(vehicleId, entity, derivedData))
-      .filter(Boolean)
-      .sort((left, right) => {
-        if (left.known !== right.known) return left.known ? -1 : 1;
-        return (left.displayVehicleId || left.vehicleId).localeCompare(right.displayVehicleId || right.vehicleId, undefined, { numeric: true });
-      });
+    const snapshots = [];
+    let processedVehicles = 0;
+    for (const [vehicleId, entity] of derivedData.gpsEntityByVehicleId) {
+      const snapshot = getHomeGtfsMapSnapshot(vehicleId, entity, derivedData);
+      if (snapshot) snapshots.push(snapshot);
+      processedVehicles += 1;
+      if (processedVehicles % HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE === 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        if (requestToken !== homeGtfsMapRequestToken) return;
+      }
+    }
+    snapshots.sort((left, right) => {
+      if (left.known !== right.known) return left.known ? -1 : 1;
+      return (left.displayVehicleId || left.vehicleId).localeCompare(right.displayVehicleId || right.vehicleId, undefined, { numeric: true });
+    });
 
     await renderHomeGtfsMap(snapshots);
     if (requestToken !== homeGtfsMapRequestToken) return;
@@ -4219,9 +4230,14 @@ function getRoutePresentationFromRealtime(id, realtimeSource, bus) {
 }
 
 async function refreshDashboardPanel(options = {}) {
+  if (dashboardRefreshInProgress) return;
+  dashboardRefreshInProgress = true;
   const { showLoading = true } = options;
   const requestToken = ++dashboardRequestToken;
-  if (!dashboardPanelEl || !dashboardGridEl || !dashboardVehicleIds.length) return;
+  if (!dashboardPanelEl || !dashboardGridEl || !dashboardVehicleIds.length) {
+    dashboardRefreshInProgress = false;
+    return;
+  }
   if (showLoading) setDashboardLoading(true);
   try {
     if (isTrackingTemporarilyUnavailable()) {
@@ -4319,6 +4335,7 @@ async function refreshDashboardPanel(options = {}) {
     if (showLoading && requestToken === dashboardRequestToken) {
       setDashboardLoading(false);
     }
+    dashboardRefreshInProgress = false;
   }
 }
 
@@ -8439,9 +8456,17 @@ function findTripDataByTripId(tripId) {
   const exact = tripsById.get(normalizedTripId);
   if (exact) return exact;
 
+  const requestedTail = getTripIdParts(normalizedTripId).at(-1) || "";
+  if (!requestedTail) return null;
+  const indexedCandidates = tripsByIdTail.get(requestedTail);
+  const candidates = Array.isArray(indexedCandidates)
+    ? indexedCandidates
+    : indexedCandidates
+      ? [indexedCandidates]
+      : [];
   let bestTrip = null;
   let bestScore = Number.POSITIVE_INFINITY;
-  for (const trip of trips) {
+  for (const trip of candidates) {
     const score = getTripIdMatchScore(trip.trip_id, normalizedTripId);
     if (score < bestScore) {
       bestScore = score;
@@ -8454,6 +8479,17 @@ function addTripToLookup(map, key, trip) {
   if (!key) return;
   if (!map.has(key)) map.set(key, []);
   map.get(key).push(trip);
+}
+function addTripIdToTailLookup(key, trip) {
+  if (!key) return;
+  const existing = tripsByIdTail.get(key);
+  if (!existing) {
+    tripsByIdTail.set(key, trip);
+  } else if (Array.isArray(existing)) {
+    existing.push(trip);
+  } else {
+    tripsByIdTail.set(key, [existing, trip]);
+  }
 }
 function getTripsForRoute(routeId, fallbackTripId = "") {
   const normalizedRouteId = cleanText(routeId);
@@ -9360,11 +9396,16 @@ async function laadTrips() {
       lineSearchRouteIndex = null;
 
       tripsById.clear();
+      tripsByIdTail.clear();
       tripsByRouteId.clear();
       tripsByRouteKey.clear();
       trips.forEach((trip) => {
         const tripId = normalize(trip.trip_id);
-        if (tripId) tripsById.set(tripId, trip);
+        if (tripId) {
+          tripsById.set(tripId, trip);
+          const tripIdTail = getTripIdParts(tripId).at(-1) || "";
+          addTripIdToTailLookup(tripIdTail, trip);
+        }
         const routeId = normalize(trip.route_id);
         addTripToLookup(tripsByRouteId, routeId, trip);
         const routeKey = getRouteKey(routeId);
@@ -9374,6 +9415,7 @@ async function laadTrips() {
       console.warn("Trips laden mislukt; gebruik lege state.", error);
       trips = [];
       tripsById.clear();
+      tripsByIdTail.clear();
       tripsByRouteId.clear();
       tripsByRouteKey.clear();
     }
