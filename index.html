@@ -56,7 +56,7 @@
       </div>
       <div class="search-shell">
         <div class="search-row">
-          <input id="voertuignummer" placeholder="Voertuignummer of nummerplaat" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" inputmode="search" maxlength="10">
+          <input id="voertuignummer" placeholder="Zoek op voertuignummer, nummerplaat of intern nummer" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" inputmode="search" maxlength="10">
           <button id="searchBtn" type="button" title="Zoeken" aria-label="Zoeken">
             <svg class="search-btn-icon" aria-hidden="true" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="6.5"></circle>
@@ -65,7 +65,6 @@
           </button>
         </div>
         <ul id="suggestielijst" hidden></ul>
-        <p id="searchHelpText" class="search-help">Zoek op voertuignummer, nummerplaat of intern nummer.</p>
       </div>
     </div>
     <div class="header-side">
@@ -213,14 +212,36 @@
   </div>
 
   <footer>
-    <h3 id="disclaimerTitle">Disclaimer</h3>
-    <p id="disclaimerText">De informatie op deze website wordt verstrekt zonder garanties. Busbibliotheek is niet aansprakelijk voor vertragingen, fouten of onnauwkeurigheden in realtimegegevens. Gebruik op eigen risico. Raadpleeg voor officiele ritinformatie de bevoegde vervoersmaatschappij.</p>
-    <div class="footer-links">
-      <button id="footerTermsBtn" class="footer-link-btn" type="button">Gebruiksvoorwaarden</button>
-      <button id="footerReviewBtn" class="footer-link-btn" type="button">Feedback achterlaten</button>
-      <button id="footerContactBtn" class="footer-link-btn" type="button">Contact opnemen</button>
+    <div class="footer-main">
+      <div class="footer-links">
+        <button id="footerTermsBtn" class="footer-link-btn" type="button">Gebruiksvoorwaarden</button>
+        <button id="footerReviewBtn" class="footer-link-btn" type="button">Feedback achterlaten</button>
+        <button id="footerContactBtn" class="footer-link-btn" type="button">Contact opnemen</button>
+      </div>
+      <nav id="footerSocials" class="footer-socials" aria-label="Sociale media">
+        <a href="https://www.facebook.com/delijn.busspotter" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+          <img src="media/icons/facebook.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+        <a href="https://www.instagram.com/delijn_busspotter" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+          <img src="media/icons/instagram.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+        <a href="https://www.tiktok.com/@delijn_busspotter" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
+          <img src="media/icons/tiktok.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+        <a href="https://www.youtube.com/@delijn_busspotter" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+          <img src="media/icons/youtube.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+        <a href="https://discord.com/invite/5v3tZybutj" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
+          <img src="media/icons/discord.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+        <a href="mailto:flandribus@gmail.com" aria-label="E-mail: flandribus@gmail.com" title="flandribus@gmail.com">
+          <img src="media/icons/gmail.png" alt="" width="32" height="32" loading="lazy">
+        </a>
+      </nav>
     </div>
-    <p id="copyrightText" class="footer-meta">&copy; Busspotter 95, 2023-<span id="currentYear"></span></p>
+    <div class="footer-bottom">
+      <p id="copyrightText" class="footer-meta">&copy; Busspotter 95, 2023-<span id="currentYear"></span></p>
+    </div>
   </footer>
 
 </div>
@@ -293,6 +314,13 @@
             <option value="pl" id="languageOptPl">Polski</option>
             <option value="es" id="languageOptEs">Espa&ntilde;ol</option>
             <option value="ru" id="languageOptRu">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+          </select>
+        </div>
+        <div class="settings-card">
+          <label for="timeFormatSelect" id="timeFormatLabel">Tijdnotatie</label>
+          <select id="timeFormatSelect">
+            <option value="24h" id="timeFormat24hOpt">24 uur</option>
+            <option value="12h" id="timeFormat12hOpt">12 uur</option>
           </select>
         </div>
         <div class="settings-card settings-card--toggle">
@@ -441,52 +469,88 @@
     <div class="pdf-modal-header first-run-modal-header">
       <div>
         <h3 id="firstRunTitle">Welkom bij Busbibliotheek</h3>
-        <p id="firstRunSummary" class="pdf-modal-summary">Kies je taal en uiterlijk voor je start. Je kan dit later altijd wijzigen in Instellingen.</p>
+        <p id="firstRunSummary" class="pdf-modal-summary">Je persoonlijke startpunt voor alles wat rijdt.</p>
       </div>
     </div>
     <div class="pdf-modal-body first-run-modal-body">
-      <div class="first-run-intro">
-        <strong id="firstRunIntroTitle">Volg voertuigen van De Lijn in realtime.</strong>
-        <p id="firstRunDescription" class="pdf-modal-note">Busbibliotheek helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.</p>
+      <div class="first-run-progress" aria-hidden="true">
+        <span class="first-run-progress-step is-active"></span>
+        <span class="first-run-progress-step"></span>
+        <span class="first-run-progress-step"></span>
+        <span class="first-run-progress-step"></span>
       </div>
-      <div class="settings-grid first-run-settings-grid">
-        <div class="settings-card">
-          <label for="firstRunLanguageSelect" id="firstRunLanguageLabel">Taal</label>
-          <select id="firstRunLanguageSelect">
-            <option value="nl" id="firstRunLanguageOptNl">Nederlands</option>
-            <option value="fr" id="firstRunLanguageOptFr">Français</option>
-            <option value="en" id="firstRunLanguageOptEn">English</option>
-            <option value="de" id="firstRunLanguageOptDe">Deutsch</option>
-            <option value="pl" id="firstRunLanguageOptPl">Polski</option>
-            <option value="es" id="firstRunLanguageOptEs">Español</option>
-            <option value="ru" id="firstRunLanguageOptRu">Русский</option>
-          </select>
+      <p id="firstRunStepLabel" class="first-run-step-label" aria-live="polite"></p>
+      <div id="firstRunWelcomeStep" class="first-run-step-panel">
+        <div class="first-run-intro">
+          <span class="first-run-hero-icon" aria-hidden="true">🚌</span>
+          <span class="first-run-hero-kicker" id="firstRunHeroKicker">Ontdek Busbibliotheek</span>
+          <strong id="firstRunIntroTitle">Volg voertuigen van De Lijn in realtime.</strong>
+          <p id="firstRunDescription" class="pdf-modal-note">Busbibliotheek helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.</p>
         </div>
-        <div class="settings-card">
-          <label for="firstRunThemeSelect" id="firstRunThemeLabel">Thema</label>
-          <select id="firstRunThemeSelect">
-            <option value="auto" id="firstRunThemeAutoOpt">Automatisch</option>
-            <option value="light" id="firstRunThemeLightOpt">Licht</option>
-            <option value="dark" id="firstRunThemeDarkOpt">Donker</option>
-          </select>
+        <div class="first-run-feature-list" aria-hidden="true">
+          <span id="firstRunFeatureRealtime">Live voertuigen</span>
+          <span id="firstRunFeatureFavorites">Favorieten</span>
+          <span id="firstRunFeaturePhotos">Voertuigfoto's</span>
         </div>
-        <div class="settings-card">
-          <label for="firstRunColorThemeSelect" id="firstRunColorThemeLabel">Kleurthema</label>
-          <select id="firstRunColorThemeSelect">
-            <option value="classic" id="firstRunColorClassicOpt">Standaard</option>
-            <option value="blue" id="firstRunColorBlueOpt">Blauw</option>
-            <option value="green" id="firstRunColorGreenOpt">Groen</option>
-            <option value="yellow" id="firstRunColorYellowOpt">Geel</option>
-            <option value="orange" id="firstRunColorOrangeOpt">Oranje</option>
-            <option value="red" id="firstRunColorRedOpt">Rood</option>
-            <option value="purple" id="firstRunColorPurpleOpt">Paars</option>
-          </select>
+      </div>
+      <div id="firstRunLanguageStep" class="first-run-step-panel" hidden>
+        <div class="first-run-settings-grid">
+          <div class="settings-card">
+            <label for="firstRunLanguageSelect" id="firstRunLanguageLabel">Taal</label>
+            <select id="firstRunLanguageSelect">
+              <option value="nl" id="firstRunLanguageOptNl">Nederlands</option>
+              <option value="fr" id="firstRunLanguageOptFr">Français</option>
+              <option value="en" id="firstRunLanguageOptEn">English</option>
+              <option value="de" id="firstRunLanguageOptDe">Deutsch</option>
+              <option value="pl" id="firstRunLanguageOptPl">Polski</option>
+              <option value="es" id="firstRunLanguageOptEs">Español</option>
+              <option value="ru" id="firstRunLanguageOptRu">Русский</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="firstRunAppearanceStep" class="first-run-step-panel" hidden>
+        <div class="first-run-settings-grid">
+          <div class="settings-card">
+            <label for="firstRunThemeSelect" id="firstRunThemeLabel">Thema</label>
+            <select id="firstRunThemeSelect">
+              <option value="auto" id="firstRunThemeAutoOpt">Automatisch</option>
+              <option value="light" id="firstRunThemeLightOpt">Licht</option>
+              <option value="dark" id="firstRunThemeDarkOpt">Donker</option>
+            </select>
+          </div>
+          <div class="settings-card">
+            <label for="firstRunColorThemeSelect" id="firstRunColorThemeLabel">Kleurthema</label>
+            <select id="firstRunColorThemeSelect">
+              <option value="classic" id="firstRunColorClassicOpt">Standaard</option>
+              <option value="blue" id="firstRunColorBlueOpt">Blauw</option>
+              <option value="green" id="firstRunColorGreenOpt">Groen</option>
+              <option value="yellow" id="firstRunColorYellowOpt">Geel</option>
+              <option value="orange" id="firstRunColorOrangeOpt">Oranje</option>
+              <option value="red" id="firstRunColorRedOpt">Rood</option>
+              <option value="purple" id="firstRunColorPurpleOpt">Paars</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="firstRunTimeFormatStep" class="first-run-step-panel" hidden>
+        <div class="first-run-settings-grid">
+          <div class="settings-card">
+            <label for="firstRunTimeFormatSelect" id="firstRunTimeFormatLabel">Tijdnotatie</label>
+            <select id="firstRunTimeFormatSelect">
+              <option value="24h" id="firstRunTimeFormat24hOpt">24 uur</option>
+              <option value="12h" id="firstRunTimeFormat12hOpt">12 uur</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
     <div class="pdf-modal-actions first-run-modal-actions">
       <button id="firstRunSkipBtn" type="button">Standaard gebruiken</button>
-      <button id="firstRunConfirmBtn" class="btn" type="button">Busbibliotheek starten</button>
+      <div class="first-run-navigation">
+        <button id="firstRunBackBtn" class="more-secondary-btn" type="button" hidden>Vorige</button>
+        <button id="firstRunConfirmBtn" class="btn" type="button">Verder</button>
+      </div>
     </div>
   </div>
 </div>
@@ -544,9 +608,6 @@
     <div class="pdf-modal-body legal-modal-body">
       <div class="review-embed-shell">
         <iframe id="reviewFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform?embedded=true" width="640" height="2843" frameborder="0" marginheight="0" marginwidth="0" title="Busbibliotheek reviewformulier" loading="lazy">Laden…</iframe>
-      </div>
-      <div class="review-mobile-fallback">
-        <a id="reviewMobileLink" class="btn" href="https://forms.gle/3uKCBA779JwVjN8d7" target="_blank" rel="noopener noreferrer">Open reviewformulier</a>
       </div>
     </div>
     <div class="pdf-modal-actions">

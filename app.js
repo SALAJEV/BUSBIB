@@ -115,6 +115,7 @@ const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/scri
 const APK_DOWNLOAD_URL = `${window.location.origin}/android/app/release/app-release.apk`;
 const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
 const REPORT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform";
+const REVIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform";
 const CONTACT_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/contact";
 const SOURCES_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/sources";
 const DE_LIJN_VEHICLE_TRACKING_URL = "https://vehicletracking.delijn.be";
@@ -373,7 +374,6 @@ const photoDelayBannerTextEl = document.getElementById("photoDelayBannerText");
 const appTitleBtnEl = document.getElementById("appTitleBtn");
 const appTitleEl = document.getElementById("appTitle");
 const appSubtitleEl = document.getElementById("appSubtitle");
-const searchHelpTextEl = document.getElementById("searchHelpText");
 const headerVisualKickerEl = document.getElementById("headerVisualKicker");
 const headerVisualTitleEl = document.getElementById("headerVisualTitle");
 const headerVisualRouteEl = document.querySelector(".header-visual-card-route");
@@ -389,6 +389,10 @@ const settingsTitleEl = document.getElementById("settingsTitle");
 const intervalLabelEl = document.getElementById("intervalLabel");
 const themeLabelEl = document.getElementById("themeLabel");
 const languageLabelEl = document.getElementById("languageLabel");
+const timeFormatSelect = document.getElementById("timeFormatSelect");
+const timeFormatLabelEl = document.getElementById("timeFormatLabel");
+const timeFormat24hOptEl = document.getElementById("timeFormat24hOpt");
+const timeFormat12hOptEl = document.getElementById("timeFormat12hOpt");
 const languageOptNlEl = document.getElementById("languageOptNl");
 const languageOptFrEl = document.getElementById("languageOptFr");
 const languageOptEnEl = document.getElementById("languageOptEn");
@@ -418,8 +422,7 @@ const vehiclePhotoEmptyStateEl = document.getElementById("vehiclePhotoEmptyState
 const vehiclePhotoEmptyTitleEl = document.getElementById("vehiclePhotoEmptyTitle");
 const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText");
 const vehiclePhotoUploadBtn = document.getElementById("vehiclePhotoUploadBtn");
-const disclaimerTitleEl = document.getElementById("disclaimerTitle");
-const disclaimerTextEl = document.getElementById("disclaimerText");
+const footerSocialsEl = document.getElementById("footerSocials");
 const footerReviewBtn = document.getElementById("footerReviewBtn");
 const footerTermsBtn = document.getElementById("footerTermsBtn");
 const footerContactBtn = document.getElementById("footerContactBtn");
@@ -442,6 +445,13 @@ const firstRunTitleEl = document.getElementById("firstRunTitle");
 const firstRunSummaryEl = document.getElementById("firstRunSummary");
 const firstRunIntroTitleEl = document.getElementById("firstRunIntroTitle");
 const firstRunDescriptionEl = document.getElementById("firstRunDescription");
+const firstRunHeroKickerEl = document.getElementById("firstRunHeroKicker");
+const firstRunFeatureRealtimeEl = document.getElementById("firstRunFeatureRealtime");
+const firstRunFeatureFavoritesEl = document.getElementById("firstRunFeatureFavorites");
+const firstRunFeaturePhotosEl = document.getElementById("firstRunFeaturePhotos");
+const firstRunStepLabelEl = document.getElementById("firstRunStepLabel");
+const firstRunStepPanels = Array.from(document.querySelectorAll(".first-run-step-panel"));
+const firstRunProgressSteps = Array.from(document.querySelectorAll(".first-run-progress-step"));
 const firstRunLanguageLabelEl = document.getElementById("firstRunLanguageLabel");
 const firstRunLanguageSelectEl = document.getElementById("firstRunLanguageSelect");
 const firstRunLanguageOptNlEl = document.getElementById("firstRunLanguageOptNl");
@@ -465,7 +475,12 @@ const firstRunColorYellowOptEl = document.getElementById("firstRunColorYellowOpt
 const firstRunColorOrangeOptEl = document.getElementById("firstRunColorOrangeOpt");
 const firstRunColorRedOptEl = document.getElementById("firstRunColorRedOpt");
 const firstRunColorPurpleOptEl = document.getElementById("firstRunColorPurpleOpt");
+const firstRunTimeFormatLabelEl = document.getElementById("firstRunTimeFormatLabel");
+const firstRunTimeFormatSelectEl = document.getElementById("firstRunTimeFormatSelect");
+const firstRunTimeFormat24hOptEl = document.getElementById("firstRunTimeFormat24hOpt");
+const firstRunTimeFormat12hOptEl = document.getElementById("firstRunTimeFormat12hOpt");
 const firstRunSkipBtnEl = document.getElementById("firstRunSkipBtn");
+const firstRunBackBtnEl = document.getElementById("firstRunBackBtn");
 const firstRunConfirmBtnEl = document.getElementById("firstRunConfirmBtn");
 const appDialogModalEl = document.getElementById("appDialogModal");
 const appDialogCardEl = document.getElementById("appDialogCard");
@@ -480,7 +495,6 @@ const reviewModalSummaryEl = document.getElementById("reviewModalSummary");
 const reviewModalCloseBtn = document.getElementById("reviewModalCloseBtn");
 const reviewModalDoneBtn = document.getElementById("reviewModalDoneBtn");
 const reviewFormFrameEl = document.getElementById("reviewFormFrame");
-const reviewMobileLinkEl = document.getElementById("reviewMobileLink");
 const reportModalEl = document.getElementById("reportModal");
 const reportModalTitleEl = document.getElementById("reportModalTitle");
 const reportModalSummaryEl = document.getElementById("reportModalSummary");
@@ -2067,11 +2081,13 @@ let androidViewportSyncInitialized = false;
 let androidKeyboardFocusHandle = 0;
 let hasStoredSettings = false;
 let pageLoadingActive = false;
+let firstRunCurrentStep = 0;
 let settings = {
   intervalMs: 10000,
   theme: "auto",
   colorTheme: "classic",
   language: "nl",
+  timeFormat: "24h",
   dashboardVehicleIds: [],
   showHomeRealtimeMap: true,
   hasCompletedOnboarding: false
@@ -2280,6 +2296,13 @@ function translateVehicleFieldLabel(key) {
 
 const localeForLanguage = (lang) => localeMap[lang] || localeMap[FALLBACK_LANG] || localeMap[DEFAULT_LANG] || "nl-NL";
 
+function formatTimeForUi(date, options = {}) {
+  return new Intl.DateTimeFormat(localeForLanguage(settings.language), {
+    ...options,
+    hour12: settings.timeFormat === "12h"
+  }).format(date);
+}
+
 function escapeHtml(value) {
   return (value ?? "")
     .toString()
@@ -2337,7 +2360,7 @@ function normalizeSearchText(value) {
 
 function formatInfoTimestamp(timestamp) {
   if (!timestamp) return getLabel("notLoadedYet", "Nog niet geladen");
-  return new Date(timestamp).toLocaleString(localeForLanguage(settings.language), {
+  return formatTimeForUi(new Date(timestamp), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -2493,9 +2516,11 @@ function hideInstallGuideModal() {
 
 function showFirstRunSetupModal() {
   if (!firstRunModalEl) return;
+  firstRunCurrentStep = 0;
   syncFirstRunSetupControls();
+  setFirstRunWizardStep(firstRunCurrentStep, false);
   openOverlayModal(firstRunModalEl, {
-    focusTarget: firstRunLanguageSelectEl || firstRunConfirmBtnEl,
+    focusTarget: firstRunConfirmBtnEl,
     closeMenu: false
   });
 }
@@ -2512,10 +2537,11 @@ function completeFirstRunSetup(options = {}) {
       ...createDefaultSettings(detectPreferredLanguage()),
       hasCompletedOnboarding: true
     };
-  } else if (firstRunLanguageSelectEl && firstRunThemeSelectEl && firstRunColorThemeSelectEl) {
+  } else if (firstRunLanguageSelectEl && firstRunThemeSelectEl && firstRunColorThemeSelectEl && firstRunTimeFormatSelectEl) {
     settings.language = normalizeLanguage(firstRunLanguageSelectEl.value);
     settings.theme = normalizeTheme(firstRunThemeSelectEl.value);
     settings.colorTheme = normalizeColorTheme(firstRunColorThemeSelectEl.value);
+    settings.timeFormat = firstRunTimeFormatSelectEl.value === "12h" ? "12h" : "24h";
     settings.hasCompletedOnboarding = true;
   } else {
     settings.hasCompletedOnboarding = true;
@@ -2528,6 +2554,64 @@ function completeFirstRunSetup(options = {}) {
   applyTranslations();
   saveSettings();
   hideFirstRunSetupModal();
+}
+
+function setFirstRunWizardStep(step, moveFocus = true) {
+  const lastStep = firstRunStepPanels.length - 1;
+  firstRunCurrentStep = Math.max(0, Math.min(step, lastStep));
+  firstRunStepPanels.forEach((panel, index) => {
+    panel.hidden = index !== firstRunCurrentStep;
+  });
+  firstRunProgressSteps.forEach((progressStep, index) => {
+    progressStep.classList.toggle("is-active", index === firstRunCurrentStep);
+    progressStep.classList.toggle("is-complete", index < firstRunCurrentStep);
+  });
+
+  const isLastStep = firstRunCurrentStep === lastStep;
+  const stepTitles = [
+    getLabel("firstRunTitle", "Welkom bij Busbibliotheek"),
+    t("language"),
+    t("theme"),
+    t("timeFormat")
+  ];
+  const stepSummaries = [
+    getLabel("firstRunSummary", "Je persoonlijke startpunt voor alles wat rijdt."),
+    t("firstRunLanguageSummary"),
+    t("firstRunAppearanceSummary"),
+    t("firstRunTimeFormatSummary")
+  ];
+  if (firstRunTitleEl) firstRunTitleEl.textContent = stepTitles[firstRunCurrentStep] || stepTitles[0];
+  if (firstRunSummaryEl) firstRunSummaryEl.textContent = stepSummaries[firstRunCurrentStep] || stepSummaries[0];
+  if (firstRunStepLabelEl) {
+    firstRunStepLabelEl.textContent = fillNamedTemplate(t("firstRunStepOf"), {
+      step: firstRunCurrentStep + 1,
+      total: firstRunStepPanels.length
+    });
+  }
+  if (firstRunBackBtnEl) firstRunBackBtnEl.hidden = firstRunCurrentStep === 0;
+  if (firstRunConfirmBtnEl) {
+    firstRunConfirmBtnEl.textContent = isLastStep
+      ? getLabel("firstRunConfirm", "Busbibliotheek starten")
+      : t("firstRunNext");
+  }
+
+  if (moveFocus) {
+    const focusTargets = [
+      firstRunConfirmBtnEl,
+      firstRunLanguageSelectEl,
+      firstRunThemeSelectEl,
+      firstRunTimeFormatSelectEl
+    ];
+    focusTargets[firstRunCurrentStep]?.focus();
+  }
+}
+
+function advanceFirstRunWizard() {
+  if (firstRunCurrentStep >= firstRunStepPanels.length - 1) {
+    completeFirstRunSetup();
+    return;
+  }
+  setFirstRunWizardStep(firstRunCurrentStep + 1);
 }
 
 function resolveAppDialog(result = false) {
@@ -2631,13 +2715,10 @@ function shouldOpenExternalFormExperience() {
 
 function showReviewModal() {
   if (!reviewModalEl) return;
-  const shouldOpenExternally = shouldOpenExternalFormExperience();
-
-  if (shouldOpenExternally && reviewMobileLinkEl?.href) {
-    openExternalUrl(reviewMobileLinkEl.href, { preferSameTab: true });
+  if (shouldOpenExternalFormExperience()) {
+    openExternalUrl(REVIEW_FORM_URL, { preferSameTab: true });
     return;
   }
-
   ensureEmbeddedFrameLoaded(reviewFormFrameEl);
   openOverlayModal(reviewModalEl, { focusTarget: reviewModalCloseBtn });
 }
@@ -2689,11 +2770,7 @@ function renderTermsModalContent() {
   const sections = [
     {
       title: getLabel("termsSectionUse", "Gebruik van de website"),
-      body: getLabel("termsUseBody", "Busbibliotheek is bedoeld voor informatief persoonlijk gebruik. Misbruik, overbelasting van de site of gebruik in strijd met de wet is niet toegestaan.")
-    },
-    {
-      title: getLabel("termsSectionData", "Realtime en juistheid"),
-      body: getLabel("termsDataBody", "Realtimegegevens, voertuiginfo en andere inhoud worden zo goed mogelijk getoond, maar kunnen vertragingen, fouten of onvolledigheden bevatten. Aan de inhoud kunnen geen rechten worden ontleend.")
+      body: getLabel("termsUseBody", "Busbibliotheek is een onafhankelijk project en is niet verbonden aan De Lijn of een officiële vertegenwoordiger ervan. De site is bedoeld voor informatief persoonlijk gebruik. De informatie wordt zonder garanties aangeboden en kan vertragingen, fouten of onvolledigheden bevatten. Busbibliotheek is niet aansprakelijk voor onnauwkeurigheden. Gebruik is op eigen risico; raadpleeg voor officiële ritinformatie de bevoegde vervoersmaatschappij. Misbruik, overbelasting of onwettig gebruik van de site is niet toegestaan.")
     },
     {
       title: getLabel("termsSectionSources", "Bronnen"),
@@ -2714,7 +2791,7 @@ function renderTermsModalContent() {
         <h4>${escapeHtml(section.title)}</h4>
         <p>${escapeHtml(section.body)}</p>
       `).join("")}
-      <a class="btn legal-sources-link" href="${escapeHtml(SOURCES_PAGE_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(getLabel("termsSourcesButton", "Bekijk bronnen"))}</a>
+      <a class="btn legal-sources-link" href="${escapeHtml(SOURCES_PAGE_URL)}">${escapeHtml(getLabel("termsSourcesButton", "Bekijk bronnen"))}</a>
     </div>
   `;
 }
@@ -5643,6 +5720,7 @@ function loadSettings() {
     settings.theme = settings.theme === "light" || settings.theme === "dark" || settings.theme === "auto" ? settings.theme : "auto";
     settings.colorTheme = normalizeColorTheme(settings.colorTheme);
     settings.language = normalizeLanguage(settings.language);
+    settings.timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
     settings.dashboardVehicleIds = normalizeDashboardVehicleIds(settings.dashboardVehicleIds);
     settings.showHomeRealtimeMap = typeof parsed.showHomeRealtimeMap === "boolean" ? parsed.showHomeRealtimeMap : true;
     settings.hasCompletedOnboarding = typeof parsed.hasCompletedOnboarding === "boolean" ? parsed.hasCompletedOnboarding : true;
@@ -5880,6 +5958,7 @@ function createDefaultSettings(language = DEFAULT_LANG) {
     theme: "auto",
     colorTheme: "classic",
     language: normalizeLanguage(language),
+    timeFormat: "24h",
     dashboardVehicleIds: [],
     showHomeRealtimeMap: true,
     hasCompletedOnboarding: false
@@ -5891,6 +5970,7 @@ function syncPrimarySettingsControls() {
   if (themeSelect) themeSelect.value = settings.theme;
   if (colorThemeSelect) colorThemeSelect.value = settings.colorTheme;
   if (languageSelect) languageSelect.value = settings.language;
+  if (timeFormatSelect) timeFormatSelect.value = settings.timeFormat;
   if (showHomeRealtimeMapToggle) showHomeRealtimeMapToggle.checked = settings.showHomeRealtimeMap;
 }
 
@@ -5898,6 +5978,7 @@ function syncFirstRunSetupControls() {
   if (firstRunLanguageSelectEl) firstRunLanguageSelectEl.value = normalizeLanguage(settings.language);
   if (firstRunThemeSelectEl) firstRunThemeSelectEl.value = getEffectiveThemeSetting(settings.theme, settings.colorTheme);
   if (firstRunColorThemeSelectEl) firstRunColorThemeSelectEl.value = normalizeColorTheme(settings.colorTheme);
+  if (firstRunTimeFormatSelectEl) firstRunTimeFormatSelectEl.value = settings.timeFormat === "12h" ? "12h" : "24h";
 }
 
 function shouldShowFirstRunSetup() {
@@ -5905,10 +5986,11 @@ function shouldShowFirstRunSetup() {
 }
 
 function applyFirstRunPreviewSettings() {
-  if (!firstRunLanguageSelectEl || !firstRunThemeSelectEl || !firstRunColorThemeSelectEl) return;
+  if (!firstRunLanguageSelectEl || !firstRunThemeSelectEl || !firstRunColorThemeSelectEl || !firstRunTimeFormatSelectEl) return;
   settings.language = normalizeLanguage(firstRunLanguageSelectEl.value);
   settings.theme = normalizeTheme(firstRunThemeSelectEl.value);
   settings.colorTheme = normalizeColorTheme(firstRunColorThemeSelectEl.value);
+  settings.timeFormat = firstRunTimeFormatSelectEl.value === "12h" ? "12h" : "24h";
   window.settings = settings;
   syncPrimarySettingsControls();
   applyTheme(settings.theme);
@@ -6024,7 +6106,6 @@ function applyTranslations() {
   appTitleEl.textContent = getLabel("appTitle", "Busbibliotheek");
   if (splashTitleEl) splashTitleEl.textContent = getLabel("appTitle", "Busbibliotheek");
   appSubtitleEl.textContent = t("subtitle").replace(/\.\s*$/, "");
-  if (searchHelpTextEl) searchHelpTextEl.textContent = getLabel("searchHelp", "Zoek op voertuignummer, nummerplaat of intern nummer.");
   if (splashCreditEl) splashCreditEl.textContent = getLabel("madeBy", "Made by @delijn_busspotter");
   if (headerVisualKickerEl) headerVisualKickerEl.textContent = getLabel("headerVisualKicker", "Realtime overzicht");
   if (headerVisualTitleEl) headerVisualTitleEl.textContent = getLabel("headerVisualTitle", "Open meteen de juiste bus en volg de rit live.");
@@ -6051,6 +6132,9 @@ function applyTranslations() {
   themeLabelEl.textContent = t("theme");
   colorThemeLabelEl.textContent = t("colorTheme");
   languageLabelEl.textContent = t("language");
+  if (timeFormatLabelEl) timeFormatLabelEl.textContent = t("timeFormat");
+  if (timeFormat24hOptEl) timeFormat24hOptEl.textContent = t("timeFormat24h");
+  if (timeFormat12hOptEl) timeFormat12hOptEl.textContent = t("timeFormat12h");
   if (languageOptNlEl) languageOptNlEl.textContent = getLocalizedLanguageLabel("nl");
   if (languageOptFrEl) languageOptFrEl.textContent = getLocalizedLanguageLabel("fr");
   if (languageOptEnEl) languageOptEnEl.textContent = getLocalizedLanguageLabel("en");
@@ -6116,8 +6200,7 @@ function applyTranslations() {
   if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.setAttribute("aria-label", getLabel("photoPrevious", "Vorige foto"));
   if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.setAttribute("aria-label", getLabel("photoNext", "Volgende foto"));
   updateVehiclePhotoTexts();
-  disclaimerTitleEl.textContent = t("disclaimerTitle");
-  disclaimerTextEl.textContent = t("disclaimerText");
+  if (footerSocialsEl) footerSocialsEl.setAttribute("aria-label", t("footerSocials"));
   if (footerReviewBtn) footerReviewBtn.textContent = getLabel("footerReview", "Feedback achterlaten");
   if (footerTermsBtn) footerTermsBtn.textContent = getLabel("footerTerms", "Gebruiksvoorwaarden");
   if (footerContactBtn) footerContactBtn.textContent = getLabel("footerContact", "Contact opnemen");
@@ -6192,8 +6275,16 @@ function applyTranslations() {
   if (firstRunColorOrangeOptEl) firstRunColorOrangeOptEl.textContent = t("colorOrange");
   if (firstRunColorRedOptEl) firstRunColorRedOptEl.textContent = t("colorRed");
   if (firstRunColorPurpleOptEl) firstRunColorPurpleOptEl.textContent = t("colorPurple");
+  if (firstRunTimeFormatLabelEl) firstRunTimeFormatLabelEl.textContent = t("timeFormat");
+  if (firstRunTimeFormat24hOptEl) firstRunTimeFormat24hOptEl.textContent = t("timeFormat24h");
+  if (firstRunTimeFormat12hOptEl) firstRunTimeFormat12hOptEl.textContent = t("timeFormat12h");
+  if (firstRunHeroKickerEl) firstRunHeroKickerEl.textContent = t("firstRunHeroKicker");
+  if (firstRunFeatureRealtimeEl) firstRunFeatureRealtimeEl.textContent = t("firstRunFeatureRealtime");
+  if (firstRunFeatureFavoritesEl) firstRunFeatureFavoritesEl.textContent = t("firstRunFeatureFavorites");
+  if (firstRunFeaturePhotosEl) firstRunFeaturePhotosEl.textContent = t("firstRunFeaturePhotos");
   if (firstRunSkipBtnEl) firstRunSkipBtnEl.textContent = getLabel("firstRunSkip", "Standaard gebruiken");
-  if (firstRunConfirmBtnEl) firstRunConfirmBtnEl.textContent = getLabel("firstRunConfirm", "Busbibliotheek starten");
+  if (firstRunBackBtnEl) firstRunBackBtnEl.textContent = t("back");
+  setFirstRunWizardStep(firstRunCurrentStep, false);
   if (appDialogTitleEl && appDialogModalEl?.hidden) appDialogTitleEl.textContent = getLabel("dialogInfoTitle", "Melding");
   if (appDialogCloseBtn) appDialogCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (appDialogCancelBtn) appDialogCancelBtn.textContent = getLabel("cancel", "Annuleren");
@@ -6207,7 +6298,6 @@ function applyTranslations() {
     reviewFormFrameEl.title = getLabel("reviewFormTitle", "Busbibliotheek reviewformulier");
     reviewFormFrameEl.textContent = t("loading");
   }
-  if (reviewMobileLinkEl) reviewMobileLinkEl.textContent = getLabel("reviewMobileOpen", "Open reviewformulier");
   if (reportModalTitleEl) reportModalTitleEl.textContent = getLabel("reportModalTitle", "Voertuig melden");
   if (reportModalSummaryEl) reportModalSummaryEl.textContent = getLabel("reportModalSummary", "Meld een ontbrekend voertuig via het formulier hieronder.");
   if (reportModalCloseBtn) reportModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
@@ -7405,6 +7495,12 @@ languageSelect.addEventListener("change", () => {
   refreshVisibleLocalizedState();
   renderFavorites();
 });
+timeFormatSelect?.addEventListener("change", () => {
+  settings.timeFormat = timeFormatSelect.value === "12h" ? "12h" : "24h";
+  timeFormatSelect.value = settings.timeFormat;
+  saveSettings();
+  refreshVisibleLocalizedState();
+});
 footerReviewBtn?.addEventListener("click", showReviewModal);
 footerTermsBtn?.addEventListener("click", showTermsModal);
 footerContactBtn?.addEventListener("click", (event) => {
@@ -7552,8 +7648,10 @@ installGuideModalEl?.addEventListener("click", (event) => {
 firstRunLanguageSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunThemeSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunColorThemeSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunTimeFormatSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunSkipBtnEl?.addEventListener("click", () => completeFirstRunSetup({ useSuggestedDefaults: true }));
-firstRunConfirmBtnEl?.addEventListener("click", () => completeFirstRunSetup());
+firstRunBackBtnEl?.addEventListener("click", () => setFirstRunWizardStep(firstRunCurrentStep - 1));
+firstRunConfirmBtnEl?.addEventListener("click", advanceFirstRunWizard);
 appDialogCloseBtn?.addEventListener("click", () => closeAppDialog(false));
 appDialogCancelBtn?.addEventListener("click", () => closeAppDialog(false));
 appDialogConfirmBtn?.addEventListener("click", () => closeAppDialog(true));
@@ -9279,7 +9377,7 @@ function getEntityRealtimeTimestamp(entity) {
 
 function formatRealtimeTimestampForUi(timestamp) {
   if (!Number.isFinite(timestamp)) return "";
-  return new Date(timestamp).toLocaleTimeString(localeForLanguage(settings.language));
+  return formatTimeForUi(new Date(timestamp));
 }
 
 function findMostRecentEntity(entities, predicate) {
@@ -9760,7 +9858,7 @@ async function updateRealtime(id){
     } else {
       setRealtimeMapVisibility(false);
     }
-    lastUpdateEl.textContent = `${t("lastUpdate")}: ${formatRealtimeTimestampForUi(gpsEntityTimestamp) || new Date().toLocaleTimeString(localeForLanguage(settings.language))}`;
+    lastUpdateEl.textContent = `${t("lastUpdate")}: ${formatRealtimeTimestampForUi(gpsEntityTimestamp) || formatTimeForUi(new Date())}`;
     lastUpdateEl.hidden = false;
 
     if (!canUseLocationForOperator(bus)) {
