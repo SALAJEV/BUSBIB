@@ -3766,13 +3766,37 @@ async function initDashboardMap() {
   dashboardMapMarkers = L.layerGroup().addTo(dashboardMap);
 }
 
-function buildDashboardMapTooltip(snapshot) {
+function buildVehicleMapPopup(snapshot) {
+  const vehicleLinkId = getHomeGtfsMapVehicleLinkId(snapshot);
+  const vehicleUrl = getHomeGtfsMapVehicleUrl(snapshot);
+  const routeColor = snapshot.routeColor || "#2563eb";
+  const routeTextColor = snapshot.routeTextColor || "#ffffff";
+  const modelText = cleanText(snapshot.type);
+  const ownerText = cleanText(snapshot.owner);
+  const vehicleModel = modelText && modelText !== "/"
+    ? modelText
+    : getLabel("unknownVehicleModel", "Onbekend voertuigmodel");
+  const owner = ownerText && ownerText !== "/" ? ownerText : "-";
+  const destinationText = cleanText(snapshot.destinationText);
+  const destination = destinationText && destinationText !== "/" ? destinationText : "-";
+  const currentStopText = cleanText(snapshot.currentStopName);
+  const currentStop = currentStopText && currentStopText !== "/"
+    ? currentStopText
+    : getLabel("unknownStop", "Onbekende halte");
+  const updatedText = formatRealtimeTimestampForUi(snapshot.updatedAt);
+
   return `
-    <div class="dashboard-map-tooltip-card">
-      <strong>${escapeHtml(snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
-      <span class="line-badge" style="--line-badge-bg:${snapshot.routeColor};--line-badge-fg:${snapshot.routeTextColor};">${escapeHtml(snapshot.routeShort)}</span>
-      <span>${escapeHtml(snapshot.destinationText || "-")}</span>
-    </div>
+    <a class="vehicle-map-popup" href="${escapeHtml(vehicleUrl || "#")}" data-home-gtfs-vehicle-id="${escapeHtml(vehicleLinkId)}">
+      <div class="vehicle-map-popup-head">
+        <strong>${escapeHtml(snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
+        <span class="line-badge" style="--line-badge-bg:${escapeHtml(routeColor)};--line-badge-fg:${escapeHtml(routeTextColor)};">${escapeHtml(snapshot.routeShort || "—")}</span>
+      </div>
+      <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("vehicleModelLabel", "Model"))}</span><strong>${escapeHtml(vehicleModel)}</strong></div>
+      <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("vehicleOwnerLabel", "Eigenaar"))}</span><strong>${escapeHtml(owner)}</strong></div>
+      <div class="vehicle-map-popup-row"><span>${escapeHtml(getLabel("destinationLabel", "Bestemming"))}</span><strong>${escapeHtml(destination)}</strong></div>
+      <div class="vehicle-map-popup-row"><span>${escapeHtml(t("currentStop"))}</span><strong>${escapeHtml(currentStop)}</strong></div>
+      ${updatedText ? `<div class="vehicle-map-popup-row"><span>${escapeHtml(t("lastUpdate"))}</span><strong>${escapeHtml(updatedText)}</strong></div>` : ""}
+    </a>
   `;
 }
 
@@ -3804,11 +3828,10 @@ async function renderDashboardMap(snapshots) {
       const img = markerEl.querySelector("img");
       if (img) img.style.transform = `rotate(${snapshot.bearing || 0}deg)`;
     }
-    markerInstance.bindTooltip(buildDashboardMapTooltip(snapshot), {
-      permanent: true,
-      direction: "top",
-      offset: [0, -26],
-      className: "dashboard-map-tooltip"
+    markerInstance.bindPopup(buildVehicleMapPopup(snapshot), {
+      maxWidth: 320,
+      minWidth: 240,
+      className: "vehicle-map-popup-shell"
     });
     bounds.push([snapshot.latitude, snapshot.longitude]);
   });
@@ -3915,17 +3938,23 @@ function getHomeGtfsMapSnapshot(vehicleId, entity, derivedData = null) {
   const currentStop = getStopByStopId(currentStopContext.stopId);
   const currentStopName = cleanText(currentStop?.stop_name || currentStopContext.stopId || "");
   const timestamp = getEntityRealtimeTimestamp(entity);
+  const routeColorRaw = (routeData?.route_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+  const routeTextColorRaw = (routeData?.route_text_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
   return {
     vehicleId: cleanText(vehicleId),
     vehicle,
     displayVehicleId: vehicle ? getVehicleDisplayId(vehicle) : cleanText(vehicleId),
     known: !!vehicle,
+    type: vehicle?.Type || "",
+    owner: getVehicleField(vehicle, "Eigenaar"),
     latitude,
     longitude,
     bearing: Number(position.bearing || 0),
     routeShort: pickFirstText(routeData?.route_short_name, descriptor.routeShortName, routeId) || "",
+    routeColor: routeColorRaw.length === 6 ? `#${routeColorRaw}` : "#2563eb",
+    routeTextColor: routeTextColorRaw.length === 6 ? `#${routeTextColorRaw}` : "#ffffff",
     destinationText: pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name) || "",
-    currentStopName,
+    currentStopName: currentStopName || getLabel("unknownStop", "Onbekende halte"),
     updatedAt: timestamp
   };
 }
@@ -3944,41 +3973,7 @@ function getHomeGtfsMapVehicleUrl(snapshot) {
 }
 
 function buildHomeGtfsMapPopup(snapshot) {
-  const statusText = snapshot.known
-    ? getLabel("homeGtfsMapKnownBus", "Bus bekend")
-    : getLabel("homeGtfsMapUnknownBus", "Bus onbekend");
-  const updatedText = formatRealtimeTimestampForUi(snapshot.updatedAt);
-  const vehicleUrl = getHomeGtfsMapVehicleUrl(snapshot);
-  const routeText = snapshot.routeShort || snapshot.destinationText
-    ? `
-      <div class="home-gtfs-map-popup-route">
-        ${snapshot.routeShort ? `<span class="line-badge">${escapeHtml(snapshot.routeShort)}</span>` : ""}
-        <strong>${escapeHtml(snapshot.destinationText || "-")}</strong>
-      </div>
-    `
-    : "";
-  const currentStopText = snapshot.currentStopName
-    ? `<div class="home-gtfs-map-popup-row"><span>${escapeHtml(t("currentStop"))}</span><strong>${escapeHtml(snapshot.currentStopName)}</strong></div>`
-    : "";
-  const updatedMarkup = updatedText
-    ? `<div class="home-gtfs-map-popup-row"><span>${escapeHtml(t("lastUpdate"))}</span><strong>${escapeHtml(updatedText)}</strong></div>`
-    : "";
-  const actionMarkup = vehicleUrl
-    ? `<a class="home-gtfs-map-popup-action" href="${escapeHtml(vehicleUrl)}" data-home-gtfs-vehicle-id="${escapeHtml(getHomeGtfsMapVehicleLinkId(snapshot))}">${escapeHtml(getLabel("openVehicle", "Open voertuig"))}</a>`
-    : "";
-
-  return `
-    <div class="home-gtfs-map-popup">
-      <div class="home-gtfs-map-popup-head">
-        <strong>${escapeHtml(snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
-        <span class="${snapshot.known ? "is-known" : "is-unknown"}">${escapeHtml(statusText)}</span>
-      </div>
-      ${routeText}
-      ${currentStopText}
-      ${updatedMarkup}
-      ${actionMarkup}
-    </div>
-  `;
+  return buildVehicleMapPopup(snapshot);
 }
 
 async function renderHomeGtfsMap(snapshots) {
@@ -4089,10 +4084,10 @@ function startHomeGtfsMapRefresh() {
 
 async function openHomeGtfsMapVehicle(vehicleId = "") {
   const vehicle = findVehicleFromGtfsVehicleId(vehicleId);
-  if (!vehicle) return false;
-  const resolvedId = normalize(vehicle.Voertuignummer || vehicleId);
+  const resolvedId = normalize(vehicle?.Voertuignummer || vehicleId);
+  if (!resolvedId) return false;
   document.body.classList.add("home-map-opening-vehicle");
-  setVehicleInputResolvedId(voertuigInput, resolvedId);
+  setVehicleInputResolvedId(voertuigInput, vehicle ? resolvedId : "");
   voertuigInput.value = getVehicleDisplayId(vehicle) || getVisibleVehicleId(vehicleId);
   try {
     await new Promise((resolve) => window.setTimeout(resolve, 120));
@@ -4210,6 +4205,7 @@ function getRoutePresentationFromRealtime(id, realtimeSource, bus) {
     vehicleId: id,
     displayVehicleId: getVehicleDisplayId(bus || id),
     type: bus?.Type || "",
+    owner: getVehicleField(bus, "Eigenaar"),
     routeShort,
     destinationText,
     currentStopName,
@@ -7866,6 +7862,16 @@ homeGtfsMapEl?.addEventListener("click", (event) => {
   const vehicleId = vehicleButton.getAttribute("data-home-gtfs-vehicle-id") || "";
   void openHomeGtfsMapVehicle(vehicleId);
 });
+dashboardMapEl?.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const vehicleLink = target.closest("[data-home-gtfs-vehicle-id]");
+  if (!vehicleLink) return;
+  event.preventDefault();
+  const vehicleId = vehicleLink.getAttribute("data-home-gtfs-vehicle-id") || "";
+  closeDashboardPanel();
+  void openHomeGtfsMapVehicle(vehicleId);
+});
 dashboardEditBtn?.addEventListener("click", showDashboardSetupModal);
 dashboardCloseBtn?.addEventListener("click", () => {
   if (getCurrentRouteState().view === "stalk") {
@@ -8866,11 +8872,6 @@ function renderMissingVehicleSuggestionList(listEl, inputEl) {
 function renderMissingVehicleStaticState() {
   if (!vasteDataEl) return;
   vasteDataEl.innerHTML = "";
-  vasteDataEl.appendChild(createMissingVehicleCallout({
-    onReport: () => {
-      showReportModal();
-    }
-  }));
 }
 
 function hideSuggestionList(listEl) {
