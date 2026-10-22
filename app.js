@@ -101,7 +101,7 @@ const BASE_URL = `${window.location.origin}/dataset`;
 const API_URL = `${window.location.origin}/api`;
 const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/script.py";
 const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
-const REPORT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform";
+const REPORT_FORM_URL = "https://forms.gle/DKKPFHfSAgA2jo6B7";
 const REVIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform";
 const CONTACT_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/contact";
 const SOURCES_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/sources";
@@ -428,9 +428,6 @@ const firstRunSummaryEl = document.getElementById("firstRunSummary");
 const firstRunIntroTitleEl = document.getElementById("firstRunIntroTitle");
 const firstRunDescriptionEl = document.getElementById("firstRunDescription");
 const firstRunHeroKickerEl = document.getElementById("firstRunHeroKicker");
-const firstRunFeatureRealtimeEl = document.getElementById("firstRunFeatureRealtime");
-const firstRunFeatureFavoritesEl = document.getElementById("firstRunFeatureFavorites");
-const firstRunFeaturePhotosEl = document.getElementById("firstRunFeaturePhotos");
 const firstRunStepLabelEl = document.getElementById("firstRunStepLabel");
 const firstRunStepPanels = Array.from(document.querySelectorAll(".first-run-step-panel"));
 const firstRunProgressSteps = Array.from(document.querySelectorAll(".first-run-progress-step"));
@@ -669,7 +666,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.22-1";
+const APP_VERSION = "2026.10.22-4";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -6884,9 +6881,6 @@ function applyTranslations() {
   if (firstRunTimeFormat24hOptEl) firstRunTimeFormat24hOptEl.textContent = t("timeFormat24h");
   if (firstRunTimeFormat12hOptEl) firstRunTimeFormat12hOptEl.textContent = t("timeFormat12h");
   if (firstRunHeroKickerEl) firstRunHeroKickerEl.textContent = t("firstRunHeroKicker");
-  if (firstRunFeatureRealtimeEl) firstRunFeatureRealtimeEl.textContent = t("firstRunFeatureRealtime");
-  if (firstRunFeatureFavoritesEl) firstRunFeatureFavoritesEl.textContent = t("firstRunFeatureFavorites");
-  if (firstRunFeaturePhotosEl) firstRunFeaturePhotosEl.textContent = t("firstRunFeaturePhotos");
   if (firstRunSkipBtnEl) firstRunSkipBtnEl.textContent = getLabel("firstRunSkip", "Standaard gebruiken");
   if (firstRunBackBtnEl) firstRunBackBtnEl.textContent = t("back");
   setFirstRunWizardStep(firstRunCurrentStep, false);
@@ -8043,6 +8037,12 @@ vasteDataEl.addEventListener("click", (event) => {
     return;
   }
 
+  const reportMissingVehicleBtn = target.closest("#reportMissingVehicleBtn");
+  if (reportMissingVehicleBtn) {
+    showReportModal();
+    return;
+  }
+
   const compareButton = target.closest("#vehicleCompareBtn");
   if (compareButton) {
     showCompareModal();
@@ -8916,7 +8916,11 @@ function debounce(func, wait) {
 
 function renderMissingVehicleStaticState() {
   if (!vasteDataEl) return;
-  vasteDataEl.innerHTML = "";
+  vasteDataEl.innerHTML = `<div class="vehicle-not-found" role="alert">
+    <span class="vehicle-not-found-icon" aria-hidden="true">!</span>
+    <p>${escapeHtml(t("noFixed"))}</p>
+    <button id="reportMissingVehicleBtn" class="vehicle-not-found-btn" type="button">${escapeHtml(getLabel("reportMobileOpen", "Open meldformulier"))}</button>
+  </div>`;
 }
 
 function hideSuggestionList(listEl) {

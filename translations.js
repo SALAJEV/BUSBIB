@@ -1667,9 +1667,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   firstRunTimeFormatSummary: "Kies hoe je tijden op de website wilt zien.",
   firstRunStepOf: "Stap {step} van {total}",
   firstRunHeroKicker: "Ontdek Busbibliotheek",
-  firstRunFeatureRealtime: "Live voertuigen",
-  firstRunFeatureFavorites: "Favorieten",
-  firstRunFeaturePhotos: "Voertuigfoto's",
   footerSocials: "Volg ons op sociale media",
   footerReview: "Feedback achterlaten",
   footerTerms: "Gebruiksvoorwaarden",
@@ -1790,10 +1787,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   firstRunAppearanceSummary: "Choisissez un thème et une couleur qui vous correspondent.",
   firstRunTimeFormatSummary: "Choisissez le format d’affichage des heures.",
   firstRunStepOf: "Étape {step} sur {total}",
-  firstRunHeroKicker: "Découvrez Busbibliotheek",
-  firstRunFeatureRealtime: "Véhicules en direct",
-  firstRunFeatureFavorites: "Favoris",
-  firstRunFeaturePhotos: "Photos des véhicules"
+  firstRunHeroKicker: "Découvrez Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   firstRunTitle: "Welcome to Busbibliotheek",
@@ -1807,10 +1801,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   firstRunAppearanceSummary: "Choose a theme and color that suit you.",
   firstRunTimeFormatSummary: "Choose how times are displayed on the website.",
   firstRunStepOf: "Step {step} of {total}",
-  firstRunHeroKicker: "Discover Busbibliotheek",
-  firstRunFeatureRealtime: "Live vehicles",
-  firstRunFeatureFavorites: "Favorites",
-  firstRunFeaturePhotos: "Vehicle photos"
+  firstRunHeroKicker: "Discover Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   firstRunTitle: "Willkommen bei Busbibliotheek",
@@ -1824,10 +1815,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   firstRunAppearanceSummary: "Wähle ein passendes Design und eine passende Farbe.",
   firstRunTimeFormatSummary: "Wähle, wie Uhrzeiten auf der Website angezeigt werden.",
   firstRunStepOf: "Schritt {step} von {total}",
-  firstRunHeroKicker: "Busbibliotheek entdecken",
-  firstRunFeatureRealtime: "Live-Fahrzeuge",
-  firstRunFeatureFavorites: "Favoriten",
-  firstRunFeaturePhotos: "Fahrzeugfotos"
+  firstRunHeroKicker: "Busbibliotheek entdecken"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   firstRunTitle: "Witaj w Busbibliotheek",
@@ -1841,10 +1829,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   firstRunAppearanceSummary: "Wybierz motyw i kolor, które Ci odpowiadają.",
   firstRunTimeFormatSummary: "Wybierz sposób wyświetlania godzin na stronie.",
   firstRunStepOf: "Krok {step} z {total}",
-  firstRunHeroKicker: "Poznaj Busbibliotheek",
-  firstRunFeatureRealtime: "Pojazdy na żywo",
-  firstRunFeatureFavorites: "Ulubione",
-  firstRunFeaturePhotos: "Zdjęcia pojazdów"
+  firstRunHeroKicker: "Poznaj Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   firstRunTitle: "Bienvenido a Busbibliotheek",
@@ -1858,10 +1843,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   firstRunAppearanceSummary: "Elige un tema y un color que te gusten.",
   firstRunTimeFormatSummary: "Elige cómo se muestran las horas en la web.",
   firstRunStepOf: "Paso {step} de {total}",
-  firstRunHeroKicker: "Descubre Busbibliotheek",
-  firstRunFeatureRealtime: "Vehículos en directo",
-  firstRunFeatureFavorites: "Favoritos",
-  firstRunFeaturePhotos: "Fotos de vehículos"
+  firstRunHeroKicker: "Descubre Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   firstRunTitle: "Добро пожаловать в Busbibliotheek",
@@ -1875,10 +1857,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   firstRunAppearanceSummary: "Выберите подходящую тему и цвет.",
   firstRunTimeFormatSummary: "Выберите формат отображения времени на сайте.",
   firstRunStepOf: "Шаг {step} из {total}",
-  firstRunHeroKicker: "Откройте для себя Busbibliotheek",
-  firstRunFeatureRealtime: "Транспорт онлайн",
-  firstRunFeatureFavorites: "Избранное",
-  firstRunFeaturePhotos: "Фотографии транспорта"
+  firstRunHeroKicker: "Откройте для себя Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.de, { menu: "Menü" });
 Object.assign(window.BB_TRANSLATIONS.i18n.pl, { menu: "Menu" });

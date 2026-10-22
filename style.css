@@ -3117,6 +3117,10 @@ footer {
   width: 100%;
 }
 
+#reportModal .review-mobile-fallback {
+  display: block;
+}
+
 .first-run-intro {
   position: relative;
   display: grid;
@@ -3222,23 +3226,6 @@ footer {
 
 .first-run-step-panel[hidden] {
   display: none;
-}
-
-.first-run-feature-list {
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.first-run-feature-list span {
-  padding: 6px 10px;
-  border: 1px solid color-mix(in srgb, var(--accent) 17%, var(--line));
-  border-radius: 99px;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  color: var(--ink);
-  font-size: 0.76rem;
-  font-weight: 700;
 }
 
 .first-run-settings-grid {
@@ -4340,4 +4327,55 @@ body.site-disabled {
     height: min(48vh, 440px);
     min-height: 220px;
   }
+}
+
+
+.vehicle-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 2px solid var(--danger);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.vehicle-not-found p {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.vehicle-not-found-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 800;
+}
+
+.vehicle-not-found-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--danger);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--danger);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vehicle-not-found-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+.vehicle-not-found-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
