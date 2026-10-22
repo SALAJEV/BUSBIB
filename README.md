@@ -1,6 +1,6 @@
 # Busbibliotheek
 
-Busbibliotheek is een mobile-first webapp en Android wrapper voor het opzoeken van voertuigen van De Lijn. De applicatie combineert statische voertuigdata, realtime voertuigposities, halte-opzoekingen, weerinformatie, voertuigfoto's en een PWA/offline laag in een project.
+Busbibliotheek is een mobile-first webapp voor het opzoeken van voertuigen van De Lijn. De applicatie combineert statische voertuigdata, realtime voertuigposities, halte-opzoekingen, weerinformatie, voertuigfoto's en een PWA/offline laag in een project.
 
 De app is gemaakt voor spotters en reizigers die snel een voertuig willen terugvinden op nummer, nummerplaat of intern nummer, en daarna live willen volgen waar het zich bevindt.
 
@@ -13,7 +13,6 @@ De app is gemaakt voor spotters en reizigers die snel een voertuig willen terugv
 - [Databronnen](#databronnen)
 - [Lokale ontwikkeling](#lokale-ontwikkeling)
 - [Deploy en hosting](#deploy-en-hosting)
-- [Android app](#android-app)
 - [Configuratie](#configuratie)
 - [Caching en offline gedrag](#caching-en-offline-gedrag)
 - [Talen en themas](#talen-en-themas)
@@ -23,13 +22,12 @@ De app is gemaakt voor spotters en reizigers die snel een voertuig willen terugv
 
 ## Projectoverzicht
 
-Busbibliotheek bestaat uit drie hoofdonderdelen:
+Busbibliotheek bestaat uit twee hoofdonderdelen:
 
 1. Een statische frontend in plain HTML, CSS en JavaScript.
 2. Een serverless API-laag in `functions/api.js` die requests naar externe bronnen proxyt en beveiligt.
-3. Een Android app in `android/` die de website in een `WebView` host en Android-specifieke integraties toevoegt.
 
-De webapp draait als PWA, ondersteunt installatie op mobiele toestellen, heeft een service worker voor caching en kan op Android ook als APK worden verspreid.
+De webapp draait als PWA, ondersteunt installatie op mobiele toestellen en heeft een service worker voor caching en offline gebruik.
 
 ## Belangrijkste functies
 
@@ -45,7 +43,6 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen, heeft e
 - EXIF- en locatieverrijking voor foto's.
 - Dashboard of "Stalk modus" om meerdere voertuigen tegelijk te volgen.
 - PWA-installatie en offline fallback.
-- Android host-app met updatecontrole, permissieflow en deep links.
 - Meertalige interface: Nederlands, Frans, Engels, Duits, Pools, Spaans en Russisch.
 
 ## Technische architectuur
@@ -77,18 +74,6 @@ De API ondersteunt drie resources via queryparameter `resource`:
 - `haltes`
 - `weather`
 
-### Android wrapper
-
-De Android app in `android/` opent standaard `https://busbibliotheek95.pages.dev/` in een `WebView`. Daarnaast voegt de app onder meer dit toe:
-
-- native splash screen;
-- netwerkdetectie;
-- updatecontrole via een extern versiebestand;
-- permissieaanvragen;
-- ondersteuning voor Android TV launcher;
-- deep links naar `busbibliotheek95.pages.dev`;
-- download/open flows voor bestanden en updates.
-
 ## Projectstructuur
 
 ```text
@@ -107,9 +92,8 @@ De Android app in `android/` opent standaard `https://busbibliotheek95.pages.dev
 |  |- favicon.ico
 |  |- hansea.png
 |  `- bus/                 # voertuigfoto's
-|- python/
-|  `- script.py            # downloadscript / hulpscript
-`- android/                # Android Studio / Gradle project
+`- python/
+   `- script.py            # downloadscript / hulpscript
 ```
 
 ## Databronnen
@@ -164,7 +148,6 @@ http://localhost:8000
 - Datasetbestanden worden via `/dataset/<bestandsnaam>` door een Cloudflare Pages Function opgehaald. Dit voorkomt browser-CORS-problemen met de R2-bucket.
 - Een eenvoudige server zoals `python -m http.server` serveert alleen de frontendbestanden; voor de API- en datasetroutes moet je de app op Cloudflare Pages draaien of lokaal met Cloudflare Pages/Wrangler Functions.
 - Zonder geldige `DELIJN_API_KEY` werken realtime-, halte- en GTFS-waarschuwingsverzoeken niet.
-- De Android app verwijst standaard naar de online site, niet automatisch naar een lokale server.
 - De service worker kan browsercache agressief vasthouden. Gebruik bij twijfel een harde refresh of verwijder de site data.
 
 ## Deploy en hosting
@@ -191,7 +174,7 @@ De frontendbestanden in de root kunnen als statische site gedeployed worden:
 DELIJN_API_KEY
 ```
 
-Zonder deze key falen realtime-, halte- en GTFS-waarschuwingsverzoeken. De sleutel staat uitsluitend in de serveromgeving; voeg hem nooit toe aan frontendcode of de Android-app.
+Zonder deze key falen realtime-, halte- en GTFS-waarschuwingsverzoeken. De sleutel staat uitsluitend in de serveromgeving; voeg hem nooit toe aan frontendcode.
 
 ### Versiebeheer van assets
 
@@ -203,49 +186,6 @@ De site gebruikt handmatige versiebumping voor cache-busting:
 
 Bij een release moeten deze waarden synchroon blijven om te voorkomen dat oude assets in cache blijven hangen.
 
-## Android app
-
-De map `android/` bevat een native Android project met Kotlin en Jetpack Compose, maar de hoofdinhoud blijft de website in een `WebView`.
-
-### Belangrijke instellingen
-
-- `compileSdk = 36`
-- `targetSdk = 36`
-- `minSdk = 23`
-- `applicationId = "be.salajev.busbibliotheek"`
-- `versionName = "1.67"`
-
-### Android build
-
-Open het project in Android Studio of gebruik Gradle.
-
-Debug build:
-
-```powershell
-.\android\gradlew.bat :app:assembleDebug
-```
-
-Release build:
-
-```powershell
-.\android\gradlew.bat :app:assembleRelease
-```
-
-De release-APK staat hier:
-
-```text
-android/app/release/app-release.apk
-```
-
-### Wat de Android app extra doet
-
-- toont een native splash screen;
-- monitort internetverbinding;
-- vraagt locatie- en notificatiepermissies;
-- controleert op nieuwe APK-versies via een extern JSON-bestand;
-- opent deep links naar de Busbibliotheek-site;
-- ondersteunt ook Android TV launchers.
-
 ## Configuratie
 
 Belangrijke configuratie zit verspreid over de frontend en API.
@@ -255,7 +195,6 @@ Belangrijke configuratie zit verspreid over de frontend en API.
 - `BASE_URL`: basis voor externe assets of datasets.
 - `API_URL`: endpoint voor proxied data via `/api`.
 - `PYTHON_MAIN_DOWNLOAD_URL`
-- `APK_DOWNLOAD_URL`
 - `PHOTO_UPLOAD_FORM_URL`
 - `REPORT_FORM_URL`
 - `DE_LIJN_VEHICLE_TRACKING_URL`
@@ -267,12 +206,6 @@ Belangrijke configuratie zit verspreid over de frontend en API.
 - `REALTIME_EDGE_CACHE_TTL_SECONDS`
 - `REALTIME_EDGE_STALE_WINDOW_SECONDS`
 - `MAX_RESPONSE_SIZE_BYTES`
-
-### In `AndroidManifest.xml`
-
-- permissies voor internet, netwerkstatus, locatie en notificaties;
-- deep link host `busbibliotheek95.pages.dev`;
-- launcher en Android TV launcher categories.
 
 ## Caching en offline gedrag
 
@@ -287,13 +220,15 @@ De app heeft caching op meerdere niveaus.
 - `/app.js`
 - `/style.css`
 - `/translations.js`
-- een aantal basisafbeeldingen
+- de PWA-installatie-iconen
 
 De service worker gebruikt een mix van:
 
 - cache-first/stale-while-revalidate voor statische assets;
 - network-first voor HTML navigatie;
 - no-store voor API-calls en niet-gecachete voertuigfoto's.
+
+De installatiecache wordt alleen geactiveerd als alle core assets beschikbaar zijn. Bij een mislukte download blijft de vorige service worker actief. Bijwerken van de shell vereist een nieuwe `CACHE_NAME` in `sw.js`; houd ook de assetversies in `index.html` en `sw.js` gelijk.
 
 ### Frontend runtime caching
 
@@ -354,7 +289,6 @@ Let op:
 - favorieten en instellingen worden lokaal in de browser bewaard;
 - realtime data en weerdata komen van externe bronnen;
 - voertuigfoto's kunnen EXIF-metadata bevatten;
-- de Android-app vraagt geen locatie- of notificatiepermissies; downloads gebruiken de bestandskiezer van Android.
 
 Als je dit project publiek deployt, is het verstandig om ook een expliciete privacyverklaring en gebruiksvoorwaarden te onderhouden.
 
@@ -365,7 +299,6 @@ Als je dit project publiek deployt, is het verstandig om ook een expliciete priv
 - Assetversies worden handmatig beheerd.
 - De frontend is groot en gecentraliseerd in een `app.js` en een `style.css`, wat onderhoud uitdagender maakt.
 - Leaflet en andere externe assets worden via CDN geladen.
-- De Android app is grotendeels een WebView-shell en dus afhankelijk van de online weblaag.
 - Grote lokale mediacollecties kunnen repositorygrootte en deploytijd verhogen.
 
 ## Onderhoud
@@ -377,7 +310,6 @@ Als je dit project publiek deployt, is het verstandig om ook een expliciete priv
 3. Controleer of de service worker cacheversie mee verhoogd is.
 4. Test zoekfunctie, realtime data, weerkaart, foto-overzicht en dashboard.
 5. Test PWA-installatie en harde refresh na update.
-6. Bouw indien nodig een nieuwe Android release.
 
 ### Aanbevolen verbeteringen op termijn
 

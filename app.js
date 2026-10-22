@@ -36,20 +36,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   syncInstallButtonVisibility();
 });
 installBtn?.addEventListener("click", async () => {
-  if (isAndroid6OrLower) {
-    syncInstallButtonVisibility();
-    return;
-  }
-  if (isAndroidAbove6) {
-    const started = await confirmAndStartDownload({
-      downloadType: "apk",
-      fileLabel: "Busbibliotheek.apk",
-      onConfirm: () => startApkDownload()
-    });
-    if (started) {
-      await showAndroidApkInstallInstructions();
-    }
-  } else if (deferredPrompt) {
+  if (deferredPrompt) {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
@@ -113,7 +100,6 @@ function syncPhotoDelayBanner() {
 const BASE_URL = `${window.location.origin}/dataset`;
 const API_URL = `${window.location.origin}/api`;
 const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/script.py";
-const APK_DOWNLOAD_URL = `${window.location.origin}/android/app/release/app-release.apk`;
 const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
 const REPORT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform";
 const REVIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform";
@@ -199,8 +185,6 @@ const isAndroidTvPlatform = isAndroidPlatform && /(TV|AFT|BRAVIA|GoogleTV|SmartT
 const androidVersionMatch = platformUserAgent.match(/Android\s+(\d+(?:\.\d+)?)/i);
 const androidVersion = androidVersionMatch ? Number(androidVersionMatch[1]) : NaN;
 const isAndroid6OrLower = isAndroidPlatform && Number.isFinite(androidVersion) && androidVersion <= 6;
-const isAndroidAbove6 = isAndroidPlatform && Number.isFinite(androidVersion) && androidVersion > 6;
-let androidHostThemeMode = (document.documentElement.dataset.androidTheme || "").toLowerCase();
 const touchPointerMediaQuery = window.matchMedia ? window.matchMedia("(hover: none), (pointer: coarse)") : null;
 touchPointerMediaQuery?.addEventListener?.("change", syncPlatformBodyClasses);
 
@@ -230,14 +214,6 @@ function isTabletLikeViewport() {
   return shortSide >= 720 || (shortSide >= 600 && longSide >= 960);
 }
 
-function isAndroidHostApp() {
-  try {
-    return /BusbibliotheekApp\//i.test(platformUserAgent) || typeof window.Android?.downloadFile === "function";
-  } catch (_) {
-    return /BusbibliotheekApp\//i.test(platformUserAgent);
-  }
-}
-
 function supportsEnhancedDialogs() {
   try {
     if (!window.CSS || typeof window.CSS.supports !== "function") return false;
@@ -252,14 +228,12 @@ function supportsEnhancedDialogs() {
 function syncPlatformBodyClasses() {
   if (!document.body) return;
   const isStandalone = isStandaloneDisplayMode();
-  const isHostApp = isAndroidHostApp();
   const isTablet = isTabletLikeViewport();
   const isLandscape = getViewportWidth() > getViewportHeight();
   document.body.classList.toggle("platform-touch", isTouchPlatform());
   document.body.classList.toggle("platform-ios", isIosPlatform);
   document.body.classList.toggle("platform-android", isAndroidPlatform);
   document.body.classList.toggle("platform-android-webview", isAndroidWebView);
-  document.body.classList.toggle("platform-android-host-app", isHostApp);
   document.body.classList.toggle("platform-android-tv", isAndroidTvPlatform);
   document.body.classList.toggle("platform-tablet", isTablet);
   document.body.classList.toggle("platform-phone", !isTablet);
@@ -277,11 +251,9 @@ function syncInstallButtonVisibility() {
     !hasInstalledOnThisDevice() &&
     !isStandaloneDisplayMode() &&
     !isAndroidWebView &&
-    !isAndroidHostApp() &&
     !isAndroidTvPlatform &&
     (
       isIosInstallable() ||
-      isAndroidAbove6 ||
       Boolean(deferredPrompt)
     );
   installBtn.hidden = !shouldShow;
@@ -302,19 +274,6 @@ function rememberInstalledOnThisDevice() {
   } catch (_) {
     // Ignore storage failures.
   }
-}
-
-async function showAndroidApkInstallInstructions() {
-  await showAppAlert(
-    getLabel(
-      "androidApkInstallInstructions",
-      "De APK-download is gestart. Open daarna je downloads of meldingencentrum, tik op Busbibliotheek.apk en bevestig de installatie. Als Android het vraagt, sta dan installatie van onbekende apps toe voor je browser of bestandsapp."
-    ),
-    {
-      title: getLabel("install", "App installeren"),
-      confirmLabel: getLabel("dialogOk", "OK")
-    }
-  );
 }
 
 function updateAndroidViewportMetrics() {
@@ -710,7 +669,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.18-2";
+const APP_VERSION = "2026.10.22-1";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -744,7 +703,6 @@ const overlayModalRestoreFocusMap = new WeakMap();
 let interactiveOverlayStack = [];
 let appDialogResolve = null;
 const usesOverlayCompatibilityMode = () =>
-  isAndroidHostApp() ||
   isAndroidWebView ||
   isAndroidTvPlatform;
 // Generated from the current contents of media/bus on 2026-10-17.
@@ -2084,7 +2042,7 @@ function navigateHomeAndReload(options = {}) {
 
 function isSpecialVehicleCommand(query = "") {
   const normalizedQuery = (query || "").toString().trim().toLowerCase();
-  return ["python", "android", "apk", "info", "best", "bus beih"].includes(normalizedQuery);
+  return ["python", "info", "best", "bus beih"].includes(normalizedQuery);
 }
 
 function initializeRouteHistory() {
@@ -2288,8 +2246,7 @@ function openExternalUrl(url, options = {}) {
     (preferSameTab && (
       isTouchPlatform() ||
       isStandaloneDisplayMode() ||
-      isAndroidWebView ||
-      isAndroidHostApp()
+      isAndroidWebView
     ));
 
   if (shouldUseSameTab) {
@@ -6657,9 +6614,6 @@ function getResolvedThemeMode() {
   const effectiveTheme = getEffectiveThemeSetting(settings.theme, settings.colorTheme);
   if (effectiveTheme === "dark") return "dark";
   if (effectiveTheme === "light") return "light";
-  if (isAndroidWebView && (androidHostThemeMode === "dark" || androidHostThemeMode === "light")) {
-    return androidHostThemeMode;
-  }
   return prefersDarkScheme.matches ? "dark" : "light";
 }
 
@@ -6698,13 +6652,6 @@ function updateSystemUiThemeColor() {
     metaEl.setAttribute("content", nextThemeColor);
   });
   if (colorSchemeMetaEl) colorSchemeMetaEl.setAttribute("content", resolvedTheme);
-  if (isAndroidHostApp() && typeof window.Android?.updateTheme === "function") {
-    try {
-      window.Android.updateTheme(nextThemeColor, resolvedTheme);
-    } catch (error) {
-      console.warn("Android theme-sync mislukt", error);
-    }
-  }
 }
 
 window.updateSystemUiThemeColor = updateSystemUiThemeColor;
@@ -7576,20 +7523,6 @@ function trapInteractiveOverlayFocus(event, overlayEl) {
 }
 
 function triggerDirectDownload(url, fileName) {
-  if (isAndroidHostApp() && typeof window.Android?.downloadFile === "function") {
-    const lowerName = (fileName || "").toLowerCase();
-    const mimeType = lowerName.endsWith(".apk")
-      ? "application/vnd.android.package-archive"
-      : lowerName.endsWith(".py")
-        ? "text/x-python"
-        : "application/octet-stream";
-    try {
-      window.Android.downloadFile(url, fileName || "", mimeType);
-      return;
-    } catch (error) {
-      console.warn("Native Android-download mislukt, browserdownload wordt gebruikt", error);
-    }
-  }
   const downloadLink = document.createElement("a");
   downloadLink.href = url;
   downloadLink.download = fileName;
@@ -7625,11 +7558,6 @@ async function confirmAndStartDownload(options = {}) {
 function startPythonDownload() {
   triggerDirectDownload(PYTHON_MAIN_DOWNLOAD_URL, "script.py");
   void showAppAlert(getLabel("pythonDownloadStarted", "De download van script.py is gestart."));
-}
-
-function startApkDownload() {
-  triggerDirectDownload(APK_DOWNLOAD_URL, "Busbibliotheek.apk");
-  void showAppAlert(getLabel("apkDownloadStarted", "De download van Busbibliotheek.apk is gestart."));
 }
 
 async function resetSiteData() {
@@ -9730,16 +9658,6 @@ async function zoekAlles(options = {}) {
     setPageLoading(false);
     return;
   }
-  if (query.toLowerCase() === "android" || query.toLowerCase() === "apk") {
-    hideSuggestionList(suggestieLijst);
-    await confirmAndStartDownload({
-      downloadType: "apk",
-      fileLabel: "Busbibliotheek.apk",
-      onConfirm: () => startApkDownload()
-    });
-    setPageLoading(false);
-    return;
-  }
   if (query.toLowerCase() === "info") {
     hideSuggestionList(suggestieLijst);
     showInfoModal();
@@ -10720,12 +10638,3 @@ if (prefersColorScheme?.addEventListener) {
     }
   });
 }
-
-window.addEventListener("bb-android-theme-change", (event) => {
-  const detailTheme = event?.detail?.theme;
-  androidHostThemeMode = typeof detailTheme === "string" ? detailTheme.toLowerCase() : "";
-  if (settings.theme === "auto") {
-    applyTheme("auto");
-    updateSystemUiThemeColor();
-  }
-});

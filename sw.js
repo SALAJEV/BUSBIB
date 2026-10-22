@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbibliotheek-v173';
+const CACHE_NAME = 'busbibliotheek-v174';
 const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
@@ -6,11 +6,15 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261019-7',
+  '/app.js?v=20261022-1',
   '/manifest.json',
-  '/style.css?v=20261019-7',
-  '/translations.js?v=20261019-7',
+  '/style.css?v=20261022-1',
+  '/translations.js?v=20261022-1',
   '/site-config.js?v=20261018-13',
+  '/media/icons/pwa-icon-192.png',
+  '/media/icons/pwa-icon-512.png',
+  '/media/icons/pwa-icon-maskable-512.png',
+  '/media/icons/pwa-icon-180.png',
   '/media/icons/logo.png',
   '/media/icons/navicon.png',
   '/media/icons/navicon_green.png',
@@ -55,20 +59,11 @@ async function cacheVehiclePhoto(request, response) {
   }
 }
 
-// Install event: cache essential files
 self.addEventListener('install', event => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
-      await Promise.allSettled(
-        CORE_ASSETS.map(async (url) => {
-          try {
-            await cache.add(url);
-          } catch (_) {
-            // Keep install resilient: one failing asset must not break offline support.
-          }
-        })
-      );
+      await cache.addAll(CORE_ASSETS);
       await self.skipWaiting();
     })()
   );
@@ -80,7 +75,11 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName !== PHOTO_CACHE_NAME) {
+          if (
+            cacheName.startsWith('busbibliotheek-') &&
+            cacheName !== CACHE_NAME &&
+            cacheName !== PHOTO_CACHE_NAME
+          ) {
             return caches.delete(cacheName);
           }
         })
@@ -114,8 +113,10 @@ self.addEventListener('fetch', event => {
 
   const isVehiclePhotoRequest =
     url.origin === self.location.origin &&
-    url.pathname.startsWith('/media/') &&
-    !['/media/icons/logo.png', '/media/icons/navicon.png', '/media/icons/navicon_green.png', '/media/icons/hansea.png', '/media/icons/favicon.ico', '/media/icons/logo.svg'].includes(url.pathname);
+    (
+      url.pathname.startsWith('/media/bus/') ||
+      url.pathname.startsWith('/media/bus-optimized/')
+    );
 
   if (isVehiclePhotoRequest) {
     event.respondWith(

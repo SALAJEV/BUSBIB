@@ -827,9 +827,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   notInServiceYet: "Bus nog niet in dienst"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
-  androidApkInstallInstructions: "Le telechargement de l'APK a commence. Ouvrez ensuite vos telechargements ou le centre de notifications, touchez Busbibliotheek.apk et confirmez l'installation. Si Android le demande, autorisez l'installation d'applications inconnues pour votre navigateur ou gestionnaire de fichiers.",
-  apkDownloadStarted: "Le telechargement de Busbibliotheek.apk a commence.",
-  confirmApkDownload: "Telecharger Busbibliotheek.apk sur cet appareil maintenant ?",
   confirmPythonDownload: "Telecharger script.py sur cet appareil maintenant ?",
   dashboardLoading: "Chargement du mode suivi...",
   dashboardSetupInvalid: "Verifiez les champs marques en rouge.",
@@ -846,9 +843,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   photoCaption: "Vehicule {id}"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.en, {
-  androidApkInstallInstructions: "The APK download has started. Then open your downloads or notification center, tap Busbibliotheek.apk, and confirm the installation. If Android asks, allow unknown app installs for your browser or file manager.",
-  apkDownloadStarted: "The download of Busbibliotheek.apk has started.",
-  confirmApkDownload: "Download Busbibliotheek.apk to this device now?",
   confirmPythonDownload: "Download script.py to this device now?",
   dashboardLoading: "Loading stalk mode...",
   dashboardSetupInvalid: "Check the fields marked in red.",
@@ -859,9 +853,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   dashboardVehicleUnknown: "This vehicle number does not exist."
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.de, {
-  androidApkInstallInstructions: "Der APK-Download wurde gestartet. Offnen Sie danach Ihre Downloads oder das Benachrichtigungszentrum, tippen Sie auf Busbibliotheek.apk und bestatigen Sie die Installation. Wenn Android fragt, erlauben Sie die Installation unbekannter Apps fur Ihren Browser oder Dateimanager.",
-  apkDownloadStarted: "Der Download von Busbibliotheek.apk wurde gestartet.",
-  confirmApkDownload: "Busbibliotheek.apk jetzt auf dieses Gerat herunterladen?",
   confirmPythonDownload: "script.py jetzt auf dieses Gerat herunterladen?",
   dashboardLoading: "Stalk-Modus wird geladen...",
   dashboardSetupInvalid: "Prufen Sie die rot markierten Felder.",
@@ -878,9 +869,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   photoCaption: "Fahrzeug {id}"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
-  androidApkInstallInstructions: "Pobieranie pliku APK zostalo rozpoczęte. Nastepnie otworz pobrane pliki lub centrum powiadomien, stuknij Busbibliotheek.apk i potwierdz instalacje. Jesli Android o to poprosi, zezwol na instalacje nieznanych aplikacji dla przegladarki lub menedzera plikow.",
-  apkDownloadStarted: "Pobieranie Busbibliotheek.apk zostalo rozpoczęte.",
-  confirmApkDownload: "Pobrac teraz Busbibliotheek.apk na to urzadzenie?",
   confirmPythonDownload: "Pobrac teraz script.py na to urzadzenie?",
   dashboardLoading: "Ladowanie trybu sledzenia...",
   dashboardSetupInvalid: "Sprawdz pola zaznaczone na czerwono.",
@@ -897,9 +885,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   photoCaption: "Pojazd {id}"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.es, {
-  androidApkInstallInstructions: "La descarga del APK ha comenzado. Luego abre tus descargas o el centro de notificaciones, toca Busbibliotheek.apk y confirma la instalacion. Si Android lo pide, permite la instalacion de aplicaciones desconocidas para tu navegador o gestor de archivos.",
-  apkDownloadStarted: "La descarga de Busbibliotheek.apk ha comenzado.",
-  confirmApkDownload: "Descargar ahora Busbibliotheek.apk en este dispositivo?",
   confirmPythonDownload: "Descargar ahora script.py en este dispositivo?",
   dashboardLoading: "Cargando modo de seguimiento...",
   dashboardSetupInvalid: "Revisa los campos marcados en rojo.",
@@ -916,9 +901,6 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   photoCaption: "Vehiculo {id}"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
-  androidApkInstallInstructions: "Zagruzka APK nachalas'. Zatem otkroyte zagruzki ili tsentr uvedomleniy, nazhmite Busbibliotheek.apk i podtverdite ustanovku. Esli Android poprosit, razreshite ustanovku neizvestnykh prilozheniy dlya brauzera ili faylovogo menedzhera.",
-  apkDownloadStarted: "Zagruzka Busbibliotheek.apk nachalas'.",
-  confirmApkDownload: "Skachat' Busbibliotheek.apk na eto ustroystvo seychas?",
   confirmPythonDownload: "Skachat' script.py na eto ustroystvo seychas?",
   dashboardLoading: "Zagruzka rezhima slezheniya...",
   dashboardSetupInvalid: "Proverte polya, otmechennye krasnym.",
@@ -1659,11 +1641,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   reviewFormTitle: "Форма отзыва Busbibliotheek"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
-  androidApkInstallInstructions: "De APK-download is gestart. Open daarna je downloads of meldingencentrum, tik op Busbibliotheek.apk en bevestig de installatie. Als Android het vraagt, sta dan installatie van onbekende apps toe voor je browser of bestandsapp.",
-  apkDownloadStarted: "De download van Busbibliotheek.apk is gestart.",
   back: "Terug",
   compareEditVehicle: "Klik om te wijzigen",
-  confirmApkDownload: "Download Busbibliotheek.apk nu naar dit toestel?",
   confirmPythonDownload: "Download script.py nu naar dit toestel?",
   dashboardLoading: "Stalk modus wordt geladen...",
   dashboardSetupInvalid: "Controleer de rood gemarkeerde velden.",
