@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbibliotheek-v179';
+const CACHE_NAME = 'busbibliotheek-v180';
 const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
@@ -6,10 +6,10 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261022-6',
+  '/app.js?v=20261022-7',
   '/manifest.json',
-  '/style.css?v=20261022-6',
-  '/translations.js?v=20261022-6',
+  '/style.css?v=20261022-7',
+  '/translations.js?v=20261022-7',
   '/site-config.js?v=20261018-13',
   '/media/icons/pwa-icon-192.png',
   '/media/icons/pwa-icon-512.png',
@@ -113,10 +113,7 @@ self.addEventListener('fetch', event => {
 
   const isVehiclePhotoRequest =
     url.origin === self.location.origin &&
-    (
-      url.pathname.startsWith('/media/bus/') ||
-      url.pathname.startsWith('/media/bus-optimized/')
-    );
+    url.pathname.startsWith('/media/bus/');
 
   if (isVehiclePhotoRequest) {
     event.respondWith(

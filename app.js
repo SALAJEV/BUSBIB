@@ -5095,9 +5095,7 @@ async function getPhotoExifMetadata(src) {
 
 function buildVehiclePhotoEntry(src, maker = "", sortOrder = 0) {
   const normalizedMaker = (maker || "").toString().trim();
-  const displaySrc = src.includes("/media/bus/")
-    ? src.replace("/media/bus/", "/media/bus-optimized/")
-    : src;
+  const displaySrc = src;
   return {
     src,
     displaySrc,
