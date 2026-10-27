@@ -6633,17 +6633,39 @@ function applyAccessibilitySettings() {
   root.setAttribute("data-reduce-motion", String(settings.reduceMotion === true));
 }
 
+let themeColorProbeCtx = null;
+
+// color-mix()/var() strings are not reliably accepted by browser chrome, so resolve to a plain hex colour
+function resolveCssColorToHex(value) {
+  try {
+    themeColorProbeCtx = themeColorProbeCtx || document.createElement("canvas").getContext("2d");
+    themeColorProbeCtx.fillStyle = "#000000";
+    themeColorProbeCtx.fillStyle = value;
+    const resolved = themeColorProbeCtx.fillStyle;
+    if (/^#[0-9a-f]{6}$/i.test(resolved)) return resolved;
+    const rgbMatch = resolved.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (rgbMatch) {
+      return "#" + rgbMatch.slice(1, 4).map((part) => Number(part).toString(16).padStart(2, "0")).join("");
+    }
+  } catch (_) {}
+  return "";
+}
+
 function updateSystemUiThemeColor() {
   const root = document.documentElement;
-  const css = getComputedStyle(document.documentElement);
   const resolvedTheme = getResolvedThemeMode();
-  const nextThemeColor =
-    css.getPropertyValue("--bg-gradient-top").trim() ||
-    css.getPropertyValue("--bg").trim() ||
-    "#f4f7fb";
+  // Set the resolved theme first so the CSS variables read below match the active mode
   root.setAttribute("data-resolved-theme", resolvedTheme);
   root.style.colorScheme = resolvedTheme;
+  const css = getComputedStyle(root);
+  const rawThemeColor =
+    css.getPropertyValue("--page-top").trim() ||
+    css.getPropertyValue("--bg-gradient-top").trim() ||
+    css.getPropertyValue("--bg").trim();
+  const nextThemeColor =
+    resolveCssColorToHex(rawThemeColor) || (resolvedTheme === "dark" ? "#171a1f" : "#f8fafc");
   themeColorMetaEls.forEach((metaEl) => {
+    metaEl.removeAttribute("media");
     metaEl.setAttribute("content", nextThemeColor);
   });
   if (colorSchemeMetaEl) colorSchemeMetaEl.setAttribute("content", resolvedTheme);
