@@ -3979,6 +3979,41 @@ body.site-disabled {
   display: inline-block;
 }
 
+/* Dark mode maps: invert only the tile layer so markers, routes and popups keep their colours */
+:root[data-resolved-theme="dark"] .leaflet-container {
+  background: #12161b;
+}
+
+:root[data-resolved-theme="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.85);
+}
+
+:root[data-resolved-theme="dark"] .leaflet-control-zoom a,
+:root[data-resolved-theme="dark"] .leaflet-bar a {
+  border-color: var(--line);
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+
+:root[data-resolved-theme="dark"] .leaflet-bar a:hover {
+  background: var(--surface-soft);
+}
+
+:root[data-resolved-theme="dark"] .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--muted);
+}
+
+:root[data-resolved-theme="dark"] .leaflet-control-attribution a {
+  color: color-mix(in srgb, var(--accent) 70%, var(--ink));
+}
+
+:root[data-resolved-theme="dark"] .home-gtfs-map,
+:root[data-resolved-theme="dark"] #map,
+:root[data-resolved-theme="dark"] .dashboard-map {
+  background: #12161b;
+}
+
 .info-value--github {
   display: inline-flex;
   align-items: center;
