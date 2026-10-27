@@ -1,4 +1,4 @@
-﻿# Busbibliotheek WVL (Python) versie 29 maart 2026
+# BUSBIB WVL (Python) versie 29 maart 2026
 
 import csv
 import base64
@@ -17,7 +17,7 @@ from io import StringIO
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 VEHICLES_FILE = "vehicles.txt"
 DOWNLOAD_URL = "https://pub-611b5bc156eb455ba86d9bcece9aea1c.r2.dev/vehicles.txt"
-PDF_LOGO_URL = "https://busbibliotheek95.pages.dev/media/icons/logo.png"
+PDF_LOGO_URL = "https://busbibliotheek95.pages.dev/media/logo/logo.png"
 SITE_URL = "https://sites.google.com/view/delijn-busspotter"
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
@@ -47,10 +47,10 @@ def _print_header():
 def _print_welkom():
     """Toon een vriendelijke begroeting bij het opstarten."""
     current_year = date.today().year
-    print("Welkom bij Busbibliotheek 95.")
+    print("Welkom bij BUSBIB 95.")
     print("Met dit script kunt u voertuigen opzoeken en lijsten per eigenaar exporteren.")
     print(f"Copyright Busspotter 95, 2023-{current_year}.")
-    print("Dank u om Busbibliotheek 95 te gebruiken.\n")
+    print("Dank u om BUSBIB 95 te gebruiken.\n")
 
 
 def _find_file():
@@ -490,7 +490,7 @@ def _maak_eigenaar_html(eigenaar, data, include_retired=True, removed_bussen=Non
             if logo_data_uri:
                 logo_html = (
                     f'<a class="logo-link" href="{SITE_URL}">'
-                    f'<img class="logo" src="{logo_data_uri}" alt="Busbibliotheek 95 logo">'
+                    f'<img class="logo" src="{logo_data_uri}" alt="BUSBIB 95 logo">'
                     f'</a>'
                 )
             header_html = f"""
@@ -498,7 +498,7 @@ def _maak_eigenaar_html(eigenaar, data, include_retired=True, removed_bussen=Non
               <div class="hero-band">
                 <div class="hero-copy">
                   <a class="brand-link" href="{SITE_URL}">
-                    <div class="eyebrow">Busbibliotheek 95</div>
+                    <div class="eyebrow">BUSBIB 95</div>
                   </a>
                   <h1>{titel}</h1>
                   <div class="sub">{subtitel}</div>
@@ -531,7 +531,7 @@ def _maak_eigenaar_html(eigenaar, data, include_retired=True, removed_bussen=Non
                   {''.join(kaarten_op_pagina)}
                 </div>
                 <div class="page-footer">
-                  <span>Busbibliotheek 95</span>
+                  <span>BUSBIB 95</span>
                   <span>Copyright Busspotter 95, 2023-{date.today().year}</span>
                 </div>
               </div>
@@ -1377,7 +1377,7 @@ def _print_intro():
     """Print introductie tekst."""
     _print_header()
     _print_welkom()
-    print(f"\nBusbibliotheek 95 (Python editie)")
+    print(f"\nBUSBIB 95 (Python editie)")
     print("-" * 70)
     print("U kunt zoeken op voertuignummer, nummerplaat, intern nummer en meer.")
     print("Deelzoeking werkt ook: bv. stukje nummerplaat, eigenaar of bustype.")

@@ -1,0 +1,35 @@
+{
+  "name": "BUSBIB",
+  "short_name": "BUSBIB",
+  "id": "/",
+  "lang": "nl",
+  "dir": "ltr",
+  "description": "BUSBIB: zoek een bus van De Lijn op en volg die in realtime via live GPS-gegevens.",
+  "start_url": "/",
+  "scope": "/",
+  "launch_handler": { "client_mode": "navigate-existing" },
+  "shortcuts": [
+    {
+      "name": "Stalk modus",
+      "short_name": "Stalk",
+      "description": "Volg meerdere bussen tegelijk in BUSBIB",
+      "url": "/?view=stalk",
+      "icons": [{ "src": "media/logo/logo.png", "sizes": "512x512", "type": "image/png" }]
+    }
+  ],
+  "display_override": ["standalone", "minimal-ui"],
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#f4f7fb",
+  "background_color": "#f4f7fb",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "media/logo/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["transportation"]
+}

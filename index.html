@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Busbibliotheek voor bussen van De Lijn: zoek een voertuig en volg het live.">
+<meta name="description" content="BUSBIB voor bussen van De Lijn: zoek een voertuig en volg het live.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f4f7fb">
-<meta name="application-name" content="Busbibliotheek">
+<meta name="application-name" content="BUSBIB">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Busbibliotheek">
-<link rel="icon" type="image/x-icon" href="media/icons/favicon.ico">
-<link rel="shortcut icon" href="media/icons/favicon.ico">
-<link rel="apple-touch-icon" href="media/icons/pwa-icon-180.png">
-<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="BUSBIB">
+<link rel="icon" type="image/svg+xml" href="media/logo/busbib-website-logo.svg">
+<link rel="icon" type="image/x-icon" href="media/logo/busbib-website-favicon.ico">
+<link rel="shortcut icon" href="media/logo/busbib-website-favicon.ico">
+<link rel="apple-touch-icon" href="media/logo/busbib-apple-touch-icon.png">
+<link rel="manifest" id="appManifest" href="manifest.json">
+<script>if (/Windows/i.test(navigator.userAgent) && !/Windows Phone/i.test(navigator.userAgent)) document.getElementById("appManifest").href = "manifest-windows.json";</script>
 <!-- Preload critical resources -->
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,22 +24,22 @@
 <link rel="preconnect" href="https://tile.memomaps.de" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
-<title>Busbibliotheek</title>
-<link rel="stylesheet" href="style.css?v=20261022-7">
+<title>BUSBIB</title>
+<link rel="stylesheet" href="style.css?v=20261027-1">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261022-7";
+  window.BB_ASSET_VERSION = "20261027-1";
 </script>
 </head>
 <body>
 <div class="app-shell">
-<div id="splash" role="img" aria-label="Busbibliotheek laden">
+<div id="splash" role="img" aria-label="BUSBIB laden">
   <picture class="logo">
-    <img src="media/icons/logo.png" alt="Busbibliotheek" fetchpriority="high" decoding="async">
+    <img src="media/logo/logo.png" alt="BUSBIB" fetchpriority="high" decoding="async">
   </picture>
-  <h1 id="splashTitle" class="splash-title">Busbibliotheek</h1>
+  <h1 id="splashTitle" class="splash-title">BUSBIB</h1>
   <p id="splashCredit" class="splash-credit">Made by Busspotter 95</p>
 </div>
 <div class="container">
@@ -48,8 +50,8 @@
   </div>  <div class="header-bar">
     <div class="header-intro">  
       <button id="appTitleBtn" class="title-home-btn" type="button">
-        <img class="title-home-logo" src="media/icons/logo.png" alt="" aria-hidden="true">
-        <h1 id="appTitle">Busbibliotheek</h1>
+        <img class="title-home-logo" src="media/logo/logo.png" alt="" aria-hidden="true">
+        <h1 id="appTitle">BUSBIB</h1>
       </button>
       <div class="header-copy">
         <p id="appSubtitle">Zoek een voertuig en volg het in realtime</p>
@@ -180,7 +182,7 @@
                     <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
                   </span>
                   <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Nog geen foto van voertuig.</strong>
-                  <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb je een foto van deze bus? Deel ze met Busbibliotheek.</p>
+                  <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb je een foto van deze bus? Deel ze met BUSBIB.</p>
                   <div id="vehiclePhotoUploadCta" class="vehicle-photo-upload-cta" hidden aria-hidden="true">
                     <p id="vehiclePhotoUploadHint" class="vehicle-photo-upload-hint">Help ons de fotobibliotheek aan te vullen.</p>
                     <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn vehicle-photo-upload-btn--footer" type="button">Foto insturen</button>
@@ -405,7 +407,7 @@
   <div class="offline-shell" role="alert" aria-live="assertive">
     <span id="offlinePill" class="offline-pill">Offline</span>
     <h2 id="offlineTitle">Geen internetverbinding</h2>
-    <p id="offlineTextPrimary">Busbibliotheek kon geen werkende internetverbinding bevestigen.</p>
+    <p id="offlineTextPrimary">BUSBIB kon geen werkende internetverbinding bevestigen.</p>
     <p id="offlineTextSecondary">Realtimegegevens en live-opzoekingen zijn tijdelijk niet beschikbaar.</p>
     <button id="offlineRetryBtn" type="button">Opnieuw proberen</button>
   </div>
@@ -512,7 +514,7 @@
     <div class="pdf-modal-header">
       <div>
         <h3 id="installGuideTitle">Installeren op iPhone</h3>
-        <p id="installGuideSummary" class="pdf-modal-summary">Voeg Busbibliotheek toe aan je beginscherm via het deelmenu van Safari.</p>
+        <p id="installGuideSummary" class="pdf-modal-summary">Voeg BUSBIB toe aan je beginscherm via het deelmenu van Safari.</p>
       </div>
       <button id="installGuideCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
     </div>
@@ -527,7 +529,7 @@
   <div class="pdf-modal-card first-run-modal-card">
     <div class="pdf-modal-header first-run-modal-header">
       <div>
-        <h3 id="firstRunTitle">Welkom bij Busbibliotheek</h3>
+        <h3 id="firstRunTitle">Welkom bij BUSBIB</h3>
         <p id="firstRunSummary" class="pdf-modal-summary">Je persoonlijke startpunt voor alles wat rijdt.</p>
       </div>
     </div>
@@ -542,9 +544,9 @@
       <div id="firstRunWelcomeStep" class="first-run-step-panel">
         <div class="first-run-intro">
           <span class="first-run-hero-icon" aria-hidden="true">🚌</span>
-          <span class="first-run-hero-kicker" id="firstRunHeroKicker">Ontdek Busbibliotheek</span>
+          <span class="first-run-hero-kicker" id="firstRunHeroKicker">Ontdek BUSBIB</span>
           <strong id="firstRunIntroTitle">Volg voertuigen van De Lijn in realtime.</strong>
-          <p id="firstRunDescription" class="pdf-modal-note">Busbibliotheek helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.</p>
+          <p id="firstRunDescription" class="pdf-modal-note">BUSBIB helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.</p>
         </div>
       </div>
       <div id="firstRunLanguageStep" class="first-run-step-panel" hidden>
@@ -679,13 +681,13 @@
     <div class="pdf-modal-header">
       <div>
         <h3 id="reviewModalTitle">Feedback achterlaten</h3>
-        <p id="reviewModalSummary" class="pdf-modal-summary">Laat weten wat beter kan of wat je goed vindt aan Busbibliotheek.</p>
+        <p id="reviewModalSummary" class="pdf-modal-summary">Laat weten wat beter kan of wat je goed vindt aan BUSBIB.</p>
       </div>
       <button id="reviewModalCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
     </div>
     <div class="pdf-modal-body legal-modal-body">
       <div class="review-embed-shell">
-        <iframe id="reviewFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform?embedded=true" width="640" height="2843" frameborder="0" marginheight="0" marginwidth="0" title="Busbibliotheek reviewformulier" loading="lazy">Laden…</iframe>
+        <iframe id="reviewFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform?embedded=true" width="640" height="2843" frameborder="0" marginheight="0" marginwidth="0" title="BUSBIB reviewformulier" loading="lazy">Laden…</iframe>
       </div>
     </div>
     <div class="pdf-modal-actions">
@@ -705,7 +707,7 @@
     </div>
     <div class="pdf-modal-body legal-modal-body">
       <div class="review-embed-shell">
-        <iframe id="reportFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform?embedded=true" width="640" height="623" frameborder="0" marginheight="0" marginwidth="0" title="Busbibliotheek meldformulier" loading="lazy">Laden…</iframe>
+        <iframe id="reportFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform?embedded=true" width="640" height="623" frameborder="0" marginheight="0" marginwidth="0" title="BUSBIB meldformulier" loading="lazy">Laden…</iframe>
       </div>
       <div class="review-mobile-fallback">
         <a id="reportMobileLink" class="btn" href="https://forms.gle/DKKPFHfSAgA2jo6B7" target="_blank" rel="noopener noreferrer">Open meldformulier</a>
@@ -735,7 +737,7 @@
         <ul class="install-guide-steps photo-upload-steps">
           <li id="photoUploadStep1">Open het formulier in je browser.</li>
           <li id="photoUploadStep2">Voeg je foto toe en vermeld het voertuignummer.</li>
-          <li id="photoUploadStep3">Na controle kan de foto op Busbibliotheek verschijnen.</li>
+          <li id="photoUploadStep3">Na controle kan de foto op BUSBIB verschijnen.</li>
         </ul>
         <a id="photoUploadOpenLink" class="btn" href="https://forms.gle/MLzezhEKqxg6xagm9" target="_blank" rel="noopener noreferrer">Open uploadformulier</a>
       </div>
@@ -751,7 +753,7 @@
     <div class="pdf-modal-header">
       <div>
         <h3 id="termsModalTitle">Gebruiksvoorwaarden</h3>
-        <p id="termsModalSummary" class="pdf-modal-summary">Korte standaardvoorwaarden voor het gebruik van Busbibliotheek.</p>
+        <p id="termsModalSummary" class="pdf-modal-summary">Korte standaardvoorwaarden voor het gebruik van BUSBIB.</p>
       </div>
       <button id="termsModalCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
     </div>
@@ -786,37 +788,37 @@
     var compatibilityCopy = {
       nl: {
         badge: "Browser update nodig",
-        title: "Busbibliotheek is niet beschikbaar op dit toestel",
+        title: "BUSBIB is niet beschikbaar op dit toestel",
         body: "Je browser of Android-versie is te oud voor deze website. Update je browser of toestel en probeer opnieuw."
       },
       fr: {
         badge: "Mise à jour du navigateur requise",
-        title: "Busbibliotheek n'est pas disponible sur cet appareil",
+        title: "BUSBIB n'est pas disponible sur cet appareil",
         body: "Votre navigateur ou votre version d'Android est trop ancien pour ce site. Mettez votre navigateur ou votre appareil à jour puis réessayez."
       },
       en: {
         badge: "Browser update required",
-        title: "Busbibliotheek is not available on this device",
+        title: "BUSBIB is not available on this device",
         body: "Your browser or Android version is too old for this website. Update your browser or device and try again."
       },
       de: {
         badge: "Browser-Update erforderlich",
-        title: "Busbibliotheek ist auf diesem Gerät nicht verfügbar",
+        title: "BUSBIB ist auf diesem Gerät nicht verfügbar",
         body: "Ihr Browser oder Ihre Android-Version ist für diese Website zu alt. Aktualisieren Sie Ihren Browser oder Ihr Gerät und versuchen Sie es erneut."
       },
       pl: {
         badge: "Wymagana aktualizacja przeglądarki",
-        title: "Busbibliotheek nie jest dostępny na tym urządzeniu",
+        title: "BUSBIB nie jest dostępny na tym urządzeniu",
         body: "Twoja przeglądarka lub wersja Androida jest zbyt stara dla tej strony. Zaktualizuj przeglądarkę lub urządzenie i spróbuj ponownie."
       },
       es: {
         badge: "Se requiere actualizar el navegador",
-        title: "Busbibliotheek no está disponible en este dispositivo",
+        title: "BUSBIB no está disponible en este dispositivo",
         body: "Tu navegador o versión de Android es demasiado antiguo para este sitio web. Actualiza tu navegador o dispositivo e inténtalo de nuevo."
       },
       ru: {
         badge: "Требуется обновление браузера",
-        title: "Busbibliotheek недоступен на этом устройстве",
+        title: "BUSBIB недоступен на этом устройстве",
         body: "Ваш браузер или версия Android слишком устарели для этого сайта. Обновите браузер или устройство и попробуйте снова."
       }
     };
@@ -881,7 +883,7 @@
       document.body.innerHTML = [
         '<div class="site-disabled-shell">',
         '  <div class="site-disabled-card" role="alert" aria-live="assertive">',
-        '    <h1>' + escapeHtml(siteConfig.disabledTitle || "Busbibliotheek is tijdelijk niet beschikbaar") + '</h1>',
+        '    <h1>' + escapeHtml(siteConfig.disabledTitle || "BUSBIB is tijdelijk niet beschikbaar") + '</h1>',
         '    <p>' + escapeHtml(siteConfig.disabledBody || "De website is momenteel uitgeschakeld. Zet de schakelaar terug op 1 om de site opnieuw te laden.") + '</p>',
         '  </div>',
         '</div>'
@@ -894,7 +896,7 @@
         '<div class="site-disabled-shell">',
         '  <div class="site-disabled-card site-maintenance-card" role="alert" aria-live="assertive">',
         '    <span class="site-disabled-badge site-maintenance-badge">' + escapeHtml(siteConfig.maintenanceBadge || "Onderhoudsmodus") + '</span>',
-        '    <h1>' + escapeHtml(siteConfig.maintenanceTitle || "Busbibliotheek is in onderhoud") + '</h1>',
+        '    <h1>' + escapeHtml(siteConfig.maintenanceTitle || "BUSBIB is in onderhoud") + '</h1>',
         '    <p>' + escapeHtml(siteConfig.maintenanceBody || "De site is momenteel in onderhoudsmodus en is tijdelijk niet bereikbaar. Probeer het later opnieuw.") + '</p>',
         '  </div>',
         '</div>'

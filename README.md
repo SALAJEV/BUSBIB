@@ -1,6 +1,6 @@
-# Busbibliotheek
+# BUSBIB
 
-Busbibliotheek is een mobile-first webapp voor het opzoeken van voertuigen van De Lijn. De applicatie combineert statische voertuigdata, realtime voertuigposities, halte-opzoekingen, weerinformatie, voertuigfoto's en een PWA/offline laag in een project.
+BUSBIB is een mobile-first webapp voor het opzoeken van voertuigen van De Lijn. De applicatie combineert statische voertuigdata, realtime voertuigposities, halte-opzoekingen, weerinformatie, voertuigfoto's en een PWA/offline laag in een project.
 
 De app is gemaakt voor spotters en reizigers die snel een voertuig willen terugvinden op nummer, nummerplaat of intern nummer, en daarna live willen volgen waar het zich bevindt.
 
@@ -22,7 +22,7 @@ De app is gemaakt voor spotters en reizigers die snel een voertuig willen terugv
 
 ## Projectoverzicht
 
-Busbibliotheek bestaat uit twee hoofdonderdelen:
+BUSBIB bestaat uit twee hoofdonderdelen:
 
 1. Een statische frontend in plain HTML, CSS en JavaScript.
 2. Een serverless API-laag in `functions/api.js` die requests naar externe bronnen proxyt en beveiligt.

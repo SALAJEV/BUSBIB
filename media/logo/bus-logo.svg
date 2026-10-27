@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="300" viewBox="0 0 1100 300" role="img" aria-labelledby="title desc">
+  <title id="title">BUSBIB</title>
+  <desc id="desc">Horizontaal BUSBIB-logo met een busboek-beeldmerk en lijnnummer 95.</desc>
+  <defs>
+    <linearGradient id="brand" x1="16" y1="18" x2="262" y2="264" gradientUnits="userSpaceOnUse"><stop stop-color="#187FA3"/><stop offset="1" stop-color="#0C587A"/></linearGradient>
+    <style>
+      .name { fill: #173344; }
+      .strap { fill: #537080; }
+      @media (prefers-color-scheme: dark) { .name { fill: #F7FAFC; } .strap { fill: #A8BAC5; } }
+    </style>
+  </defs>
+  <g transform="translate(15 25) scale(.49)">
+    <rect width="512" height="512" rx="112" fill="url(#brand)"/>
+    <path d="M91 324c69-25 124-19 165 17 41-36 96-42 165-17v86c-69-22-124-16-165 18-41-34-96-40-165-18z" fill="#F7FAFC"/>
+    <path d="M118 345c47-15 84-14 119 4v48c-34-21-73-26-119-14zm276 0c-47-15-84-14-119 4v48c34-21 73-26 119-14z" fill="#DCEAF0"/>
+    <path d="M256 341v84" fill="none" stroke="#B3CCD7" stroke-width="7" stroke-linecap="round"/>
+    <path d="M137 169c0-30 24-54 54-54h130c30 0 54 24 54 54v134H137z" fill="#F7FAFC"/>
+    <path d="M163 175c0-16 13-29 29-29h128c16 0 29 13 29 29v76H163z" fill="#124F6A"/>
+    <path d="M256 148v103" fill="none" stroke="#236E8B" stroke-width="6"/>
+    <path d="M149 270h214" fill="none" stroke="#B3CCD7" stroke-width="8" stroke-linecap="round"/>
+    <rect x="215" y="184" width="82" height="48" rx="13" fill="#F7FAFC"/>
+    <text x="256" y="218" text-anchor="middle" fill="#0C587A" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="800" letter-spacing="-1">95</text>
+    <rect x="153" y="273" width="36" height="10" rx="5" fill="#61C5D7"/><rect x="323" y="273" width="36" height="10" rx="5" fill="#61C5D7"/>
+    <circle cx="180" cy="303" r="18" fill="#103F58"/><circle cx="332" cy="303" r="18" fill="#103F58"/>
+    <circle cx="180" cy="303" r="6" fill="#B7D4DE"/><circle cx="332" cy="303" r="6" fill="#B7D4DE"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text class="name" x="295" y="158" font-size="76" font-weight="800" letter-spacing="-2.5">BUSBIB</text>
+    <rect x="300" y="190" width="54" height="6" rx="3" fill="#2D8BAF"/>
+    <text class="strap" x="372" y="198" font-size="20" font-weight="700" letter-spacing="3">BUSSPOTTER 95</text>
+  </g>
+</svg>
+

@@ -112,7 +112,7 @@ const PUBLIC_TRANSPORT_TILE_URL = "https://tile.memomaps.de/tilegen/{z}/{x}/{y}.
 const PUBLIC_TRANSPORT_TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &amp; <a href="https://www.xn--pnvkarte-m4a.de/">OPNVKarte</a>';
 const FALLBACK_TILE_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const FALLBACK_TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &amp; <a href="https://carto.com/">CARTO</a>';
-const BUSBIBLIOTHEEK_PUBLIC_BUS_URL = "https://busbibliotheek95.pages.dev/";
+const BUSBIB_PUBLIC_BUS_URL = "https://busbibliotheek95.pages.dev/";
 const NETWORK_CHECK_URL = `${window.location.origin}/manifest.json?network-check=1`;
 const NETWORK_CHECK_TIMEOUT_MS = 5000;
 const NETWORK_CHECK_CACHE_MS = 60000;
@@ -2578,7 +2578,7 @@ function setFirstRunWizardStep(step, moveFocus = true) {
 
   const isLastStep = firstRunCurrentStep === lastStep;
   const stepTitles = [
-    getLabel("firstRunTitle", "Welkom bij Busbibliotheek"),
+    getLabel("firstRunTitle", "Welkom bij BUSBIB"),
     t("language"),
     t("theme"),
     t("timeFormat")
@@ -2600,7 +2600,7 @@ function setFirstRunWizardStep(step, moveFocus = true) {
   if (firstRunBackBtnEl) firstRunBackBtnEl.hidden = firstRunCurrentStep === 0;
   if (firstRunConfirmBtnEl) {
     firstRunConfirmBtnEl.textContent = isLastStep
-      ? getLabel("firstRunConfirm", "Busbibliotheek starten")
+      ? getLabel("firstRunConfirm", "BUSBIB starten")
       : t("firstRunNext");
   }
 
@@ -3255,7 +3255,7 @@ function renderTermsModalContent() {
   const sections = [
     {
       title: getLabel("termsSectionUse", "Gebruik van de website"),
-      body: getLabel("termsUseBody", "Busbibliotheek is een onafhankelijk project en is niet verbonden aan De Lijn of een officiële vertegenwoordiger ervan. De site is bedoeld voor informatief persoonlijk gebruik. De informatie wordt zonder garanties aangeboden en kan vertragingen, fouten of onvolledigheden bevatten. Busbibliotheek is niet aansprakelijk voor onnauwkeurigheden. Gebruik is op eigen risico; raadpleeg voor officiële ritinformatie de bevoegde vervoersmaatschappij. Misbruik, overbelasting of onwettig gebruik van de site is niet toegestaan.")
+      body: getLabel("termsUseBody", "BUSBIB is een onafhankelijk project en is niet verbonden aan De Lijn of een officiële vertegenwoordiger ervan. De site is bedoeld voor informatief persoonlijk gebruik. De informatie wordt zonder garanties aangeboden en kan vertragingen, fouten of onvolledigheden bevatten. BUSBIB is niet aansprakelijk voor onnauwkeurigheden. Gebruik is op eigen risico; raadpleeg voor officiële ritinformatie de bevoegde vervoersmaatschappij. Misbruik, overbelasting of onwettig gebruik van de site is niet toegestaan.")
     },
     {
       title: getLabel("termsSectionSources", "Bronnen"),
@@ -3295,7 +3295,7 @@ function updateDocumentTitle(vehicleId = "") {
   const normalizedVehicleId = getVehicleDisplayId(vehicleId || currentVehicleId);
   document.title = normalizedVehicleId
     ? `${getLabel("vehicleTitlePrefix", "Voertuig")} ${normalizedVehicleId}`
-    : getLabel("appTitle", "Busbibliotheek");
+    : getLabel("appTitle", "BUSBIB");
 }
 
 const DEFAULT_HEADER_ROUTE = "95";
@@ -3964,7 +3964,7 @@ function getHomeGtfsMapVehicleLinkId(snapshot) {
 function getHomeGtfsMapVehicleUrl(snapshot) {
   const linkId = getHomeGtfsMapVehicleLinkId(snapshot);
   if (!linkId) return "";
-  const url = new URL(BUSBIBLIOTHEEK_PUBLIC_BUS_URL);
+  const url = new URL(BUSBIB_PUBLIC_BUS_URL);
   url.searchParams.set("bus", linkId);
   return url.toString();
 }
@@ -4396,8 +4396,8 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   if (photoUploadModalTitleEl) photoUploadModalTitleEl.textContent = getLabel("photoUploadTitle", "Foto uploaden");
   if (photoUploadModalSummaryEl) {
     photoUploadModalSummaryEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadSummary", "Help Busbibliotheek aanvullen met een foto van voertuig {id}."), visibleVehicleId)
-      : getLabel("photoUploadSummaryGeneric", "Help Busbibliotheek aanvullen met een foto van dit voertuig.");
+      ? fillTemplate(getLabel("photoUploadSummary", "Help BUSBIB aanvullen met een foto van voertuig {id}."), visibleVehicleId)
+      : getLabel("photoUploadSummaryGeneric", "Help BUSBIB aanvullen met een foto van dit voertuig.");
   }
   if (photoUploadModalBadgeEl) photoUploadModalBadgeEl.textContent = getLabel("photoUploadModalBadge", "Voertuigfoto ontbreekt");
   if (photoUploadModalNoteEl) {
@@ -4411,7 +4411,7 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
       ? fillTemplate(getLabel("photoUploadStep2", "Voeg je foto toe en vermeld voertuig {id}."), visibleVehicleId)
       : getLabel("photoUploadStep2Generic", "Voeg je foto toe en vermeld het voertuignummer.");
   }
-  if (photoUploadStep3El) photoUploadStep3El.textContent = getLabel("photoUploadStep3", "Na controle kan de foto op Busbibliotheek verschijnen.");
+  if (photoUploadStep3El) photoUploadStep3El.textContent = getLabel("photoUploadStep3", "Na controle kan de foto op BUSBIB verschijnen.");
   if (photoUploadOpenLinkEl) {
     photoUploadOpenLinkEl.textContent = getLabel("photoUploadOpen", "Open uploadformulier");
     photoUploadOpenLinkEl.href = PHOTO_UPLOAD_FORM_URL;
@@ -6072,7 +6072,7 @@ function formatWeatherMetric(value, suffix, digits = 0) {
 }
 
 function getWeatherSourceText() {
-  return getLabel("weatherApiSource", "Bron: Open-Meteo via Busbibliotheek");
+  return getLabel("weatherApiSource", "Bron: Open-Meteo via BUSBIB");
 }
 
 function renderWeatherModal(weatherData, latitude, longitude) {
@@ -6663,12 +6663,12 @@ function applyTranslations() {
   document.documentElement.lang = settings.language || DEFAULT_LANG;
   updateDocumentTitle();
   updateCopyrightText();
-  if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", getLabel("metaDescription", "Busbibliotheek voor bussen van De Lijn: zoek een voertuig en volg het live."));
-  splash?.setAttribute("aria-label", getLabel("splashAria", "Busbibliotheek laden"));
+  if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", getLabel("metaDescription", "BUSBIB voor bussen van De Lijn: zoek een voertuig en volg het live."));
+  splash?.setAttribute("aria-label", getLabel("splashAria", "BUSBIB laden"));
   syncTrackingStatusBanner();
   syncPhotoDelayBanner();
-  appTitleEl.textContent = getLabel("appTitle", "Busbibliotheek");
-  if (splashTitleEl) splashTitleEl.textContent = getLabel("appTitle", "Busbibliotheek");
+  appTitleEl.textContent = getLabel("appTitle", "BUSBIB");
+  if (splashTitleEl) splashTitleEl.textContent = getLabel("appTitle", "BUSBIB");
   appSubtitleEl.textContent = t("subtitle").replace(/\.\s*$/, "");
   if (splashCreditEl) splashCreditEl.textContent = getLabel("madeBy", "Made by @delijn_busspotter");
   if (headerVisualKickerEl) headerVisualKickerEl.textContent = getLabel("headerVisualKicker", "Realtime overzicht");
@@ -6809,7 +6809,7 @@ function applyTranslations() {
   if (closeBtnTextEl) closeBtnTextEl.textContent = getLabel("back", "Terug");
   if (offlinePillEl) offlinePillEl.textContent = getLabel("offlinePill", "Offline");
   if (offlineTitleEl) offlineTitleEl.textContent = getLabel("offlineTitle", "Geen internetverbinding");
-  if (offlineTextPrimaryEl) offlineTextPrimaryEl.textContent = getLabel("offlineTextPrimary", "Busbibliotheek kon geen werkende internetverbinding bevestigen.");
+  if (offlineTextPrimaryEl) offlineTextPrimaryEl.textContent = getLabel("offlineTextPrimary", "BUSBIB kon geen werkende internetverbinding bevestigen.");
   if (offlineTextSecondaryEl) offlineTextSecondaryEl.textContent = getLabel("offlineTextSecondary", "Realtimegegevens en live-opzoekingen zijn tijdelijk niet beschikbaar.");
   if (offlineRetryBtn) offlineRetryBtn.textContent = getLabel("offlineRetry", "Opnieuw proberen");
   if (funnyModalTitleEl) funnyModalTitleEl.textContent = getLabel("funnyTitle", "Buswijsheid");
@@ -6848,13 +6848,13 @@ function applyTranslations() {
   infoModalOkBtn.textContent = getLabel("close", "Sluiten");
   if (resetSiteDataBtn) resetSiteDataBtn.textContent = getLabel("resetSiteData", "Reset website");
   if (installGuideTitleEl) installGuideTitleEl.textContent = getLabel("installGuideTitle", "Installeren op iPhone");
-  if (installGuideSummaryEl) installGuideSummaryEl.textContent = getLabel("installGuideSummary", "Voeg Busbibliotheek toe aan je beginscherm via het deelmenu van Safari.");
+  if (installGuideSummaryEl) installGuideSummaryEl.textContent = getLabel("installGuideSummary", "Voeg BUSBIB toe aan je beginscherm via het deelmenu van Safari.");
   if (installGuideCloseBtn) installGuideCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (installGuideOkBtn) installGuideOkBtn.textContent = getLabel("close", "Sluiten");
-  if (firstRunTitleEl) firstRunTitleEl.textContent = getLabel("firstRunTitle", "Welkom bij Busbibliotheek");
+  if (firstRunTitleEl) firstRunTitleEl.textContent = getLabel("firstRunTitle", "Welkom bij BUSBIB");
   if (firstRunSummaryEl) firstRunSummaryEl.textContent = getLabel("firstRunSummary", "Kies je taal en uiterlijk voor je start. Je kan dit later altijd wijzigen in Instellingen.");
   if (firstRunIntroTitleEl) firstRunIntroTitleEl.textContent = getLabel("firstRunIntroTitle", "Volg voertuigen van De Lijn in realtime.");
-  if (firstRunDescriptionEl) firstRunDescriptionEl.textContent = getLabel("firstRunDescription", "Busbibliotheek helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.");
+  if (firstRunDescriptionEl) firstRunDescriptionEl.textContent = getLabel("firstRunDescription", "BUSBIB helpt je snel een voertuig terugvinden, live volgen en extra info bekijken zoals foto's, favorieten en vergelijking.");
   if (firstRunLanguageLabelEl) firstRunLanguageLabelEl.textContent = t("language");
   if (firstRunLanguageOptNlEl) firstRunLanguageOptNlEl.textContent = getLocalizedLanguageLabel("nl");
   if (firstRunLanguageOptFrEl) firstRunLanguageOptFrEl.textContent = getLocalizedLanguageLabel("fr");
@@ -6888,11 +6888,11 @@ function applyTranslations() {
   if (appDialogConfirmBtn) appDialogConfirmBtn.textContent = getLabel("dialogOk", "OK");
   if (halteSearchCloseBtn) halteSearchCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (reviewModalTitleEl) reviewModalTitleEl.textContent = getLabel("footerReview", "Feedback achterlaten");
-  if (reviewModalSummaryEl) reviewModalSummaryEl.textContent = getLabel("reviewSummary", "Laat weten wat beter kan of wat je goed vindt aan Busbibliotheek.");
+  if (reviewModalSummaryEl) reviewModalSummaryEl.textContent = getLabel("reviewSummary", "Laat weten wat beter kan of wat je goed vindt aan BUSBIB.");
   if (reviewModalCloseBtn) reviewModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (reviewModalDoneBtn) reviewModalDoneBtn.textContent = getLabel("close", "Sluiten");
   if (reviewFormFrameEl) {
-    reviewFormFrameEl.title = getLabel("reviewFormTitle", "Busbibliotheek reviewformulier");
+    reviewFormFrameEl.title = getLabel("reviewFormTitle", "BUSBIB reviewformulier");
     reviewFormFrameEl.textContent = t("loading");
   }
   if (reportModalTitleEl) reportModalTitleEl.textContent = getLabel("reportModalTitle", "Voertuig melden");
@@ -6900,14 +6900,14 @@ function applyTranslations() {
   if (reportModalCloseBtn) reportModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (reportModalDoneBtn) reportModalDoneBtn.textContent = getLabel("close", "Sluiten");
   if (reportFormFrameEl) {
-    reportFormFrameEl.title = getLabel("reportFormTitle", "Busbibliotheek meldformulier");
+    reportFormFrameEl.title = getLabel("reportFormTitle", "BUSBIB meldformulier");
     reportFormFrameEl.textContent = t("loading");
   }
   if (reportMobileLinkEl) reportMobileLinkEl.textContent = getLabel("reportMobileOpen", "Open meldformulier");
   if (photoUploadModalCloseBtn) photoUploadModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (photoUploadModalDoneBtn) photoUploadModalDoneBtn.textContent = getLabel("close", "Sluiten");
   if (termsModalTitleEl) termsModalTitleEl.textContent = getLabel("footerTerms", "Gebruiksvoorwaarden");
-  if (termsModalSummaryEl) termsModalSummaryEl.textContent = getLabel("termsSummary", "Korte standaardvoorwaarden voor het gebruik van Busbibliotheek.");
+  if (termsModalSummaryEl) termsModalSummaryEl.textContent = getLabel("termsSummary", "Korte standaardvoorwaarden voor het gebruik van BUSBIB.");
   if (termsModalCloseBtn) termsModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (termsModalDoneBtn) termsModalDoneBtn.textContent = getLabel("close", "Sluiten");
   if (weatherModalTitleEl) weatherModalTitleEl.textContent = getLabel("weatherModalTitle", "Weer op locatie");
@@ -7554,7 +7554,7 @@ function startPythonDownload() {
 
 async function resetSiteData() {
   if (!(await showAppConfirm(
-    getLabel("resetSiteDataConfirm", "Alles van Busbibliotheek op dit toestel resetten?"),
+    getLabel("resetSiteDataConfirm", "Alles van BUSBIB op dit toestel resetten?"),
     {
       title: getLabel("dialogConfirmTitle", "Bevestiging"),
       confirmLabel: getLabel("dialogOk", "OK")
@@ -10465,7 +10465,7 @@ async function updateRealtime(id){
     const tripHeadsign = pickFirstText(tripData?.trip_headsign, descriptor.headsign);
     const destinationText = getDestinationDisplayName(tripHeadsign) || "-";
     if (routeShort === "?" || destinationText === "-") {
-      console.warn("[busbibliotheek] lijn/bestemming niet gevonden", {
+      console.warn("[BUSBIB] lijn/bestemming niet gevonden", {
         vehicleId: normalizedRequestedId,
         gpsEntityId: cleanText(gpsEntity?.id || ""),
         currentStopId,
@@ -10621,7 +10621,23 @@ async function updateRealtime(id){
 }
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  let reloadingForUpdate = false;
+  // Reload once when a new service worker takes over so users always run the latest BUSBIB version
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloadingForUpdate) return;
+    reloadingForUpdate = true;
+    window.location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { scope: '/', updateViaCache: 'none' })
+    .then((registration) => {
+      const checkForUpdate = () => registration.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      });
+      window.addEventListener('online', checkForUpdate);
+      setInterval(checkForUpdate, 60 * 60 * 1000);
+    })
     .catch(err => console.error('Service Worker registratie mislukt:', err));
 }
 

@@ -1,25 +1,25 @@
-const CACHE_NAME = 'busbibliotheek-v180';
-const PHOTO_CACHE_NAME = 'busbibliotheek-photos-v1';
+const CACHE_NAME = 'busbib-v184';
+const PHOTO_CACHE_NAME = 'busbib-photos-v1';
+const NAVIGATION_TIMEOUT_MS = 4000;
 const PHOTO_CACHE_MAX_ENTRIES = 32;
 const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
 const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261022-7',
+  '/app.js?v=20261027-1',
   '/manifest.json',
-  '/style.css?v=20261022-7',
-  '/translations.js?v=20261022-7',
+  '/manifest-windows.json',
+  '/style.css?v=20261027-1',
+  '/translations.js?v=20261027-1',
   '/site-config.js?v=20261018-13',
-  '/media/icons/pwa-icon-192.png',
-  '/media/icons/pwa-icon-512.png',
-  '/media/icons/pwa-icon-maskable-512.png',
-  '/media/icons/pwa-icon-180.png',
-  '/media/icons/logo.png',
+  '/media/logo/logo.png',
+  '/media/logo/busbib-apple-touch-icon.png',
+  '/media/logo/busbib-website-logo.svg',
   '/media/icons/navicon.png',
   '/media/icons/navicon_green.png',
   '/media/icons/hansea.png',
-  '/media/icons/favicon.ico'
+  '/media/logo/busbib-website-favicon.ico'
 ];
 
 function isHttpCacheRequest(requestOrUrl) {
@@ -76,7 +76,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (
-            cacheName.startsWith('busbibliotheek-') &&
+            (cacheName.startsWith('busbib-') || cacheName.startsWith('busbibliotheek-')) &&
             cacheName !== CACHE_NAME &&
             cacheName !== PHOTO_CACHE_NAME
           ) {
@@ -84,8 +84,13 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.registration.navigationPreload?.enable().catch(() => {}))
+      .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
@@ -130,20 +135,32 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // HTML navigation: network first with cached index fallback
+  // HTML navigation: network first (with preload and timeout) and cached shell fallback
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request, { cache: 'no-store' })
-        .then(response => {
-          const cloned = response.clone();
-          cacheInBackground(event, APP_SHELL_CACHE_KEY, cloned);
-          return response;
-        })
-        .catch(async () => {
-          const cachedIndex = await caches.match(APP_SHELL_CACHE_KEY, { ignoreSearch: true });
-          return cachedIndex || offlineTextResponse;
-        })
-    );
+    event.respondWith((async () => {
+      const cachedShell = () => caches.match(APP_SHELL_CACHE_KEY, { ignoreSearch: true });
+      const networkPromise = (async () => {
+        const preload = event.preloadResponse ? await event.preloadResponse : null;
+        return preload || fetch(request, { cache: 'no-store' });
+      })();
+      networkPromise.then(response => {
+        if (response && response.ok) cacheInBackground(event, APP_SHELL_CACHE_KEY, response.clone());
+      }).catch(() => {});
+
+      try {
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), NAVIGATION_TIMEOUT_MS)
+        );
+        const response = await Promise.race([networkPromise, timeout]);
+        if (response && (response.ok || !(await cachedShell()))) return response;
+        return (await cachedShell()) || response;
+      } catch (_) {
+        // Slow or failed network: prefer the cached shell, otherwise keep waiting for the network
+        const cached = await cachedShell();
+        if (cached) return cached;
+        try { return await networkPromise; } catch (__) { return offlineTextResponse; }
+      }
+    })());
     return;
   }
 
@@ -210,3 +227,4 @@ self.addEventListener('fetch', event => {
     );
   }
 });
+

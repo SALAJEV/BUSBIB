@@ -2,7 +2,7 @@ window.BB_SITE_CONFIG = {
   siteEnabled: 1,
   maintenanceModeEnabled: 0,
   maintenanceBadge: "Onderhoudsmodus",
-  maintenanceTitle: "Busbibliotheek is in onderhoud",
+  maintenanceTitle: "BUSBIB is in onderhoud",
   maintenanceBody: "De site is momenteel in onderhoudsmodus en is tijdelijk niet bereikbaar. Probeer het later opnieuw.",
   trackingStatusBannerEnabled: 0,
   trackingStatusBannerText: "Realtime-informatie kan tijdelijk vertraagd zijn.",
@@ -11,6 +11,6 @@ window.BB_SITE_CONFIG = {
   bannerText: "Realtime-informatie kan tijdelijk vertraagd zijn.",
   photoDelayEnabled: 0,
   photoDelayText: "Door omstandigheden worden foto's later ge\u00fcpload dan normaal. Bedankt voor je begrip.",
-  disabledTitle: "Busbibliotheek is tijdelijk niet beschikbaar",
+  disabledTitle: "BUSBIB is tijdelijk niet beschikbaar",
   disabledBody: "De website is momenteel tijdelijk niet beschikbaar. Probeer het later opnieuw."
 };

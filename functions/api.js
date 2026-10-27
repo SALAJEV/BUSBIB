@@ -171,7 +171,7 @@ function jsonResponse(payload, status = 200) {
 async function getRealtimeFromCache(allowStale = false) {
   try {
     const cache = caches.default;
-    const cacheKey = new Request("https://api.busbibliotheek.local/__cache/realtime", { method: "GET" });
+    const cacheKey = new Request("https://api.busbib.local/__cache/realtime", { method: "GET" });
     const cached = await cache.match(cacheKey);
     if (!cached) return null;
 
@@ -188,8 +188,8 @@ async function getRealtimeFromCache(allowStale = false) {
     if (isStale && !allowStale) return null;
 
     const response = new Response(cached.body, { status: 200, headers: JSON_HEADERS });
-    response.headers.set("X-Busbibliotheek-Realtime-Cache", isStale ? "stale" : "fresh");
-    response.headers.set("X-Busbibliotheek-Cache", isStale ? "stale" : "fresh");
+    response.headers.set("X-BUSBIB-Realtime-Cache", isStale ? "stale" : "fresh");
+    response.headers.set("X-BUSBIB-Cache", isStale ? "stale" : "fresh");
     return response;
   } catch {
     return null;
@@ -267,7 +267,7 @@ function normalizeResource(value) {
 async function fetchUpstream(url, resource, apiKey) {
   const requestHeaders = {
     Accept: "application/json",
-    "User-Agent": "Busbibliotheek/1.0"
+    "User-Agent": "BUSBIB/1.0"
   };
 
   if (resource === "realtime" || resource === "haltes" || resource === "gtfsalerts") {
@@ -366,7 +366,7 @@ function normalizeIntegerParam(value) {
 
 function buildRealtimeCacheKey() {
   // Use consistent static key for realtime cache
-  return new Request("https://api.busbibliotheek.local/__cache/realtime", { method: "GET" });
+  return new Request("https://api.busbib.local/__cache/realtime", { method: "GET" });
 }
 
 async function storeCachedRealtimeResponse(cacheKey, payload) {
@@ -374,7 +374,7 @@ async function storeCachedRealtimeResponse(cacheKey, payload) {
     const cache = caches.default;
     const cacheHeaders = new Headers(JSON_HEADERS);
     cacheHeaders.set("Cache-Control", `public, max-age=${REALTIME_EDGE_CACHE_TTL_SECONDS}, stale-while-revalidate=${REALTIME_EDGE_STALE_WINDOW_SECONDS}`);
-    cacheHeaders.set("X-Busbibliotheek-Realtime-Cache", "fresh");
+    cacheHeaders.set("X-BUSBIB-Realtime-Cache", "fresh");
     cacheHeaders.set("X-Cache-Time", new Date().toISOString());
     
     await cache.put(

@@ -68,7 +68,7 @@ export async function onRequest(context) {
         headers: {
           Accept: format === "protobuf" ? "application/x-protobuf" : "application/json",
           "Ocp-Apim-Subscription-Key": apiKey,
-          "User-Agent": "Busbibliotheek/1.0"
+          "User-Agent": "BUSBIB/1.0"
         },
         signal: controller.signal
       });
