@@ -3979,9 +3979,28 @@ async function renderDashboardMap(snapshots) {
   }, 0);
 }
 
+function buildLoadingSkeletonMarkup(label, lineCount = 3) {
+  const lineClasses = ["long", "medium", "short", "medium", "long"];
+  const lines = Array.from({ length: lineCount }, (_, index) =>
+    `<span class="skeleton-line skeleton-line--${lineClasses[index % lineClasses.length]}"></span>`
+  ).join("");
+  return `<div class="loading-skeleton" role="status" aria-live="polite">
+    <div class="loading-skeleton-head"><span class="spinner" aria-hidden="true"></span><span class="loading">${escapeHtml(label)}</span></div>
+    ${lines}
+  </div>`;
+}
+
 function setHomeGtfsMapStatus(message, tone = "") {
   if (!homeGtfsMapStatusEl) return;
-  homeGtfsMapStatusEl.textContent = message;
+  homeGtfsMapStatusEl.textContent = "";
+  if (tone === "loading") {
+    const spinnerEl = document.createElement("span");
+    spinnerEl.className = "spinner";
+    spinnerEl.setAttribute("aria-hidden", "true");
+    homeGtfsMapStatusEl.append(spinnerEl, document.createTextNode(message));
+  } else {
+    homeGtfsMapStatusEl.textContent = message;
+  }
   homeGtfsMapStatusEl.dataset.tone = tone;
 }
 
@@ -4174,7 +4193,7 @@ async function refreshHomeGtfsMap(options = {}) {
   if (homeGtfsMapPausedByInactivity && !force) return;
   homeGtfsMapIsRefreshing = true;
   const requestToken = ++homeGtfsMapRequestToken;
-  setHomeGtfsMapStatus(getLabel("homeGtfsMapLoading", "Kaart wordt geladen..."));
+  setHomeGtfsMapStatus(getLabel("homeGtfsMapLoading", "Kaart wordt geladen..."), "loading");
   homeGtfsMapRefreshBtn?.setAttribute("disabled", "disabled");
 
   try {
@@ -4583,6 +4602,7 @@ function ensureVehiclePhotoLoaderElement() {
     <span class="page-loading-spinner vehicle-photo-loader-spinner" aria-hidden="true"></span>
     <span class="vehicle-photo-loader-text">${escapeHtml(getLabel("photoLoading", "Foto wordt geladen..."))}</span>
   `;
+  loaderEl.setAttribute("role", "status");
   vehiclePhotoFrameEl.appendChild(loaderEl);
   vehiclePhotoLoaderEl = loaderEl;
   return loaderEl;
@@ -9837,7 +9857,14 @@ async function zoekAlles(options = {}) {
     setPageLoading(false);
     return;
   }
-  if (voertuigen.length === 0) await laadVoertuigen();
+  if (voertuigen.length === 0) {
+    // Vehicle data still has to load: show a skeleton instead of an empty card
+    staticVehicleCardEl.hidden = false;
+    resultsWrapEl.classList.add("show");
+    resultsGridEl.classList.add("show");
+    vasteDataEl.innerHTML = buildLoadingSkeletonMarkup(t("loading"), 4);
+    await laadVoertuigen();
+  }
   if (searchToken !== latestSearchToken) return;
   const resolved = resolveVehicleQuery(query, getVehicleInputResolvedId(voertuigInput));
   const activeVehicleId = resolved.vehicleId || normalize(query);
@@ -9906,7 +9933,7 @@ async function zoekAlles(options = {}) {
   }
 
   setRealtimeMarkup(
-    `<div class="realtime-loading-inline"><span class="spinner"></span><span class="loading">${t("loading")}</span></div>`,
+    buildLoadingSkeletonMarkup(t("loading"), 3),
     `loading:${activeVehicleId}:${settings.language}`
   );
   // The vehicle record is already on screen. Keep realtime loading inline instead

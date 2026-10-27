@@ -2173,15 +2173,111 @@ footer {
   filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.2));
 }
 
+.vehicle-photo-image.is-visible {
+  animation: busbib-fade-in 320ms ease-out;
+}
+
 .vehicle-photo-loader {
-  position: absolute;
-  inset: auto 16px 16px auto;
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--line);
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background:
+    linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.13) 50%, transparent 70%) 0 0 / 250% 100%,
+    radial-gradient(ellipse at 50% 45%, #3b4652, #202832 76%);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.92rem;
+  font-weight: 700;
+  pointer-events: none;
+  animation: busbib-fade-in 220ms ease-out, busbib-shimmer 1.7s ease-in-out infinite;
+}
+
+.vehicle-photo-loader[hidden] {
+  display: none;
+}
+
+.vehicle-photo-loader .vehicle-photo-loader-spinner {
+  width: 46px;
+  height: 46px;
+  border-width: 4px;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: color-mix(in srgb, var(--accent) 45%, #ffffff);
+}
+
+.spinner {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid color-mix(in srgb, var(--accent) 22%, transparent);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 850ms linear infinite;
+  vertical-align: -3px;
+  animation: spin 800ms linear infinite;
+}
+
+.skeleton-line,
+.skeleton-block {
+  display: block;
+  border-radius: 8px;
+  background:
+    linear-gradient(100deg, transparent 25%, color-mix(in srgb, var(--accent) 14%, var(--surface)) 50%, transparent 75%) 0 0 / 250% 100%,
+    var(--surface-soft);
+  animation: busbib-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 14px;
+}
+
+.skeleton-line--long { width: 86%; }
+.skeleton-line--medium { width: 64%; }
+.skeleton-line--short { width: 42%; }
+
+.skeleton-block {
+  height: clamp(120px, 20vw, 200px);
+  border-radius: var(--radius-md);
+}
+
+.loading-skeleton {
+  display: grid;
+  gap: 12px;
+  padding: 4px 0 8px;
+}
+
+.loading-skeleton-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.loading-skeleton-head .loading {
+  padding: 0;
+}
+
+.realtime-loading-inline {
+  min-width: 0;
+}
+
+.home-gtfs-map-status[data-tone="loading"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes busbib-shimmer {
+  from { background-position: 150% 0, 0 0; }
+  to { background-position: -50% 0, 0 0; }
+}
+
+@keyframes busbib-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .photo-nav-btn {
