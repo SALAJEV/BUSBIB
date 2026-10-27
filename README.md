@@ -60,6 +60,8 @@ De frontend wordt rechtstreeks geladen vanuit de rootbestanden:
 
 Er wordt bewust geen framework zoals React, Vue of Angular gebruikt. De app is volledig geschreven in vanilla JavaScript en werkt met DOM-manipulatie, lokale state, `localStorage`, `fetch`, `history` en een service worker.
 
+De hoofdnavigatie gebruikt deelbare URL's via de `view`-queryparameter, zoals `?view=halte`, `?view=lijn`, `?view=stalk` en `?view=menu`. Navigeren werkt samen met de browsergeschiedenis; voertuiglinks blijven beschikbaar via `?bus=<nummer>` en optioneel `&compare=<nummer>`.
+
 ### API-laag
 
 `functions/api.js` fungeert als proxy tussen de frontend en externe APIs. Dat doet drie belangrijke dingen:

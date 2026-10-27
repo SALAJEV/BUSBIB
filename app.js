@@ -25,10 +25,17 @@ const appShellEl = document.querySelector(".app-shell");
 const favoritesBackdropEl = document.getElementById("favoritesBackdrop");
 const favoritesToggleBtn = document.getElementById("favoritesToggleBtn");
 const favoritesPanelEl = document.getElementById("favoritesPanel");
+const routePageOutletEl = document.getElementById("routePageOutlet");
 const favoritesPanelCloseBtn = document.getElementById("favoritesPanelCloseBtn");
 const favoritesTopEl = document.querySelector(".favorites-top");
 const headerActionsEl = document.querySelector(".header-actions");
 const headerSearchRowEl = document.querySelector(".search-row");
+const primaryNavigationEl = document.getElementById("primaryNavigation");
+const navHomeBtn = document.getElementById("navHomeBtn");
+const navHalteBtn = document.getElementById("navHalteBtn");
+const navLineBtn = document.getElementById("navLineBtn");
+const navDashboardBtn = document.getElementById("navDashboardBtn");
+const navMoreBtn = document.getElementById("navMoreBtn");
 window.addEventListener('beforeinstallprompt', (e) => {
   // The site has its own install action and calls prompt() after a user click.
   e.preventDefault();
@@ -593,6 +600,13 @@ const lineSearchStatusEl = document.getElementById("lineSearchStatus");
 const lineSearchResultsEl = document.getElementById("lineSearchResults");
 const haltSearchResultsListEl = document.getElementById("haltSearchResultsList");
 
+routePageOutletEl?.append(
+  halteSearchModalEl,
+  lineSearchModalEl,
+  dashboardPanelEl,
+  favoritesBackdropEl
+);
+
 let voertuigen = [];
 let trips = [];
 let routes = [];
@@ -640,6 +654,7 @@ let currentVehiclePhotoEntries = [];
 let currentVehiclePhotoIndex = 0;
 let favorites = [];
 let favoritesPanelOpen = false;
+let currentPageView = "home";
 let favoritesPanelRestoreFocusEl = null;
 let feedEndDateValue = "";
 let vehiclesSourceUpdatedAt = "";
@@ -666,7 +681,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.22-4";
+const APP_VERSION = "2026.10.27-2";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -1867,8 +1882,6 @@ function registerOverlayModal(modalEl) {
   installGuideModalEl,
   firstRunModalEl,
   appDialogModalEl,
-  halteSearchModalEl,
-  lineSearchModalEl,
   reviewModalEl,
   reportModalEl,
   photoUploadModalEl,
@@ -1997,7 +2010,7 @@ function syncInteractiveOverlayState() {
       favoritesPanelEl.inert = false;
       favoritesPanelEl.removeAttribute("inert");
     } else {
-      favoritesPanelEl.inert = !favoritesPanelOpen || activeOverlayEl !== favoritesBackdropEl;
+      favoritesPanelEl.inert = !favoritesPanelOpen;
     }
   }
 }
@@ -2008,7 +2021,7 @@ function openOverlayModal(modalEl, options = {}) {
     focusTarget = null,
     closeMenu = true
   } = options;
-  if (closeMenu) setFavoritesPanel(false);
+  if (closeMenu && getRouteStateFromLocation().view !== "menu") setFavoritesPanel(false);
   overlayModalRestoreFocusMap.set(
     modalEl,
     document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -2090,14 +2103,19 @@ function closeTransientOverlays() {
   hidePhotoUploadModal();
   hideTermsModal();
   hideFunnyModal();
-  hideHalteSearchModal();
 }
 
 function getRouteStateFromLocation() {
   const params = new URLSearchParams(window.location.search);
   const bus = normalize(params.get("bus") || "");
   const compare = normalize(params.get("compare") || "");
-  const view = params.get("view") === "stalk" ? "stalk" : (bus ? "vehicle" : "home");
+  const requestedView = params.get("view") || "";
+  const pageViews = new Set(["halte", "lijn", "menu", "stalk"]);
+  const view = requestedView === "stalk"
+    ? "stalk"
+    : bus
+      ? "vehicle"
+      : (pageViews.has(requestedView) ? requestedView : "home");
   return {
     view,
     bus,
@@ -2106,6 +2124,13 @@ function getRouteStateFromLocation() {
 }
 
 function getCurrentRouteState() {
+  if (currentPageView !== "home") {
+    return {
+      view: currentPageView,
+      bus: "",
+      compare: ""
+    };
+  }
   if (isDashboardPanelOpen()) {
     return {
       view: "stalk",
@@ -2121,14 +2146,15 @@ function getCurrentRouteState() {
 }
 
 function buildUrlForRouteState(routeState = {}) {
+  const pageViews = new Set(["halte", "lijn", "menu", "stalk"]);
   const normalizedState = {
-    view: routeState.view === "stalk" ? "stalk" : routeState.bus ? "vehicle" : "home",
+    view: pageViews.has(routeState.view) ? routeState.view : routeState.bus ? "vehicle" : "home",
     bus: normalize(routeState.bus || ""),
     compare: normalize(routeState.compare || "")
   };
   const url = new URL(window.location.href);
 
-  if (normalizedState.view === "stalk") {
+  if (normalizedState.view !== "vehicle") {
     url.searchParams.delete("bus");
     url.searchParams.delete("compare");
   } else {
@@ -2139,7 +2165,7 @@ function buildUrlForRouteState(routeState = {}) {
     else url.searchParams.delete("compare");
   }
 
-  if (normalizedState.view === "stalk") url.searchParams.set("view", "stalk");
+  if (pageViews.has(normalizedState.view)) url.searchParams.set("view", normalizedState.view);
   else url.searchParams.delete("view");
 
   return `${url.pathname}${url.search}${url.hash}`;
@@ -2174,6 +2200,76 @@ function navigateHomeAndReload(options = {}) {
   window.location[replaceHistory ? "replace" : "assign"](homeUrl);
 }
 
+function navigateToPage(view) {
+  const pageViews = new Set(["home", "halte", "lijn", "menu", "stalk"]);
+  if (!pageViews.has(view) || (view === "stalk" && !isStalkModeAvailable())) return;
+  const nextState = { view, bus: "", compare: "" };
+  const currentState = getCurrentRouteState();
+  if (routeStatesEqual(currentState, nextState)) return;
+  window.history.pushState({
+    bbRoute: true,
+    view,
+    bus: "",
+    compare: ""
+  }, "", buildUrlForRouteState(nextState));
+  void applyRouteStateFromLocation();
+}
+
+function isMobileMenuOverlay() {
+  return getRouteStateFromLocation().view === "menu" &&
+    window.matchMedia("(max-width: 680px)").matches;
+}
+
+function syncFavoritesMenuPlacement() {
+  if (!favoritesBackdropEl || !routePageOutletEl) return;
+  const destination = isMobileMenuOverlay() ? document.body : routePageOutletEl;
+  if (favoritesBackdropEl.parentElement !== destination) {
+    destination.append(favoritesBackdropEl);
+  }
+}
+
+function syncRoutePageBodyState(view = currentPageView) {
+  const isMobileMenu = view === "menu" && window.matchMedia("(max-width: 680px)").matches;
+  document.body.dataset.pageView = view;
+  document.body.classList.toggle(
+    "route-page-open",
+    view !== "home" && view !== "vehicle" && !isMobileMenu
+  );
+}
+
+function goBackFromRoutePage() {
+  if (window.history.state?.bbRoute) {
+    window.history.back();
+    return;
+  }
+  navigateToPage("home");
+}
+
+function setCurrentPageView(view) {
+  currentPageView = view;
+  const pageElements = [halteSearchModalEl, lineSearchModalEl, favoritesBackdropEl];
+  pageElements.forEach((pageEl) => {
+    if (!pageEl) return;
+    const isActive = pageEl.dataset.routeView === view;
+    pageEl.hidden = !isActive;
+    pageEl.setAttribute("aria-hidden", String(!isActive));
+  });
+  const navButtonsByView = {
+    home: navHomeBtn,
+    halte: navHalteBtn,
+    lijn: navLineBtn,
+    stalk: navDashboardBtn,
+    menu: navMoreBtn
+  };
+  Object.entries(navButtonsByView).forEach(([navView, buttonEl]) => {
+    if (navView === view) buttonEl?.setAttribute("aria-current", "page");
+    else buttonEl?.removeAttribute("aria-current");
+  });
+  setFavoritesPanel(view === "menu");
+  syncRoutePageBodyState(view);
+  updateDocumentTitle("");
+}
+
 function isSpecialVehicleCommand(query = "") {
   const normalizedQuery = (query || "").toString().trim().toLowerCase();
   return ["python", "info", "best", "bus beih"].includes(normalizedQuery);
@@ -2188,6 +2284,7 @@ function initializeRouteHistory() {
     return;
   }
 
+  routeNavigationLocked = true;
   const currentUrl = buildUrlForRouteState(routeState);
   const homeState = { bbRoute: true, view: "home", bus: "", compare: "" };
   window.history.replaceState(homeState, "", buildUrlForRouteState(homeState));
@@ -2832,15 +2929,18 @@ function showAppConfirm(message, options = {}) {
   });
 }
 
-function showHalteSearchModal() {
+function prepareHalteSearchPage() {
   if (!halteSearchModalEl) return;
   halteSearchRequestToken += 1;
   setHalteStatus("");
   clearHalteSearchResults();
-  openOverlayModal(halteSearchModalEl, { focusTarget: haltecodeInputEl });
   void laadStops().catch((error) => {
     console.warn("Haltes vooraf laden mislukt", error);
   });
+}
+
+function showHalteSearchModal() {
+  navigateToPage("halte");
 }
 
 function hideHalteSearchModal() {
@@ -2848,7 +2948,7 @@ function hideHalteSearchModal() {
   if (haltecodeInputEl) haltecodeInputEl.value = "";
   setHalteStatus("");
   clearHalteSearchResults();
-  closeOverlayModal(halteSearchModalEl);
+  if (currentPageView === "halte") goBackFromRoutePage();
 }
 
 function setLineSearchStatus(message, isError = false) {
@@ -2864,7 +2964,7 @@ function clearLineSearchSuggestions() {
   lineSearchSuggestionsEl.hidden = true;
 }
 
-function showLineSearchModal() {
+function prepareLineSearchPage() {
   if (!lineSearchModalEl) return;
   lineSearchRequestToken += 1;
   if (lineSearchInputEl) lineSearchInputEl.value = "";
@@ -2872,7 +2972,10 @@ function showLineSearchModal() {
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
   setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
-  openOverlayModal(lineSearchModalEl, { focusTarget: lineSearchInputEl });
+}
+
+function showLineSearchModal() {
+  navigateToPage("lijn");
 }
 
 function hideLineSearchModal() {
@@ -2882,7 +2985,7 @@ function hideLineSearchModal() {
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
   setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
-  closeOverlayModal(lineSearchModalEl);
+  if (currentPageView === "lijn") goBackFromRoutePage();
 }
 
 function getLineSearchTerms(query) {
@@ -3430,8 +3533,19 @@ function hideTermsModal() {
 
 function updateDocumentTitle(vehicleId = "") {
   const normalizedVehicleId = getVehicleDisplayId(vehicleId || currentVehicleId);
-  document.title = normalizedVehicleId
-    ? `${getLabel("vehicleTitlePrefix", "Voertuig")} ${normalizedVehicleId}`
+  if (normalizedVehicleId) {
+    document.title = `${getLabel("vehicleTitlePrefix", "Voertuig")} ${normalizedVehicleId}`;
+    return;
+  }
+  const pageTitleByView = {
+    halte: haltModuleTitleEl,
+    lijn: lineSearchTitleEl,
+    menu: morePanelTitleEl,
+    stalk: dashboardTitleEl
+  };
+  const pageTitle = pageTitleByView[currentPageView]?.textContent.trim();
+  document.title = pageTitle
+    ? `${pageTitle} - ${getLabel("appTitle", "BUSBIB")}`
     : getLabel("appTitle", "BUSBIB");
 }
 
@@ -3689,6 +3803,9 @@ async function applyRouteStateFromLocation() {
   closeTransientOverlays();
 
   try {
+    currentPageView = routeState.view === "vehicle" ? "home" : routeState.view;
+    setCurrentPageView(currentPageView);
+    if (routeState.view !== "stalk") closeDashboardPanel({ historyMode: "replace" });
     if (routeState.bus && voertuigen.length === 0) await laadVoertuigen();
 
     if (routeState.bus) {
@@ -3728,9 +3845,11 @@ async function applyRouteStateFromLocation() {
 
     if (routeState.view === "stalk") {
       await openDashboardPanel({ historyMode: "replace" });
-    } else {
-      closeDashboardPanel({ historyMode: "replace" });
     }
+    setCurrentPageView(routeState.view === "vehicle" ? "home" : routeState.view);
+    setHomeGtfsMapVisible(routeState.view === "home" || isMobileMenuOverlay());
+    if (routeState.view === "halte") prepareHalteSearchPage();
+    if (routeState.view === "lijn") prepareLineSearchPage();
   } finally {
     routeNavigationLocked = false;
     updateUrlState("replace");
@@ -3857,12 +3976,14 @@ function showDashboardSetupModal() {
 }
 
 function hideDashboardSetupModal() {
+  const cancelingStalkSetup = currentPageView === "stalk" && !isDashboardPanelOpen() && !routeNavigationLocked;
   closeOverlayModal(dashboardSetupModalEl);
   document.body.classList.remove("dashboard-setup-open");
   dashboardSetupValidation = [];
   dashboardSetupDraftValues = [];
   dashboardSetupDraftResolvedIds = [];
   setDashboardSetupError("");
+  if (cancelingStalkSetup) goBackFromRoutePage();
 }
 
 function isStalkModeAvailable() {
@@ -3872,6 +3993,7 @@ function isStalkModeAvailable() {
 function syncStalkModeAvailability() {
   const isAvailable = isStalkModeAvailable();
   if (dashboardToggleBtn) dashboardToggleBtn.hidden = !isAvailable;
+  if (navDashboardBtn) navDashboardBtn.hidden = !isAvailable;
   if (!isAvailable) {
     hideDashboardSetupModal();
     closeDashboardPanel();
@@ -6855,6 +6977,18 @@ function applyTranslations() {
   if (installBtn) installBtn.textContent = t("install");
   const moreLabel = getLabel("more", "Meer");
   const menuLabel = getLabel("menu", "Menu");
+  if (primaryNavigationEl) primaryNavigationEl.setAttribute("aria-label", getLabel("primaryNavigation", "Hoofdnavigatie"));
+  const navHomeTextEl = document.getElementById("navHomeText");
+  const navHalteTextEl = document.getElementById("navHalteText");
+  const navLineTextEl = document.getElementById("navLineText");
+  const navDashboardTextEl = document.getElementById("navDashboardText");
+  const navMoreTextEl = document.getElementById("navMoreText");
+  if (navHomeTextEl) navHomeTextEl.textContent = getLabel("navHome", "Homepagina");
+  if (navHalteTextEl) navHalteTextEl.textContent = getLabel("haltSearch", "Halte zoeken");
+  if (navLineTextEl) navLineTextEl.textContent = getLabel("lineSearch", "Lijn zoeken");
+  if (navDashboardTextEl) navDashboardTextEl.textContent = getLabel("dashboard", "Stalk modus");
+  if (navMoreTextEl) navMoreTextEl.textContent = menuLabel;
+  if (navMoreBtn) navMoreBtn.setAttribute("aria-label", menuLabel);
   favoritesToggleBtn.title = menuLabel;
   favoritesToggleBtn.setAttribute("aria-label", menuLabel);
   if (favoritesPanelCloseBtn) favoritesPanelCloseBtn.setAttribute("aria-label", getLabel("menuClose", "Menu sluiten"));
@@ -7490,87 +7624,40 @@ async function loadFeedStatus() {
 }
 
 function setFavoritesPanel(open) {
-  const shouldOpen = !!open;
-  if (!favoritesBackdropEl || !favoritesPanelEl || !favoritesToggleBtn) {
-    favoritesPanelOpen = false;
-    document.body.classList.remove("more-open");
-    removeInteractiveOverlay(favoritesBackdropEl);
-    syncInteractiveOverlayState();
-    return;
-  }
-  if (!open && favoritesBackdropEl.contains(document.activeElement)) {
-    const savedTarget = favoritesPanelRestoreFocusEl;
-    const focusTarget =
-      savedTarget instanceof HTMLElement &&
-      savedTarget.isConnected &&
-      !favoritesBackdropEl.contains(savedTarget)
-        ? savedTarget
-        : favoritesToggleBtn;
-    try {
-      focusTarget.focus({ preventScroll: true });
-    } catch (_) {
-      focusTarget.focus();
+  const isMenuRoute = getRouteStateFromLocation().view === "menu";
+  const wasMobileMenuOverlay = interactiveOverlayStack.includes(favoritesBackdropEl);
+  syncFavoritesMenuPlacement();
+  favoritesPanelOpen = !!open || isMenuRoute;
+  if (favoritesBackdropEl) {
+    favoritesBackdropEl.hidden = !favoritesPanelOpen;
+    favoritesBackdropEl.setAttribute("aria-hidden", String(!favoritesPanelOpen));
+    if (isMobileMenuOverlay() && favoritesPanelOpen) {
+      favoritesBackdropEl.setAttribute("role", "dialog");
+      favoritesBackdropEl.setAttribute("aria-modal", "true");
+    } else {
+      favoritesBackdropEl.removeAttribute("role");
+      favoritesBackdropEl.removeAttribute("aria-modal");
     }
   }
-  if (shouldOpen === favoritesPanelOpen) {
-    if (!shouldOpen) {
-      favoritesPanelEl.setAttribute("aria-hidden", "true");
-      favoritesPanelEl.hidden = true;
-      favoritesBackdropEl.setAttribute("aria-hidden", "true");
-      favoritesBackdropEl.removeAttribute("data-overlay-state");
-      favoritesBackdropEl.style.removeProperty("display");
-      favoritesBackdropEl.style.removeProperty("visibility");
-      favoritesBackdropEl.style.removeProperty("pointer-events");
-      favoritesBackdropEl.hidden = true;
-      favoritesToggleBtn.setAttribute("aria-expanded", "false");
-      favoritesToggleBtn.classList.remove("active");
-      document.body.classList.remove("more-open");
-      removeInteractiveOverlay(favoritesBackdropEl);
-      syncInteractiveOverlayState();
-    }
-    return;
+  if (favoritesPanelEl) {
+    favoritesPanelEl.hidden = !favoritesPanelOpen;
+    favoritesPanelEl.setAttribute("aria-hidden", String(!favoritesPanelOpen));
   }
-  favoritesPanelOpen = shouldOpen;
-  if (favoritesPanelOpen) {
-    favoritesPanelRestoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : favoritesToggleBtn;
-    favoritesBackdropEl.hidden = false;
-    favoritesBackdropEl.setAttribute("aria-hidden", "false");
-    favoritesBackdropEl.setAttribute("data-overlay-state", "open");
-    favoritesBackdropEl.style.display = "grid";
-    favoritesBackdropEl.style.visibility = "visible";
-    favoritesBackdropEl.style.pointerEvents = "auto";
-    favoritesPanelEl.hidden = false;
-    favoritesPanelEl.setAttribute("aria-hidden", "false");
+  favoritesToggleBtn?.setAttribute("aria-expanded", String(favoritesPanelOpen));
+  navMoreBtn?.setAttribute("aria-expanded", String(favoritesPanelOpen));
+  favoritesToggleBtn?.classList.toggle("active", favoritesPanelOpen);
+  navMoreBtn?.classList.toggle("active", favoritesPanelOpen);
+  if (favoritesPanelEl && "inert" in favoritesPanelEl) {
+    favoritesPanelEl.inert = !favoritesPanelOpen;
+  }
+  if (isMobileMenuOverlay() && favoritesPanelOpen) {
     pushInteractiveOverlay(favoritesBackdropEl);
   } else {
-    favoritesPanelEl.setAttribute("aria-hidden", "true");
-    favoritesPanelEl.hidden = true;
-    favoritesBackdropEl.setAttribute("aria-hidden", "true");
-    favoritesBackdropEl.removeAttribute("data-overlay-state");
-    favoritesBackdropEl.style.removeProperty("display");
-    favoritesBackdropEl.style.removeProperty("visibility");
-    favoritesBackdropEl.style.removeProperty("pointer-events");
-    favoritesBackdropEl.hidden = true;
     removeInteractiveOverlay(favoritesBackdropEl);
   }
-  favoritesToggleBtn.setAttribute("aria-expanded", String(favoritesPanelOpen));
-  favoritesToggleBtn.classList.toggle("active", favoritesPanelOpen);
-  document.body.classList.toggle("more-open", favoritesPanelOpen);
   syncInteractiveOverlayState();
-  if (favoritesPanelOpen) {
-    window.requestAnimationFrame(() => focusInteractiveOverlay(favoritesBackdropEl));
-    return;
-  }
-  const restoreTarget = favoritesPanelRestoreFocusEl;
-  favoritesPanelRestoreFocusEl = null;
-  if (restoreTarget instanceof HTMLElement) {
-    window.requestAnimationFrame(() => {
-      try {
-        restoreTarget.focus({ preventScroll: true });
-      } catch (_) {
-        restoreTarget.focus();
-      }
-    });
+  if (!wasMobileMenuOverlay && isMobileMenuOverlay() && favoritesPanelOpen) {
+    window.requestAnimationFrame(() => focusInteractiveOverlay(favoritesBackdropEl, favoritesPanelCloseBtn));
   }
 }
 
@@ -7585,7 +7672,8 @@ function hideFunnyModal() {
 function closeInteractiveOverlay(overlayEl) {
   if (!overlayEl || !isOverlayOpen(overlayEl)) return false;
   if (overlayEl === favoritesBackdropEl) {
-    setFavoritesPanel(false);
+    if (getRouteStateFromLocation().view === "menu") goBackFromRoutePage();
+    else setFavoritesPanel(false);
     return true;
   }
   if (overlayEl === halteSearchModalEl) {
@@ -8053,9 +8141,14 @@ closeBtnEl?.addEventListener("click", () => {
   }
   terug({ historyMode: "replace" });
 });
-appTitleBtnEl?.addEventListener("click", () => {
-  closeTransientOverlays();
-  navigateHomeAndReload({ replaceHistory: true });
+appTitleBtnEl?.addEventListener("click", () => navigateToPage("home"));
+navHomeBtn?.addEventListener("click", () => navigateToPage("home"));
+navHalteBtn?.addEventListener("click", () => navigateToPage("halte"));
+navLineBtn?.addEventListener("click", () => navigateToPage("lijn"));
+navDashboardBtn?.addEventListener("click", () => navigateToPage("stalk"));
+navMoreBtn?.addEventListener("click", () => navigateToPage(currentPageView === "menu" ? "home" : "menu"));
+favoritesBackdropEl?.addEventListener("click", (event) => {
+  if (event.target === favoritesBackdropEl && isMobileMenuOverlay()) goBackFromRoutePage();
 });
 bindVehicleSuggestions(voertuigInput, () => {
   dismissPrimaryVehicleSearchInput({ closeKeyboard: true });
@@ -8093,9 +8186,7 @@ voertuigInput.addEventListener("keydown", (event) => {
   }
 });
 dashboardToggleBtn?.addEventListener("click", () => {
-  if (!isStalkModeAvailable()) return;
-  setFavoritesPanel(false);
-  showDashboardSetupModal();
+  navigateToPage("stalk");
 });
 homeGtfsMapRefreshBtn?.addEventListener("click", () => {
   homeGtfsMapStarted = true;
@@ -8145,14 +8236,11 @@ voertuigInput.addEventListener("input", () => {
   }
 });
 voertuigInput.addEventListener("input", debounce(updateFavoriteButtonState, 150));
-favoritesToggleBtn.addEventListener("click", (event) => {
-  event.stopPropagation();
-  setFavoritesPanel(!favoritesPanelOpen);
-});
+favoritesToggleBtn.addEventListener("click", () => navigateToPage(currentPageView === "menu" ? "home" : "menu"));
 favoritesPanelEl.addEventListener("click", (event) => {
   event.stopPropagation();
 });
-favoritesPanelCloseBtn?.addEventListener("click", () => setFavoritesPanel(false));
+favoritesPanelCloseBtn?.addEventListener("click", goBackFromRoutePage);
 favoritesListEl?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
@@ -8197,13 +8285,6 @@ haltecodeInputEl?.addEventListener("keydown", (event) => {
 haltecodeInputEl?.addEventListener("input", debounce(() => {
   void updateHalteSuggestions();
 }, 200));
-favoritesBackdropEl?.addEventListener("click", (event) => {
-  const target = event.target;
-  if (!(target instanceof Element)) return;
-  if (target === favoritesBackdropEl || target.closest("[data-menu-close='true']")) {
-    setFavoritesPanel(false);
-  }
-});
 vasteDataEl.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
@@ -8422,7 +8503,6 @@ dashboardSetupConfirmBtn?.addEventListener("click", async () => {
   if (!validationResult.hasAnyInput) {
     persistDashboardVehicleIds([]);
     hideDashboardSetupModal();
-    closeDashboardPanel();
     return;
   }
   persistDashboardVehicleIds(validationResult.ids);
@@ -8468,13 +8548,7 @@ appDialogModalEl?.addEventListener("click", (event) => {
   if (event.target === appDialogModalEl) closeAppDialog(false);
 });
 halteSearchCloseBtn?.addEventListener("click", hideHalteSearchModal);
-halteSearchModalEl?.addEventListener("click", (event) => {
-  if (event.target === halteSearchModalEl) hideHalteSearchModal();
-});
 lineSearchCloseBtn?.addEventListener("click", hideLineSearchModal);
-lineSearchModalEl?.addEventListener("click", (event) => {
-  if (event.target === lineSearchModalEl) hideLineSearchModal();
-});
 lineSearchFormEl?.addEventListener("submit", (event) => {
   event.preventDefault();
   void searchLines();
@@ -8572,6 +8646,10 @@ window.addEventListener("offline", () => {
 });
 window.addEventListener("popstate", () => {
   void applyRouteStateFromLocation();
+});
+window.addEventListener("resize", () => {
+  syncRoutePageBodyState();
+  setFavoritesPanel(getRouteStateFromLocation().view === "menu");
 });
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && homeGtfsMapStarted && homeGtfsMapHasLoaded && !homeGtfsMapPanelEl?.hidden) {
@@ -9869,6 +9947,7 @@ async function zoekAlles(options = {}) {
   const resolved = resolveVehicleQuery(query, getVehicleInputResolvedId(voertuigInput));
   const activeVehicleId = resolved.vehicleId || normalize(query);
   const bus = resolved.bus;
+  setCurrentPageView("home");
   currentVehicleId = activeVehicleId;
   staticVehicleCardEl.hidden = false;
   realtimeVehicleCardEl.hidden = false;
