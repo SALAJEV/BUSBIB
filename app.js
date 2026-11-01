@@ -867,7 +867,8 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "646075": [
         "@delijn_busspotter/646075.jpeg",
-        "@van.de.ven.robin/646075.jpeg"
+        "@van.de.ven.robin/646075.jpeg",
+        "@dln.spotter/646075 + 668017.jpeg"
     ],
     "646080": [
         "@delijn_busspotter/646080.jpeg"
@@ -923,7 +924,8 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "689044": [
         "@delijn_busspotter/689044 (2).jpeg",
-        "@delijn_busspotter/689044.jpeg"
+        "@delijn_busspotter/689044.jpeg",
+        "@dln.spotter/689044.jpeg"
     ],
     "689046": [
         "@delijn_busspotter/689046.jpeg"
@@ -1424,9 +1426,11 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/618097.jpeg"
     ],
     "643039": [
+        "@dln.spotter/643039 (2).jpeg",
         "@dln.spotter/643039.jpeg"
     ],
     "643043": [
+        "@dln.spotter/643043 (2).jpeg",
         "@dln.spotter/643043.jpeg"
     ],
     "643047": [
@@ -1436,7 +1440,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/644081.jpeg"
     ],
     "646079": [
-        "@dln.spotter/646079 (1).jpeg",
+        "@dln.spotter/646079.jpeg",
         "@dln.spotter/646079.jpeg"
     ],
     "646086": [
@@ -1455,6 +1459,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/664040.jpeg"
     ],
     "664053": [
+        "@dln.spotter/664053 (2).jpeg",
         "@dln.spotter/664053.jpeg"
     ],
     "664054": [
@@ -1465,6 +1470,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/664059.jpeg"
     ],
     "664062": [
+        "@dln.spotter/664062 (2).jpeg",
         "@dln.spotter/664062.jpeg"
     ],
     "669039": [
@@ -1809,6 +1815,89 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "7411": [
         "@van.de.ven.robin/7411.jpeg"
+    ],
+    "010061": [
+        "@delijn_spotter_mori/010061.jpeg"
+    ],
+    "104812": [
+        "@delijn_spotter_mori/104812.jpeg"
+    ],
+    "110440": [
+        "@delijn_spotter_mori/110440.jpeg"
+    ],
+    "110991": [
+        "@delijn_spotter_mori/110991.jpeg"
+    ],
+    "5019": [
+        "@delijn_spotter_mori/5019.jpeg"
+    ],
+    "610070": [
+        "@delijn_spotter_mori/610070.jpeg"
+    ],
+    "632067": [
+        "@delijn_spotter_mori/632067.jpeg"
+    ],
+    "143009": [
+        "@dln.spotter/143009 +2816.jpeg"
+    ],
+    "2816": [
+        "@dln.spotter/143009 +2816.jpeg"
+    ],
+    "154013": [
+        "@dln.spotter/154013.jpeg"
+    ],
+    "220778": [
+        "@dln.spotter/220778.jpeg"
+    ],
+    "221118": [
+        "@dln.spotter/221118.jpeg"
+    ],
+    "5122": [
+        "@dln.spotter/5122.jpeg"
+    ],
+    "627035": [
+        "@dln.spotter/627035.jpeg"
+    ],
+    "643033": [
+        "@dln.spotter/643033.jpeg"
+    ],
+    "643034": [
+        "@dln.spotter/643034 (2).jpeg",
+        "@dln.spotter/643034.jpeg"
+    ],
+    "643037": [
+        "@dln.spotter/643037.jpeg"
+    ],
+    "643038": [
+        "@dln.spotter/643038.jpeg"
+    ],
+    "643041": [
+        "@dln.spotter/643041.jpeg"
+    ],
+    "643045": [
+        "@dln.spotter/643045.jpeg"
+    ],
+    "646069": [
+        "@dln.spotter/646069.jpeg"
+    ],
+    "668017": [
+        "@dln.spotter/646075 + 668017.jpeg"
+    ],
+    "664055": [
+        "@dln.spotter/664055 (2).jpeg",
+        "@dln.spotter/664055.jpeg"
+    ],
+    "674102": [
+        "@dln.spotter/674102.jpeg"
+    ],
+    "674123": [
+        "@dln.spotter/674123.jpeg"
+    ],
+    "675006": [
+        "@dln.spotter/675006.jpeg"
+    ],
+    "686053": [
+        "@dln.spotter/686053.jpeg"
     ]
 };
 
