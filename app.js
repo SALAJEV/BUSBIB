@@ -599,6 +599,7 @@ let homeGtfsMapRefreshHandle = null;
 let homeGtfsMapRequestToken = 0;
 let homeGtfsMapHasLoaded = false;
 let homeGtfsMapStarted = false;
+let homeGtfsMapTripsDeferred = false;
 let homeGtfsMapIsRefreshing = false;
 let homeGtfsMapPausedByInactivity = false;
 let currentPhotoVehicleId = "";
@@ -2219,12 +2220,6 @@ function updateUrlState(mode = "replace") {
   window.history[shouldPush ? "pushState" : "replaceState"](historyState, "", nextUrl);
 }
 
-function navigateHomeAndReload(options = {}) {
-  const { replaceHistory = true } = options;
-  const homeUrl = buildUrlForRouteState({ view: "home", bus: "", compare: "" });
-  window.location[replaceHistory ? "replace" : "assign"](homeUrl);
-}
-
 function navigateToPage(view) {
   const pageViews = new Set(["home", "halte", "lijn", "menu"]);
   if (!pageViews.has(view)) return;
@@ -2290,11 +2285,6 @@ function setCurrentPageView(view) {
   setFavoritesPanel(view === "menu");
   syncRoutePageBodyState(view);
   updateDocumentTitle("");
-}
-
-function isSpecialVehicleCommand(query = "") {
-  const normalizedQuery = (query || "").toString().trim().toLowerCase();
-  return ["python", "info", "best", "bus beih"].includes(normalizedQuery);
 }
 
 function initializeRouteHistory() {
@@ -2543,7 +2533,10 @@ function translateVehicleFieldLabel(key) {
 const localeForLanguage = (lang) => localeMap[lang] || localeMap[FALLBACK_LANG] || localeMap[DEFAULT_LANG] || "nl-NL";
 
 function formatTimeForUi(date, options = {}) {
+  const hasExplicitFields = ["hour", "minute", "second", "dateStyle", "timeStyle", "year", "month", "day", "weekday"]
+    .some((key) => options[key] !== undefined);
   return new Intl.DateTimeFormat(localeForLanguage(settings.language), {
+    ...(hasExplicitFields ? {} : { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
     ...options,
     hour12: settings.timeFormat === "12h"
   }).format(date);
@@ -4122,7 +4115,7 @@ async function refreshHomeGtfsMap(options = {}) {
   try {
     const [, , , , data] = await Promise.all([
       voertuigen.length === 0 ? laadVoertuigen() : Promise.resolve(),
-      trips.length === 0 ? laadTrips() : Promise.resolve(),
+      Promise.resolve(),
       routes.length === 0 ? laadRoutes() : Promise.resolve(),
       stopsById.size === 0 ? laadStops() : Promise.resolve(),
       fetchRealtimeFeed({ force })
@@ -4157,6 +4150,21 @@ async function refreshHomeGtfsMap(options = {}) {
         : getLabel("homeGtfsMapEmpty", "Geen live GTFS-bussen gevonden."),
       snapshots.length ? "" : "muted"
     );
+    if (trips.length === 0 && !tripsLoadPromise && !homeGtfsMapTripsDeferred) {
+      // Grote ritten-dataset pas na de eerste kaartweergave laden en dan de kaart verrijken.
+      homeGtfsMapTripsDeferred = true;
+      const loadTripsLater = () => {
+        laadTrips()
+          .then(() => {
+            if (trips.length && !homeGtfsMapPanelEl?.hidden) {
+              return refreshHomeGtfsMap({ force: true });
+            }
+          })
+          .catch((error) => console.warn("Ritten laden na kaartweergave mislukt", error));
+      };
+      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(loadTripsLater, { timeout: 3000 });
+      else window.setTimeout(loadTripsLater, 1500);
+    }
   } catch (error) {
     console.warn("GTFS-overzichtskaart laden mislukt", error);
     setHomeGtfsMapStatus(getLabel("homeGtfsMapError", "Live GTFS-kaart kon niet geladen worden."), "error");
@@ -8045,6 +8053,21 @@ document.addEventListener("visibilitychange", () => {
 
 // Helper: CSV parser that respects quoted fields
 function parseCSVLine(line, delimiter = ','){
+  const hasEscapedQuote = line.indexOf('""') !== -1;
+  if (!hasEscapedQuote) {
+    // Snelle paden voor de gewone gevallen: geen quotes, of elk veld volledig tussen quotes.
+    let fields = null;
+    if (line.indexOf('"') === -1) {
+      fields = line.split(delimiter);
+    } else if (line.charCodeAt(0) === 34 && line.charCodeAt(line.length - 1) === 34 && line.length > 1) {
+      const parts = line.slice(1, -1).split('"' + delimiter + '"');
+      if (parts.every((part) => part.indexOf('"') === -1)) fields = parts;
+    }
+    if (fields) {
+      for (let i = 0; i < fields.length; i++) fields[i] = fields[i].trim();
+      return fields;
+    }
+  }
   const fields = [];
   let cur = "";
   let inQuotes = false;
@@ -8068,24 +8091,34 @@ function parseDelimitedTable(text, options = {}) {
     commentPrefix = "",
     sourceLabel = "bestand"
   } = options;
-  const lines = String(text || "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && (!commentPrefix || !line.startsWith(commentPrefix)));
+  const source = String(text || "");
+  const length = source.length;
+  let headers = null;
+  const rows = [];
+  let position = 0;
 
-  if (!lines.length) {
-    throw new Error(`${sourceLabel} bevat geen bruikbare gegevens`);
-  }
+  while (position < length) {
+    let lineEnd = source.indexOf("\n", position);
+    if (lineEnd === -1) lineEnd = length;
+    const line = source.slice(position, lineEnd).trim();
+    position = lineEnd + 1;
+    if (!line || (commentPrefix && line.startsWith(commentPrefix))) continue;
 
-  const headers = parseCSVLine(lines[0], delimiter).map((header) => header.trim());
-  const rows = lines.slice(1).map((line) => {
+    if (!headers) {
+      headers = parseCSVLine(line, delimiter).map((header) => header.trim());
+      continue;
+    }
     const values = parseCSVLine(line, delimiter);
     const record = {};
-    headers.forEach((header, index) => {
-      record[header] = values[index] || "/";
-    });
-    return record;
-  });
+    for (let i = 0; i < headers.length; i++) {
+      record[headers[i]] = values[i] || "/";
+    }
+    rows.push(record);
+  }
+
+  if (!headers) {
+    throw new Error(`${sourceLabel} bevat geen bruikbare gegevens`);
+  }
 
   return { headers, rows };
 }
@@ -9694,61 +9727,6 @@ function findMostRecentEntity(entities, predicate) {
   });
 
   return bestEntity;
-}
-
-function getTripUpdateForVehicle(entities, vehicleId, tripId = "") {
-  const normalizedVehicleId = cleanText(vehicleId);
-  const normalizedTripId = cleanText(tripId);
-  if (!Array.isArray(entities)) return null;
-
-  const byVehicleId = findMostRecentEntity(entities, (entity) => {
-    const tripUpdate = getEntityTripUpdatePayload(entity);
-    const descriptor =
-      tripUpdate?.vehicle ||
-      tripUpdate?.vehicleDescriptor ||
-      tripUpdate?.vehicle_descriptor;
-    return getVehicleDescriptorId(descriptor) === normalizedVehicleId;
-  });
-  if (byVehicleId) return getEntityTripUpdatePayload(byVehicleId);
-
-  if (normalizedTripId) {
-    const matchingTripUpdates = entities.filter((entity) => {
-      const descriptor = extractTripDescriptor(getEntityTripUpdatePayload(entity));
-      return descriptor.tripId === normalizedTripId;
-    });
-    if (matchingTripUpdates.length === 1) {
-      return getEntityTripUpdatePayload(matchingTripUpdates[0]);
-    }
-
-    if (matchingTripUpdates.length > 1) {
-      const freshestMatchingTripUpdate = findMostRecentEntity(matchingTripUpdates, () => true);
-      if (freshestMatchingTripUpdate) {
-        return getEntityTripUpdatePayload(freshestMatchingTripUpdate);
-      }
-    }
-
-    const withoutVehicleDescriptor = matchingTripUpdates.find((entity) => {
-      const tripUpdate = getEntityTripUpdatePayload(entity);
-      const descriptor =
-        tripUpdate?.vehicle ||
-        tripUpdate?.vehicleDescriptor ||
-        tripUpdate?.vehicle_descriptor;
-      return !getVehicleDescriptorId(descriptor);
-    });
-    if (withoutVehicleDescriptor) return getEntityTripUpdatePayload(withoutVehicleDescriptor);
-  }
-
-  return null;
-}
-
-function getTripUpdateForEntityId(entities, entityId) {
-  const normalizedEntityId = cleanText(entityId);
-  if (!normalizedEntityId || !Array.isArray(entities)) return null;
-  const match = findMostRecentEntity(entities, (entity) => {
-    const currentEntityId = cleanText(entity?.id || entity?.entityId || entity?.entity_id || "");
-    return currentEntityId === normalizedEntityId && !!getEntityTripUpdatePayload(entity);
-  });
-  return match ? getEntityTripUpdatePayload(match) : null;
 }
 
 function getTripUpdateForVehicleFromDerivedData(derivedData, vehicleId, tripId = "") {

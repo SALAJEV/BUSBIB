@@ -4595,6 +4595,43 @@ body.route-page-open .container > footer {
     --page-card-gap: 16px;
   }
 
+  #routePageOutlet .settings-categories {
+    gap: 0;
+  }
+
+  /* Geen kaart-in-kaart op gsm: categorieën zijn vlak met een scheidingslijn. */
+  #routePageOutlet .settings-category {
+    padding: 16px 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  #routePageOutlet .settings-category:first-child {
+    padding-top: 4px;
+    border-top: 0;
+  }
+
+  #routePageOutlet .settings-category-heading h5 {
+    font-size: 1rem;
+  }
+
+  #routePageOutlet .settings-card {
+    padding: 12px;
+    background: var(--surface-soft);
+  }
+
+  #routePageOutlet .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #routePageOutlet .chip-row,
+  #routePageOutlet .more-action-grid,
+  #routePageOutlet .settings-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .home-gtfs-map-head h2,
   .pdf-modal-header h3,
   .more-panel-header h3,
