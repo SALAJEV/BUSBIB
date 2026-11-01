@@ -295,7 +295,7 @@ html {
   min-height: 100%;
   overflow-y: scroll;
   scrollbar-gutter: stable;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-padding-top: 1rem;
   -webkit-text-size-adjust: 100%;
 }
