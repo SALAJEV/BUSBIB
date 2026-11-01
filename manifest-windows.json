@@ -22,5 +22,31 @@
       "purpose": "any"
     }
   ],
-  "categories": ["transportation"]
+  "categories": ["transportation"],
+  "shortcuts": [
+    {
+      "name": "Homepagina",
+      "short_name": "Home",
+      "url": "/?view=home&source=shortcut",
+      "icons": [{ "src": "media/icons/shortcut-home.svg", "sizes": "any", "type": "image/svg+xml" }, { "src": "media/logo/logo.png", "sizes": "512x512", "type": "image/png" }]
+    },
+    {
+      "name": "Halte zoeken",
+      "short_name": "Halte",
+      "url": "/?view=halte&source=shortcut",
+      "icons": [{ "src": "media/icons/shortcut-halte.svg", "sizes": "any", "type": "image/svg+xml" }, { "src": "media/logo/logo.png", "sizes": "512x512", "type": "image/png" }]
+    },
+    {
+      "name": "Lijn zoeken",
+      "short_name": "Lijn",
+      "url": "/?view=lijn&source=shortcut",
+      "icons": [{ "src": "media/icons/shortcut-lijn.svg", "sizes": "any", "type": "image/svg+xml" }, { "src": "media/logo/logo.png", "sizes": "512x512", "type": "image/png" }]
+    },
+    {
+      "name": "Menu",
+      "short_name": "Menu",
+      "url": "/?view=menu&source=shortcut",
+      "icons": [{ "src": "media/icons/shortcut-menu.svg", "sizes": "any", "type": "image/svg+xml" }, { "src": "media/logo/logo.png", "sizes": "512x512", "type": "image/png" }]
+    }
+  ]
 }
