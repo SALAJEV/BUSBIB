@@ -309,7 +309,7 @@ Als je dit project publiek deployt, is het verstandig om ook een expliciete priv
 1. Werk code en assets bij.
 2. Verhoog de websiteversie in `index.html`, `app.js` en `sw.js`.
 3. Controleer of de service worker cacheversie mee verhoogd is.
-4. Test zoekfunctie, realtime data, weerkaart, foto-overzicht en dashboard.
+4. Test zoekfunctie, realtime data, weerkaart en foto-overzicht.
 5. Test PWA-installatie en harde refresh na update.
 
 ### Aanbevolen verbeteringen op termijn
