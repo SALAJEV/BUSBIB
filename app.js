@@ -159,7 +159,6 @@ const homeMapInterval30OptEl = document.getElementById("homeMapInterval30Opt");
 const textScaleSelect = document.getElementById("textScaleSelect");
 const highContrastToggle = document.getElementById("highContrastToggle");
 const reduceMotionToggle = document.getElementById("reduceMotionToggle");
-const settingsResetBtn = document.getElementById("settingsResetBtn");
 const intervalOpt10El = document.getElementById("intervalOpt10");
 const intervalOpt15El = document.getElementById("intervalOpt15");
 const intervalOpt30El = document.getElementById("intervalOpt30");
@@ -2155,8 +2154,7 @@ function navigateToPage(view) {
 }
 
 function isMobileMenuOverlay() {
-  return getRouteStateFromLocation().view === "menu" &&
-    window.matchMedia("(max-width: 680px)").matches;
+  return false;
 }
 
 function syncFavoritesMenuPlacement() {
@@ -2168,11 +2166,10 @@ function syncFavoritesMenuPlacement() {
 }
 
 function syncRoutePageBodyState(view = currentPageView) {
-  const isMobileMenu = view === "menu" && window.matchMedia("(max-width: 680px)").matches;
   document.body.dataset.pageView = view;
   document.body.classList.toggle(
     "route-page-open",
-    view !== "home" && view !== "vehicle" && !isMobileMenu
+    view !== "home" && view !== "vehicle"
   );
 }
 
@@ -6257,41 +6254,6 @@ function syncPrimarySettingsControls() {
   if (reduceMotionToggle) reduceMotionToggle.checked = settings.reduceMotion;
 }
 
-async function resetSettingsPreferences() {
-  const confirmed = await showAppConfirm(
-    getLabel(
-      "settingsResetConfirm",
-      "De standaardvoorkeuren herstellen? Je taal, weergave- en realtimevoorkeuren worden teruggezet. Je favorieten blijven behouden."
-    ),
-    {
-      title: getLabel("settingsReset", "Voorkeuren herstellen"),
-      confirmLabel: getLabel("dialogOk", "OK")
-    }
-  );
-  if (!confirmed) return;
-
-  const nextSettings = createDefaultSettings(detectPreferredLanguage());
-  nextSettings.hasCompletedOnboarding = settings.hasCompletedOnboarding;
-  settings = nextSettings;
-  window.settings = settings;
-  updateIntervalMs = settings.intervalMs;
-  syncPrimarySettingsControls();
-  applyTheme(settings.theme);
-  applyColorTheme(settings.colorTheme);
-  applyAccessibilitySettings();
-  applyTranslations();
-  refreshVisibleLocalizedState();
-  renderFavorites();
-  saveSettings();
-  restartRealtimeRefresh();
-  setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
-  restartHomeGtfsMapRefresh();
-  if (settings.showHomeRealtimeMap && getCurrentRouteState().view === "home") {
-    homeGtfsMapStarted = true;
-    void refreshHomeGtfsMap({ force: true }).catch((error) => console.warn("Realtimekaart vernieuwen na voorkeurenreset mislukt", error));
-  }
-}
-
 function syncFirstRunSetupControls() {
   if (firstRunLanguageSelectEl) firstRunLanguageSelectEl.value = normalizeLanguage(settings.language);
   if (firstRunThemeSelectEl) firstRunThemeSelectEl.value = getEffectiveThemeSetting(settings.theme, settings.colorTheme);
@@ -6472,7 +6434,6 @@ function applyTranslations() {
   if (settingsRealtimeTitleEl) settingsRealtimeTitleEl.textContent = getLabel("settingsRealtime", "Realtime");
   if (settingsAccessTitleEl) settingsAccessTitleEl.textContent = getLabel("settingsAccessibility", "Toegankelijkheid");
   if (settingsLanguageTitleEl) settingsLanguageTitleEl.textContent = t("language");
-  if (settingsResetBtn) settingsResetBtn.textContent = getLabel("settingsReset", "Voorkeuren herstellen");
   if (showHomeRealtimeMapLabelEl) {
     showHomeRealtimeMapLabelEl.textContent = getLabel("showHomeRealtimeMap", "Realtime kaart op startscherm");
   }
@@ -7740,9 +7701,6 @@ reduceMotionToggle?.addEventListener("change", () => {
   settings.reduceMotion = reduceMotionToggle.checked;
   applyAccessibilitySettings();
   saveSettings();
-});
-settingsResetBtn?.addEventListener("click", () => {
-  void resetSettingsPreferences();
 });
 themeSelect.addEventListener("change", () => {
   settings.theme = themeSelect.value;

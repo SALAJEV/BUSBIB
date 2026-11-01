@@ -545,18 +545,6 @@ p {
   outline-offset: 2px;
 }
 
-.primary-nav__link--home {
-  border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
-  background: var(--surface);
-  color: var(--accent-hover);
-}
-
-.primary-nav__link--home:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-hover);
-}
-
 .primary-nav__link[aria-current="page"] {
   border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
   background: var(--surface);
@@ -4462,33 +4450,10 @@ body.route-page-open .container > footer {
   font-weight: 800;
 }
 
-@media (max-width: 680px) {
-  #favoritesBackdrop.menu-overlay.app-route-page:not([hidden]) {
-    position: fixed;
-    z-index: 1100;
-    inset: 0;
-    display: block;
-    overflow: hidden;
-    background: var(--overlay);
-    backdrop-filter: blur(4px);
-  }
-
-  #favoritesPanel.favorites-panel {
-    position: absolute;
-    inset: auto 0 0;
-    width: 100%;
-    height: min(88vh, var(--visual-viewport-height));
-    max-height: var(--visual-viewport-height);
-    margin: 0;
-    padding: max(18px, env(safe-area-inset-top)) 17px max(18px, env(safe-area-inset-bottom));
-    overflow: auto;
-    border-radius: 22px 22px 0 0;
-    box-shadow: var(--shadow-lg);
-  }
-
-  #favoritesPanel.favorites-panel::before {
-    display: block;
-  }
+#halteSearchCloseBtn,
+#lineSearchCloseBtn,
+#favoritesPanelCloseBtn {
+  display: none;
 }
 
 .vehicle-not-found-btn {
