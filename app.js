@@ -7521,7 +7521,6 @@ function initAppPreferences() {
   loadFavorites();
   settings.intervalMs = normalizeUpdateIntervalMs(settings.intervalMs);
   updateIntervalMs = settings.intervalMs;
-  dashboardVehicleIds = normalizeDashboardVehicleIds(settings.dashboardVehicleIds);
   settings.language = normalizeLanguage(settings.language);
   settings.colorTheme = normalizeColorTheme(settings.colorTheme);
   syncPrimarySettingsControls();
@@ -7529,7 +7528,6 @@ function initAppPreferences() {
   applyColorTheme(settings.colorTheme);
   applyAccessibilitySettings();
   applyTranslations();
-  syncStalkModeAvailability();
   setFavoritesPanel(false);
   hideVehiclePhotoCard();
   setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
@@ -7564,7 +7562,6 @@ appTitleBtnEl?.addEventListener("click", () => navigateToPage("home"));
 navHomeBtn?.addEventListener("click", () => navigateToPage("home"));
 navHalteBtn?.addEventListener("click", () => navigateToPage("halte"));
 navLineBtn?.addEventListener("click", () => navigateToPage("lijn"));
-navDashboardBtn?.addEventListener("click", () => navigateToPage("stalk"));
 navMoreBtn?.addEventListener("click", () => navigateToPage(currentPageView === "menu" ? "home" : "menu"));
 favoritesBackdropEl?.addEventListener("click", (event) => {
   if (event.target === favoritesBackdropEl && isMobileMenuOverlay()) goBackFromRoutePage();
@@ -7604,9 +7601,6 @@ voertuigInput.addEventListener("keydown", (event) => {
     zoekAlles({ closeKeyboard: true });
   }
 });
-dashboardToggleBtn?.addEventListener("click", () => {
-  navigateToPage("stalk");
-});
 homeGtfsMapRefreshBtn?.addEventListener("click", () => {
   homeGtfsMapStarted = true;
   homeGtfsMapPausedByInactivity = false;
@@ -7621,24 +7615,6 @@ homeGtfsMapEl?.addEventListener("click", (event) => {
   event.preventDefault();
   const vehicleId = vehicleButton.getAttribute("data-home-gtfs-vehicle-id") || "";
   void openHomeGtfsMapVehicle(vehicleId);
-});
-dashboardMapEl?.addEventListener("click", (event) => {
-  const target = event.target;
-  if (!(target instanceof Element)) return;
-  const vehicleLink = target.closest("[data-home-gtfs-vehicle-id]");
-  if (!vehicleLink) return;
-  event.preventDefault();
-  const vehicleId = vehicleLink.getAttribute("data-home-gtfs-vehicle-id") || "";
-  closeDashboardPanel();
-  void openHomeGtfsMapVehicle(vehicleId);
-});
-dashboardEditBtn?.addEventListener("click", showDashboardSetupModal);
-dashboardCloseBtn?.addEventListener("click", () => {
-  if (getCurrentRouteState().view === "stalk") {
-    window.history.back();
-    return;
-  }
-  closeDashboardPanel({ historyMode: "replace" });
 });
 voertuigInput.addEventListener("input", () => {
   const clampedValue = clampPrimaryVehicleQuery(voertuigInput.value);
@@ -7731,9 +7707,6 @@ intervalSelect.addEventListener("change", () => {
   updateIntervalMs = settings.intervalMs;
   saveSettings();
   restartRealtimeRefresh();
-  if (dashboardVehicleIds.length && !dashboardPanelEl.hidden) {
-    void openDashboardPanel();
-  }
 });
 showHomeRealtimeMapToggle?.addEventListener("change", () => {
   settings.showHomeRealtimeMap = showHomeRealtimeMapToggle.checked;
@@ -7775,24 +7748,9 @@ themeSelect.addEventListener("change", () => {
   settings.theme = themeSelect.value;
   saveSettings();
   applyTheme(settings.theme);
-  if (dashboardThemeSelectEl) dashboardThemeSelectEl.value = settings.theme;
 });
 colorThemeSelect.addEventListener("change", () => {
   settings.colorTheme = normalizeColorTheme(colorThemeSelect.value);
-  colorThemeSelect.value = settings.colorTheme;
-  saveSettings();
-  applyColorTheme(settings.colorTheme);
-  if (dashboardColorThemeSelectEl) dashboardColorThemeSelectEl.value = settings.colorTheme;
-});
-dashboardThemeSelectEl?.addEventListener("change", () => {
-  settings.theme = dashboardThemeSelectEl.value;
-  themeSelect.value = settings.theme;
-  saveSettings();
-  applyTheme(settings.theme);
-});
-dashboardColorThemeSelectEl?.addEventListener("change", () => {
-  settings.colorTheme = normalizeColorTheme(dashboardColorThemeSelectEl.value);
-  dashboardColorThemeSelectEl.value = settings.colorTheme;
   colorThemeSelect.value = settings.colorTheme;
   saveSettings();
   applyColorTheme(settings.colorTheme);
@@ -7902,33 +7860,6 @@ compareVehicleInputEl?.addEventListener("keydown", (event) => {
     compareModalConfirmBtn?.click();
   }
 });
-dashboardSetupCloseBtn?.addEventListener("click", hideDashboardSetupModal);
-dashboardSetupCancelBtn?.addEventListener("click", hideDashboardSetupModal);
-dashboardSetupModalEl?.addEventListener("click", (event) => {
-  if (event.target === dashboardSetupModalEl) hideDashboardSetupModal();
-});
-dashboardSetupConfirmBtn?.addEventListener("click", async () => {
-  if (!isStalkModeAvailable()) {
-    hideDashboardSetupModal();
-    return;
-  }
-  const validationResult = validateDashboardSetupInputs();
-  renderDashboardSetupInputs();
-  if (validationResult.hasErrors) {
-    setDashboardSetupError(getLabel("dashboardSetupInvalid", "Controleer de rood gemarkeerde velden."));
-    dashboardSetupGridEl?.querySelector(".dashboard-setup-field.is-invalid .dashboard-setup-input")?.focus();
-    return;
-  }
-  if (!validationResult.hasAnyInput) {
-    persistDashboardVehicleIds([]);
-    hideDashboardSetupModal();
-    return;
-  }
-  persistDashboardVehicleIds(validationResult.ids);
-  hideDashboardSetupModal();
-  await openDashboardPanel();
-});
-stalkModeMediaQuery.addEventListener?.("change", syncStalkModeAvailability);
 compareModalEl?.addEventListener("click", (event) => {
   if (event.target === compareModalEl) hideCompareModal();
 });
@@ -8044,15 +7975,6 @@ document.addEventListener("keydown", (event) => {
   }
   if (isTvSuggestionNavigationActive()) {
     return;
-  }
-  if (isAndroidTvPlatform && (event.key === "ArrowRight" || event.key === "ArrowDown") && (!dashboardSetupModalEl?.hidden || !dashboardPanelEl?.hidden)) {
-    event.preventDefault();
-    moveDashboardFocus(1);
-    return;
-  }
-  if (isAndroidTvPlatform && (event.key === "ArrowLeft" || event.key === "ArrowUp") && (!dashboardSetupModalEl?.hidden || !dashboardPanelEl?.hidden)) {
-    event.preventDefault();
-    moveDashboardFocus(-1);
   }
 });
 window.addEventListener("online", () => {
@@ -9249,7 +9171,6 @@ function warmUpVehiclesAndDeepLinks() {
     void laadVoertuigen()
       .then(async () => {
         await applyDeepLinkIfNeeded();
-        await maybeAutoStartDashboardForAndroidTv();
       })
       .catch((e) => console.warn("Warm-up voertuigen mislukt", e));
   }, 1500);
