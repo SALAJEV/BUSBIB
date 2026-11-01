@@ -17,7 +17,6 @@ setTimeout(() => hideSplash(180), 2800);
 let deferredPrompt = null;
 const INSTALL_STATE_KEY = "bb_install_state_v1";
 const installBtn = document.getElementById("footerInstallBtn");
-const dashboardToggleBtn = document.getElementById("dashboardToggleBtn");
 const halteSearchToggleBtn = document.getElementById("halteSearchToggleBtn");
 const lineSearchToggleBtn = document.getElementById("lineSearchToggleBtn");
 const settingsInfoBtn = document.getElementById("settingsInfoBtn");
@@ -34,7 +33,6 @@ const primaryNavigationEl = document.getElementById("primaryNavigation");
 const navHomeBtn = document.getElementById("navHomeBtn");
 const navHalteBtn = document.getElementById("navHalteBtn");
 const navLineBtn = document.getElementById("navLineBtn");
-const navDashboardBtn = document.getElementById("navDashboardBtn");
 const navMoreBtn = document.getElementById("navMoreBtn");
 window.addEventListener('beforeinstallprompt', (e) => {
   // The site has its own install action and calls prompt() after a user click.
@@ -129,7 +127,6 @@ const FAVORITES_KEY = "bb_favorites_v1";
 const SETTINGS_KEY = "bb_settings_v1";
 const REALTIME_PERSISTED_CACHE_KEY = "bb_realtime_feed_cache_v1";
 const REALTIME_PERSISTED_MAX_AGE_MS = 3 * 60 * 1000;
-const DASHBOARD_MAX_VEHICLES = 9;
 const HOME_GTFS_MAP_REFRESH_MS = 30000;
 const ALLOWED_HOME_MAP_REFRESH_INTERVALS_SEC = [30, 60, 120];
 const HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE = 48;
@@ -180,7 +177,6 @@ const colorPurpleOptEl = document.getElementById("colorPurpleOpt");
 const themeColorMetaEls = Array.from(document.querySelectorAll('meta[name="theme-color"]'));
 const colorSchemeMetaEl = document.querySelector('meta[name="color-scheme"]');
 const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const stalkModeMediaQuery = window.matchMedia("(min-width: 981px)");
 const platformUserAgent = window.navigator.userAgent || "";
 const appleTouchDesktopPlatform =
   /Mac/i.test(window.navigator.platform || "") &&
@@ -389,7 +385,6 @@ const languageOptDeEl = document.getElementById("languageOptDe");
 const languageOptPlEl = document.getElementById("languageOptPl");
 const languageOptEsEl = document.getElementById("languageOptEs");
 const languageOptRuEl = document.getElementById("languageOptRu");
-const dashboardTitleEl = document.getElementById("dashboardTitle");
 const staticVehicleCardEl = document.getElementById("staticVehicleCard");
 const realtimeVehicleCardEl = document.getElementById("realtimeVehicleCard");
 const staticCardTitleEl = document.getElementById("staticCardTitle");
@@ -538,46 +533,12 @@ const compareVehicleInputEl = document.getElementById("compareVehicleInput");
 const compareModalCloseBtn = document.getElementById("compareModalCloseBtn");
 const compareModalCancelBtn = document.getElementById("compareModalCancelBtn");
 const compareModalConfirmBtn = document.getElementById("compareModalConfirmBtn");
-const dashboardPanelEl = document.getElementById("dashboardPanel");
-const dashboardGridEl = document.getElementById("dashboardGrid");
-const dashboardSummaryEl = document.getElementById("dashboardSummary");
-const dashboardMapWrapEl = document.getElementById("dashboardMapWrap");
-const dashboardMapEl = document.getElementById("dashboardMap");
-const dashboardLoadingStateEl = document.getElementById("dashboardLoadingState");
-const dashboardLoadingTextEl = document.getElementById("dashboardLoadingText");
-const dashboardEditBtn = document.getElementById("dashboardEditBtn");
-const dashboardCloseBtn = document.getElementById("dashboardCloseBtn");
 const homeGtfsMapPanelEl = document.getElementById("homeGtfsMapPanel");
 const homeGtfsMapTitleEl = document.getElementById("homeGtfsMapTitle");
 const homeGtfsMapSummaryEl = document.getElementById("homeGtfsMapSummary");
 const homeGtfsMapStatusEl = document.getElementById("homeGtfsMapStatus");
 const homeGtfsMapEl = document.getElementById("homeGtfsMap");
 const homeGtfsMapRefreshBtn = document.getElementById("homeGtfsMapRefreshBtn");
-const dashboardSetupModalEl = document.getElementById("dashboardSetupModal");
-const dashboardSetupTitleEl = document.getElementById("dashboardSetupTitle");
-const dashboardTvSettingsEl = document.getElementById("dashboardTvSettings");
-const dashboardTvSettingsTitleEl = document.getElementById("dashboardTvSettingsTitle");
-const dashboardTvSettingsSummaryEl = document.getElementById("dashboardTvSettingsSummary");
-const dashboardThemeLabelEl = document.getElementById("dashboardThemeLabel");
-const dashboardThemeSelectEl = document.getElementById("dashboardThemeSelect");
-const dashboardThemeAutoOptEl = document.getElementById("dashboardThemeAutoOpt");
-const dashboardThemeLightOptEl = document.getElementById("dashboardThemeLightOpt");
-const dashboardThemeDarkOptEl = document.getElementById("dashboardThemeDarkOpt");
-const dashboardColorThemeLabelEl = document.getElementById("dashboardColorThemeLabel");
-const dashboardColorThemeSelectEl = document.getElementById("dashboardColorThemeSelect");
-const dashboardColorClassicOptEl = document.getElementById("dashboardColorClassicOpt");
-const dashboardColorBlueOptEl = document.getElementById("dashboardColorBlueOpt");
-const dashboardColorGreenOptEl = document.getElementById("dashboardColorGreenOpt");
-const dashboardColorYellowOptEl = document.getElementById("dashboardColorYellowOpt");
-const dashboardColorOrangeOptEl = document.getElementById("dashboardColorOrangeOpt");
-const dashboardColorRedOptEl = document.getElementById("dashboardColorRedOpt");
-const dashboardColorPurpleOptEl = document.getElementById("dashboardColorPurpleOpt");
-const dashboardSetupGridEl = document.getElementById("dashboardSetupGrid");
-const dashboardSetupSummaryEl = document.getElementById("dashboardSetupSummary");
-const dashboardSetupErrorEl = document.getElementById("dashboardSetupError");
-const dashboardSetupCloseBtn = document.getElementById("dashboardSetupCloseBtn");
-const dashboardSetupCancelBtn = document.getElementById("dashboardSetupCancelBtn");
-const dashboardSetupConfirmBtn = document.getElementById("dashboardSetupConfirmBtn");
 const morePanelTitleEl = document.getElementById("morePanelTitle");
 const haltModuleTitleEl = document.getElementById("haltModuleTitle");
 const haltModuleDescriptionEl = document.getElementById("haltModuleDescription");
@@ -603,7 +564,6 @@ const haltSearchResultsListEl = document.getElementById("haltSearchResultsList")
 routePageOutletEl?.append(
   halteSearchModalEl,
   lineSearchModalEl,
-  dashboardPanelEl,
   favoritesBackdropEl
 );
 
@@ -636,11 +596,6 @@ let compareVehicleId = "";
 let lastRealtimeRenderKey = "";
 let lastWeatherRenderKey = "";
 let compareEditTarget = "compare";
-let dashboardVehicleIds = [];
-let dashboardRefreshHandle = null;
-let dashboardRefreshInProgress = false;
-let dashboardMap = null;
-let dashboardMapMarkers = null;
 let homeGtfsMap = null;
 let homeGtfsMapMarkers = null;
 let homeGtfsMapRefreshHandle = null;
@@ -693,7 +648,6 @@ let lastVerifiedInternetAt = 0;
 let lastVerifiedInternetState = true;
 let internetVerificationPromise = null;
 let realtimeRequestToken = 0;
-let dashboardRequestToken = 0;
 let latestSearchToken = 0;
 let weatherRequestToken = 0;
 let realtimeFeedCacheData = null;
@@ -1877,7 +1831,6 @@ function registerOverlayModal(modalEl) {
 
 [
   compareModalEl,
-  dashboardSetupModalEl,
   infoModalEl,
   installGuideModalEl,
   firstRunModalEl,
@@ -2087,13 +2040,8 @@ function closeOverlayModal(modalEl, options = {}) {
   }
 }
 
-function isDashboardPanelOpen() {
-  return !!dashboardPanelEl && !dashboardPanelEl.hidden;
-}
-
 function closeTransientOverlays() {
   setFavoritesPanel(false);
-  hideDashboardSetupModal();
   hideCompareModal();
   hideInfoModal();
   hideInstallGuideModal();
@@ -2110,12 +2058,10 @@ function getRouteStateFromLocation() {
   const bus = normalize(params.get("bus") || "");
   const compare = normalize(params.get("compare") || "");
   const requestedView = params.get("view") || "";
-  const pageViews = new Set(["halte", "lijn", "menu", "stalk"]);
-  const view = requestedView === "stalk"
-    ? "stalk"
-    : bus
-      ? "vehicle"
-      : (pageViews.has(requestedView) ? requestedView : "home");
+  const pageViews = new Set(["halte", "lijn", "menu"]);
+  const view = bus
+    ? "vehicle"
+    : (pageViews.has(requestedView) ? requestedView : "home");
   return {
     view,
     bus,
@@ -2131,13 +2077,6 @@ function getCurrentRouteState() {
       compare: ""
     };
   }
-  if (isDashboardPanelOpen()) {
-    return {
-      view: "stalk",
-      bus: "",
-      compare: ""
-    };
-  }
   return {
     view: currentVehicleId ? "vehicle" : "home",
     bus: currentVehicleId || "",
@@ -2146,7 +2085,7 @@ function getCurrentRouteState() {
 }
 
 function buildUrlForRouteState(routeState = {}) {
-  const pageViews = new Set(["halte", "lijn", "menu", "stalk"]);
+  const pageViews = new Set(["halte", "lijn", "menu"]);
   const normalizedState = {
     view: pageViews.has(routeState.view) ? routeState.view : routeState.bus ? "vehicle" : "home",
     bus: normalize(routeState.bus || ""),
@@ -2201,8 +2140,8 @@ function navigateHomeAndReload(options = {}) {
 }
 
 function navigateToPage(view) {
-  const pageViews = new Set(["home", "halte", "lijn", "menu", "stalk"]);
-  if (!pageViews.has(view) || (view === "stalk" && !isStalkModeAvailable())) return;
+  const pageViews = new Set(["home", "halte", "lijn", "menu"]);
+  if (!pageViews.has(view)) return;
   const nextState = { view, bus: "", compare: "" };
   const currentState = getCurrentRouteState();
   if (routeStatesEqual(currentState, nextState)) return;
@@ -2258,7 +2197,6 @@ function setCurrentPageView(view) {
     home: navHomeBtn,
     halte: navHalteBtn,
     lijn: navLineBtn,
-    stalk: navDashboardBtn,
     menu: navMoreBtn
   };
   Object.entries(navButtonsByView).forEach(([navView, buttonEl]) => {
@@ -2296,10 +2234,6 @@ function initializeRouteHistory() {
   }, "", currentUrl);
 }
 
-let dashboardSetupValidation = [];
-let dashboardSetupDraftValues = [];
-let dashboardSetupDraftResolvedIds = [];
-let dashboardAutoStarted = false;
 let leafletLoadPromise = null;
 let busIcon = null;
 let homeGtfsCanvasLayerClass = null;
@@ -2318,7 +2252,6 @@ let settings = {
   textScale: "normal",
   highContrast: false,
   reduceMotion: false,
-  dashboardVehicleIds: [],
   showHomeRealtimeMap: true,
   hasCompletedOnboarding: false
 };
@@ -2428,20 +2361,6 @@ function normalizeHomeMapRefreshIntervalSec(intervalSec) {
 
 function normalizeTextScale(textScale) {
   return ALLOWED_TEXT_SCALES.includes(textScale) ? textScale : "normal";
-}
-
-function normalizeDashboardVehicleIds(ids) {
-  if (!Array.isArray(ids)) return [];
-  return ids
-    .map((id) => normalize(id))
-    .filter(Boolean)
-    .slice(0, DASHBOARD_MAX_VEHICLES);
-}
-
-function persistDashboardVehicleIds(ids) {
-  dashboardVehicleIds = normalizeDashboardVehicleIds(ids);
-  settings.dashboardVehicleIds = [...dashboardVehicleIds];
-  saveSettings();
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
@@ -3540,8 +3459,7 @@ function updateDocumentTitle(vehicleId = "") {
   const pageTitleByView = {
     halte: haltModuleTitleEl,
     lijn: lineSearchTitleEl,
-    menu: morePanelTitleEl,
-    stalk: dashboardTitleEl
+    menu: morePanelTitleEl
   };
   const pageTitle = pageTitleByView[currentPageView]?.textContent.trim();
   document.title = pageTitle
@@ -3805,7 +3723,6 @@ async function applyRouteStateFromLocation() {
   try {
     currentPageView = routeState.view === "vehicle" ? "home" : routeState.view;
     setCurrentPageView(currentPageView);
-    if (routeState.view !== "stalk") closeDashboardPanel({ historyMode: "replace" });
     if (routeState.bus && voertuigen.length === 0) await laadVoertuigen();
 
     if (routeState.bus) {
@@ -3843,9 +3760,6 @@ async function applyRouteStateFromLocation() {
       clearComparison();
     }
 
-    if (routeState.view === "stalk") {
-      await openDashboardPanel({ historyMode: "replace" });
-    }
     setCurrentPageView(routeState.view === "vehicle" ? "home" : routeState.view);
     setHomeGtfsMapVisible(routeState.view === "home" || isMobileMenuOverlay());
     if (routeState.view === "halte") prepareHalteSearchPage();
@@ -3856,167 +3770,15 @@ async function applyRouteStateFromLocation() {
   }
 }
 
-function renderDashboardSetupInputs() {
-  if (!dashboardSetupGridEl) return;
-  dashboardSetupGridEl.innerHTML = Array.from({ length: DASHBOARD_MAX_VEHICLES }, (_, index) => {
-    const internalValue = dashboardVehicleIds[index] || "";
-    const draftValue = dashboardSetupDraftValues[index];
-    const currentValue = escapeHtml(draftValue != null ? draftValue : getVisibleVehicleId(internalValue));
-    const validation = dashboardSetupValidation[index] || {};
-    const errorMessage = escapeHtml(validation.error || "");
-    const resolvedId = dashboardSetupDraftResolvedIds[index] || internalValue;
-    const resolvedAttr = resolvedId ? ` data-resolved-vehicle-id="${escapeHtml(resolvedId)}"` : "";
-    return `
-      <label class="dashboard-setup-field${validation.error ? " is-invalid" : ""}">
-        <span>${getLabel("dashboardCardLabel", "Kaart")} ${index + 1}</span>
-        <div class="suggestion-input-shell">
-          <input class="dashboard-setup-input" type="text" inputmode="text" autocomplete="off" placeholder="${escapeHtml(getLabel("dashboardSetupPlaceholder", "Voertuignummer of plaat"))}" value="${currentValue}" data-index="${index}"${resolvedAttr}>
-        </div>
-        <span class="dashboard-setup-field-error"${validation.error ? "" : " hidden"}>${errorMessage}</span>
-      </label>
-    `;
-  }).join("");
 
-  dashboardSetupGridEl.querySelectorAll(".dashboard-setup-input").forEach((inputEl) => {
-    bindVehicleSuggestions(inputEl, (vehicleId) => {
-      const index = Number(inputEl.dataset.index || -1);
-      if (Number.isInteger(index) && index >= 0) {
-        dashboardSetupDraftResolvedIds[index] = vehicleId;
-        dashboardSetupDraftValues[index] = inputEl.value;
-      }
-    });
-    inputEl.addEventListener("input", () => {
-      setVehicleInputResolvedId(inputEl, "");
-      const index = Number(inputEl.dataset.index || -1);
-      if (Number.isInteger(index) && index >= 0) {
-        dashboardSetupDraftValues[index] = inputEl.value;
-        dashboardSetupDraftResolvedIds[index] = "";
-      }
-      if (Number.isInteger(index) && index >= 0 && dashboardSetupValidation[index]?.error) {
-        dashboardSetupValidation[index] = { error: "" };
-        renderDashboardSetupInputs();
-        dashboardSetupGridEl.querySelector(`.dashboard-setup-input[data-index="${index}"]`)?.focus();
-      }
-    });
-  });
-}
 
-function setDashboardSetupError(message = "") {
-  if (!dashboardSetupErrorEl) return;
-  dashboardSetupErrorEl.hidden = !message;
-  dashboardSetupErrorEl.textContent = message;
-}
 
-function validateDashboardSetupInputs() {
-  const inputs = Array.from(dashboardSetupGridEl?.querySelectorAll(".dashboard-setup-input") || []);
-  const nextValidation = [];
-  const nextIds = [];
-  const seenIds = new Set();
 
-  inputs.forEach((inputEl, index) => {
-    const query = inputEl.value.trim();
-    dashboardSetupDraftValues[index] = query;
-    const preferredVehicleId = getVehicleInputResolvedId(inputEl);
-    const resolved = resolveVehicleQuery(query, preferredVehicleId);
-    const resolvedVehicleId = resolved.vehicleId || "";
-    const isDuplicate = !!resolvedVehicleId && seenIds.has(resolvedVehicleId);
-    const error = getDashboardVehicleValidationMessage(query, resolvedVehicleId, resolved.bus, isDuplicate);
-    nextValidation[index] = { error };
-    if (query && !error && resolvedVehicleId) {
-      nextIds.push(resolvedVehicleId);
-      seenIds.add(resolvedVehicleId);
-    }
-  });
 
-  dashboardSetupValidation = nextValidation;
-  const hasErrors = nextValidation.some((item) => item?.error);
-  const hasAnyInput = inputs.some((inputEl) => inputEl.value.trim());
-  return {
-    ids: nextIds,
-    hasErrors,
-    hasAnyInput
-  };
-}
 
-function getSanitizedDashboardVehicleIds(ids = []) {
-  const uniqueIds = [];
-  const seenIds = new Set();
-  normalizeDashboardVehicleIds(ids).forEach((id) => {
-    const resolved = resolveVehicleSearch(id);
-    const resolvedId = resolved.vehicleId || "";
-    if (!resolved.bus || !resolvedId) return;
-    if (!isDashboardEligibleVehicleId(resolvedId)) return;
-    if (seenIds.has(resolvedId)) return;
-    seenIds.add(resolvedId);
-    uniqueIds.push(resolvedId);
-  });
-  return uniqueIds;
-}
 
-function showDashboardSetupModal() {
-  if (!isStalkModeAvailable()) return;
-  dashboardSetupValidation = [];
-  dashboardSetupDraftValues = Array.from({ length: DASHBOARD_MAX_VEHICLES }, (_, index) => getVisibleVehicleId(dashboardVehicleIds[index] || ""));
-  dashboardSetupDraftResolvedIds = Array.from({ length: DASHBOARD_MAX_VEHICLES }, (_, index) => dashboardVehicleIds[index] || "");
-  if (dashboardTvSettingsEl) dashboardTvSettingsEl.hidden = !isAndroidTvPlatform;
-  if (dashboardThemeSelectEl) dashboardThemeSelectEl.value = getEffectiveThemeSetting(settings.theme, settings.colorTheme);
-  if (dashboardColorThemeSelectEl) dashboardColorThemeSelectEl.value = settings.colorTheme;
-  setDashboardSetupError("");
-  renderDashboardSetupInputs();
-  openOverlayModal(dashboardSetupModalEl, {
-    focusTarget:
-      (isAndroidTvPlatform
-        ? dashboardThemeSelectEl
-        : null) ||
-      dashboardSetupGridEl?.querySelector("input") ||
-      dashboardSetupCloseBtn,
-    closeMenu: false
-  });
-  document.body.classList.add("dashboard-setup-open");
-}
 
-function hideDashboardSetupModal() {
-  const cancelingStalkSetup = currentPageView === "stalk" && !isDashboardPanelOpen() && !routeNavigationLocked;
-  closeOverlayModal(dashboardSetupModalEl);
-  document.body.classList.remove("dashboard-setup-open");
-  dashboardSetupValidation = [];
-  dashboardSetupDraftValues = [];
-  dashboardSetupDraftResolvedIds = [];
-  setDashboardSetupError("");
-  if (cancelingStalkSetup) goBackFromRoutePage();
-}
 
-function isStalkModeAvailable() {
-  return stalkModeMediaQuery.matches || isAndroidTvPlatform;
-}
-
-function syncStalkModeAvailability() {
-  const isAvailable = isStalkModeAvailable();
-  if (dashboardToggleBtn) dashboardToggleBtn.hidden = !isAvailable;
-  if (navDashboardBtn) navDashboardBtn.hidden = !isAvailable;
-  if (!isAvailable) {
-    hideDashboardSetupModal();
-    closeDashboardPanel();
-  }
-}
-
-function stopDashboardRefresh() {
-  if (dashboardRefreshHandle) {
-    clearInterval(dashboardRefreshHandle);
-    dashboardRefreshHandle = null;
-  }
-  dashboardRequestToken += 1;
-}
-
-async function initDashboardMap() {
-  if (!dashboardMapEl || dashboardMap) return;
-  const L = await ensureLeafletLoaded();
-  dashboardMap = L.map("dashboardMap", { zoomControl: true, preferCanvas: true }).setView([51.0, 4.4], 9);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &amp; <a href="https://carto.com/">CARTO</a>'
-  }).addTo(dashboardMap);
-  dashboardMapMarkers = L.layerGroup().addTo(dashboardMap);
-}
 
 function buildVehicleMapPopup(snapshot) {
   const vehicleLinkId = getHomeGtfsMapVehicleLinkId(snapshot);
@@ -4055,51 +3817,6 @@ function buildVehicleMapPopup(snapshot) {
   `;
 }
 
-async function renderDashboardMap(snapshots) {
-  if (!dashboardMapWrapEl) return;
-  const liveSnapshots = snapshots.filter((snapshot) =>
-    snapshot.status === "live" &&
-    Number.isFinite(snapshot.latitude) &&
-    Number.isFinite(snapshot.longitude)
-  );
-
-  if (!liveSnapshots.length) {
-    dashboardMapWrapEl.classList.add("hidden");
-    if (dashboardMapMarkers) dashboardMapMarkers.clearLayers();
-    return;
-  }
-
-  dashboardMapWrapEl.classList.remove("hidden");
-  await initDashboardMap();
-  if (!dashboardMapMarkers) return;
-  dashboardMapMarkers.clearLayers();
-  const L = window.L;
-
-  const bounds = [];
-  liveSnapshots.forEach((snapshot) => {
-    const markerInstance = L.marker([snapshot.latitude, snapshot.longitude], { icon: getBusIcon() }).addTo(dashboardMapMarkers);
-    const markerEl = markerInstance.getElement && markerInstance.getElement();
-    if (markerEl) {
-      const img = markerEl.querySelector("img");
-      if (img) img.style.transform = `rotate(${snapshot.bearing || 0}deg)`;
-    }
-    markerInstance.bindPopup(buildVehicleMapPopup(snapshot), {
-      maxWidth: 320,
-      minWidth: 240,
-      className: "vehicle-map-popup-shell"
-    });
-    bounds.push([snapshot.latitude, snapshot.longitude]);
-  });
-
-  window.setTimeout(() => {
-    dashboardMap.invalidateSize();
-    if (bounds.length === 1) {
-      dashboardMap.setView(bounds[0], 15);
-      return;
-    }
-    dashboardMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 15 });
-  }, 0);
-}
 
 function buildLoadingSkeletonMarkup(label, lineCount = 3) {
   const lineClasses = ["long", "medium", "short", "medium", "long"];
@@ -4398,252 +4115,10 @@ async function openHomeGtfsMapVehicle(vehicleId = "") {
   }
 }
 
-function closeDashboardPanel(options = {}) {
-  const { historyMode = "replace" } = options;
-  stopDashboardRefresh();
-  if (!dashboardPanelEl) return;
-  setDashboardLoading(false);
-  dashboardPanelEl.hidden = true;
-  dashboardPanelEl.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("dashboard-open");
-  void renderDashboardMap([]);
-  updateUrlState(historyMode);
-}
 
-function setDashboardLoading(active) {
-  if (!dashboardLoadingStateEl) return;
-  dashboardLoadingStateEl.hidden = !active;
-  dashboardLoadingStateEl.setAttribute("aria-hidden", String(!active));
-  dashboardPanelEl?.classList.toggle("is-loading", !!active);
-  if (dashboardLoadingTextEl) {
-    dashboardLoadingTextEl.textContent = getLabel("dashboardLoading", "Stalk modus wordt geladen...");
-  }
-}
 
-function getRoutePresentationFromRealtime(id, realtimeSource, bus) {
-  const derivedData = Array.isArray(realtimeSource) ? null : realtimeSource;
-  const entities = Array.isArray(realtimeSource) ? realtimeSource : (derivedData?.entities || []);
-  if (isHiddenAlphaVehicleId(id)) {
-    return {
-      status: "offline",
-      vehicleId: id,
-      displayVehicleId: getVehicleDisplayId(bus || id),
-      type: bus?.Type || "",
-      message: getLabel("dashboardNoRealtime", "Geen realtime beschikbaar")
-    };
-  }
-  const normalizedRequestedId = cleanText(id);
-  const gpsEntity = derivedData
-    ? (derivedData.gpsEntityByVehicleId.get(normalizedRequestedId) || null)
-    : findMostRecentEntity(entities, (entity) => {
-      const vehiclePayload = getEntityVehiclePayload(entity);
-      if (!vehiclePayload?.position) return false;
-      const descriptor =
-        vehiclePayload?.vehicle ||
-        vehiclePayload?.vehicleDescriptor ||
-        vehiclePayload?.vehicle_descriptor;
-      const descriptorId = getVehicleDescriptorId(descriptor);
-      return descriptorId === normalizedRequestedId;
-    });
-  const gps = gpsEntity ? { vehicle: getEntityVehiclePayload(gpsEntity) } : null;
-  if (!gps) {
-    return {
-      status: "offline",
-      vehicleId: id,
-      displayVehicleId: getVehicleDisplayId(bus || id),
-      type: bus?.Type || "",
-      message: getLabel("dashboardNoRealtime", "Geen realtime beschikbaar")
-    };
-  }
 
-  const v = gps.vehicle;
-  const vehicleDescriptor = extractTripDescriptor(v);
-  let tripUpdate = derivedData
-    ? getTripUpdateForVehicleFromDerivedData(derivedData, id, vehicleDescriptor.tripId)
-    : getTripUpdateForVehicle(entities, id, vehicleDescriptor.tripId);
-  if (!tripUpdate) {
-    const gpsEntityId = cleanText(gpsEntity?.id || gpsEntity?.entityId || gpsEntity?.entity_id || "");
-    tripUpdate = derivedData
-      ? getTripUpdateForEntityIdFromDerivedData(derivedData, gpsEntityId)
-      : getTripUpdateForEntityId(entities, gpsEntityId);
-  }
-  const tripUpdateDescriptor = extractTripDescriptor(tripUpdate);
-  const descriptor = {
-    tripId: vehicleDescriptor.tripId || tripUpdateDescriptor.tripId,
-    routeId: vehicleDescriptor.routeId || tripUpdateDescriptor.routeId,
-    routeShortName: vehicleDescriptor.routeShortName || tripUpdateDescriptor.routeShortName,
-    headsign: vehicleDescriptor.headsign || tripUpdateDescriptor.headsign
-  };
 
-  const tripId = cleanText(descriptor.tripId);
-  const provisionalRouteId = pickFirstText(cleanText(descriptor.routeId), getRouteKeyFromTripId(tripId));
-  const tripData = findTripData(provisionalRouteId, tripId, descriptor.headsign);
-  const routeId = pickFirstText(tripData?.route_id, provisionalRouteId, getRouteKeyFromTripId(tripId));
-  const routeData = findRouteDataByRouteId(routeId, tripId);
-  const routeShort = pickFirstText(routeData?.route_short_name, descriptor.routeShortName, routeId) || "?";
-  const destinationText = getDestinationDisplayName(
-    pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name)
-  ) || "-";
-  const currentStopContext = getCurrentStopContext(v, tripUpdate);
-  const currentStopName = getStopDisplayName(currentStopContext.stopId);
-  const routeColorRaw = (routeData?.route_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
-  const routeTextColorRaw = (routeData?.route_text_color || "").replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
-
-  let delaySeconds = getDelaySecondsFromTripUpdate(tripUpdate);
-  if (typeof delaySeconds !== "number" && typeof gps.vehicle.trip?.delay === "number") delaySeconds = gps.vehicle.trip.delay;
-  if (typeof delaySeconds !== "number" && typeof v.stopStatus?.delay === "number") delaySeconds = v.stopStatus.delay;
-  if (typeof delaySeconds !== "number") delaySeconds = 0;
-  const delayMins = delaySeconds < 0 ? -Math.round(Math.abs(delaySeconds) / 60) : Math.round(delaySeconds / 60);
-
-  return {
-    status: "live",
-    vehicleId: id,
-    displayVehicleId: getVehicleDisplayId(bus || id),
-    type: bus?.Type || "",
-    owner: getVehicleField(bus, "Eigenaar"),
-    routeShort,
-    destinationText,
-    currentStopName,
-    delayMessage: formatDelayMessage(delayMins),
-    routeColor: routeColorRaw.length === 6 ? `#${routeColorRaw}` : "#2563eb",
-    routeTextColor: routeTextColorRaw.length === 6 ? `#${routeTextColorRaw}` : "#ffffff",
-    latitude: Number(v.position?.latitude),
-    longitude: Number(v.position?.longitude),
-    bearing: Number(v.position?.bearing || 0)
-  };
-}
-
-async function refreshDashboardPanel(options = {}) {
-  if (dashboardRefreshInProgress) return;
-  dashboardRefreshInProgress = true;
-  const { showLoading = true } = options;
-  const requestToken = ++dashboardRequestToken;
-  if (!dashboardPanelEl || !dashboardGridEl || !dashboardVehicleIds.length) {
-    dashboardRefreshInProgress = false;
-    return;
-  }
-  if (showLoading) setDashboardLoading(true);
-  try {
-    if (isTrackingTemporarilyUnavailable()) {
-      await renderDashboardMap([]);
-      dashboardGridEl.innerHTML = `<div class="dashboard-empty">${escapeHtml(getLabel("trackingStatusBanner", "Trackinginformatie is tijdelijk niet beschikbaar."))}</div>`;
-      if (dashboardSummaryEl) {
-        dashboardSummaryEl.textContent = getLabel("trackingStatusBanner", "Trackinginformatie is tijdelijk niet beschikbaar.");
-      }
-      return;
-    }
-
-    const hasInternet = await verifyInternetConnection();
-    if (requestToken !== dashboardRequestToken) return;
-    if (!hasInternet) {
-      await renderDashboardMap([]);
-      dashboardGridEl.innerHTML = `<div class="dashboard-empty">${escapeHtml(getLabel("dashboardNoInternet", "Geen internetverbinding voor live dashboard."))}</div>`;
-      return;
-    }
-
-    await Promise.all([
-      voertuigen.length === 0 ? laadVoertuigen() : Promise.resolve(),
-      trips.length === 0 ? laadTrips() : Promise.resolve(),
-      routes.length === 0 ? laadRoutes() : Promise.resolve(),
-      stopsById.size === 0 ? laadStops() : Promise.resolve()
-    ]);
-
-    const data = await fetchRealtimeFeed();
-    if (requestToken !== dashboardRequestToken || dashboardPanelEl.hidden) return;
-    const derivedData = getRealtimeFeedDerivedData(data);
-
-    const snapshots = [];
-    const cardsHtml = dashboardVehicleIds.map((id) => {
-      const bus = findBusById(id);
-      const displayVehicleId = getVehicleDisplayId(bus || id) || id;
-      if (!bus) {
-        return `
-          <article class="dashboard-card is-offline" tabindex="0">
-            <div class="dashboard-card-top">
-              <strong>${escapeHtml(displayVehicleId)}</strong>
-              <span class="dashboard-status">${escapeHtml(getLabel("dashboardNotFound", "Niet gevonden"))}</span>
-            </div>
-            <p class="dashboard-meta">${escapeHtml(getLabel("dashboardNoVehicleData", "Geen voertuigdata gevonden."))}</p>
-          </article>
-        `;
-      }
-
-      if (isOutOfService(bus) || !canUseRealtimeForOperator(bus)) {
-        return `
-          <article class="dashboard-card is-offline" tabindex="0">
-            <div class="dashboard-card-top">
-              <strong>${escapeHtml(displayVehicleId)}</strong>
-              <span class="dashboard-status">${escapeHtml(getLabel("dashboardOffline", "Offline"))}</span>
-            </div>
-            <p class="dashboard-type">${escapeHtml(bus.Type || "")}</p>
-            <p class="dashboard-meta">${escapeHtml(getLabel("dashboardNoRealtimeWithPeriod", "Geen realtime beschikbaar."))}</p>
-          </article>
-        `;
-      }
-
-      const snapshot = getRoutePresentationFromRealtime(id, derivedData, bus);
-      snapshots.push(snapshot);
-      if (snapshot.status !== "live") {
-        return `
-          <article class="dashboard-card is-offline" tabindex="0">
-            <div class="dashboard-card-top">
-              <strong>${escapeHtml(displayVehicleId)}</strong>
-              <span class="dashboard-status">${escapeHtml(getLabel("dashboardOffline", "Offline"))}</span>
-            </div>
-            <p class="dashboard-type">${escapeHtml(bus.Type || "")}</p>
-            <p class="dashboard-meta">${escapeHtml(snapshot.message || getLabel("dashboardNoRealtime", "Geen realtime beschikbaar"))}</p>
-          </article>
-        `;
-      }
-
-      return `
-        <article class="dashboard-card is-live" tabindex="0">
-          <div class="dashboard-card-top">
-            <strong>${escapeHtml(displayVehicleId)}</strong>
-          </div>
-          <p class="dashboard-type">${escapeHtml(bus.Type || "")}</p>
-          <p class="dashboard-destination"><span class="line-badge" style="--line-badge-bg:${snapshot.routeColor};--line-badge-fg:${snapshot.routeTextColor};">${escapeHtml(snapshot.routeShort)}</span><span class="dashboard-destination-text">${escapeHtml(snapshot.destinationText)}</span></p>
-          <p class="dashboard-meta">${escapeHtml(getLabel("dashboardStopPrefix", "Halte:"))} ${escapeHtml(snapshot.currentStopName)}</p>
-          <p class="dashboard-meta">${escapeHtml(snapshot.delayMessage)}</p>
-        </article>
-      `;
-    }).join("");
-
-    await renderDashboardMap(snapshots);
-    dashboardGridEl.innerHTML = cardsHtml;
-    const liveCount = snapshots.filter((snapshot) => snapshot.status === "live").length;
-    dashboardSummaryEl.textContent = getLabel("dashboardLiveSummary", "{live} van {total} voertuigen live op kaart")
-      .replace("{live}", String(liveCount))
-      .replace("{total}", String(dashboardVehicleIds.length));
-  } finally {
-    if (showLoading && requestToken === dashboardRequestToken) {
-      setDashboardLoading(false);
-    }
-    dashboardRefreshInProgress = false;
-  }
-}
-
-async function openDashboardPanel(options = {}) {
-  const { historyMode = "push" } = options;
-  if (!isStalkModeAvailable()) return;
-  if (!dashboardVehicleIds.length) {
-    showDashboardSetupModal();
-    return;
-  }
-  setFavoritesPanel(false);
-  dashboardPanelEl.hidden = false;
-  dashboardPanelEl.setAttribute("aria-hidden", "false");
-  document.body.classList.add("dashboard-open");
-  if (dashboardCloseBtn) dashboardCloseBtn.hidden = isAndroidTvPlatform;
-  await initDashboardMap();
-  await refreshDashboardPanel({ showLoading: true });
-  window.setTimeout(() => dashboardEditBtn?.focus(), 30);
-  stopDashboardRefresh();
-  dashboardRefreshHandle = window.setInterval(() => {
-    refreshDashboardPanel({ showLoading: false }).catch((error) => console.warn("Dashboard refresh mislukt", error));
-  }, updateIntervalMs);
-  updateUrlState(historyMode);
-}
 
 function updateVehiclePhotoTexts() {
   if (!photoCardTitleEl || !vehiclePhotoCaptionEl) return;
@@ -6519,7 +5994,6 @@ function loadSettings() {
     settings.textScale = normalizeTextScale(settings.textScale);
     settings.highContrast = settings.highContrast === true;
     settings.reduceMotion = settings.reduceMotion === true;
-    settings.dashboardVehicleIds = normalizeDashboardVehicleIds(settings.dashboardVehicleIds);
     settings.showHomeRealtimeMap = typeof parsed.showHomeRealtimeMap === "boolean" ? parsed.showHomeRealtimeMap : true;
     settings.hasCompletedOnboarding = typeof parsed.hasCompletedOnboarding === "boolean" ? parsed.hasCompletedOnboarding : true;
     window.settings = settings;
@@ -6761,7 +6235,6 @@ function createDefaultSettings(language = DEFAULT_LANG) {
     textScale: "normal",
     highContrast: false,
     reduceMotion: false,
-    dashboardVehicleIds: [],
     showHomeRealtimeMap: true,
     hasCompletedOnboarding: false
   };
@@ -6788,7 +6261,7 @@ async function resetSettingsPreferences() {
   const confirmed = await showAppConfirm(
     getLabel(
       "settingsResetConfirm",
-      "De standaardvoorkeuren herstellen? Je taal, weergave- en realtimevoorkeuren worden teruggezet. Je favorieten en ingestelde stalkvoertuigen blijven behouden."
+      "De standaardvoorkeuren herstellen? Je taal, weergave- en realtimevoorkeuren worden teruggezet. Je favorieten blijven behouden."
     ),
     {
       title: getLabel("settingsReset", "Voorkeuren herstellen"),
@@ -6798,7 +6271,6 @@ async function resetSettingsPreferences() {
   if (!confirmed) return;
 
   const nextSettings = createDefaultSettings(detectPreferredLanguage());
-  nextSettings.dashboardVehicleIds = [...dashboardVehicleIds];
   nextSettings.hasCompletedOnboarding = settings.hasCompletedOnboarding;
   settings = nextSettings;
   window.settings = settings;
@@ -6855,9 +6327,6 @@ function syncThemeControlState() {
     [themeAutoOptEl, true],
     [themeLightOptEl, true],
     [themeDarkOptEl, true],
-    [dashboardThemeAutoOptEl, true],
-    [dashboardThemeLightOptEl, true],
-    [dashboardThemeDarkOptEl, true],
     [firstRunThemeAutoOptEl, true],
     [firstRunThemeLightOptEl, true],
     [firstRunThemeDarkOptEl, true]
@@ -6870,7 +6339,6 @@ function syncThemeControlState() {
   });
 
   if (themeSelect) themeSelect.value = visibleThemeValue;
-  if (dashboardThemeSelectEl) dashboardThemeSelectEl.value = visibleThemeValue;
   if (firstRunThemeSelectEl) firstRunThemeSelectEl.value = visibleThemeValue;
 }
 
@@ -6981,12 +6449,10 @@ function applyTranslations() {
   const navHomeTextEl = document.getElementById("navHomeText");
   const navHalteTextEl = document.getElementById("navHalteText");
   const navLineTextEl = document.getElementById("navLineText");
-  const navDashboardTextEl = document.getElementById("navDashboardText");
   const navMoreTextEl = document.getElementById("navMoreText");
   if (navHomeTextEl) navHomeTextEl.textContent = getLabel("navHome", "Homepagina");
   if (navHalteTextEl) navHalteTextEl.textContent = getLabel("haltSearch", "Halte zoeken");
   if (navLineTextEl) navLineTextEl.textContent = getLabel("lineSearch", "Lijn zoeken");
-  if (navDashboardTextEl) navDashboardTextEl.textContent = getLabel("dashboard", "Stalk modus");
   if (navMoreTextEl) navMoreTextEl.textContent = menuLabel;
   if (navMoreBtn) navMoreBtn.setAttribute("aria-label", menuLabel);
   favoritesToggleBtn.title = menuLabel;
@@ -7048,21 +6514,11 @@ function applyTranslations() {
   colorOrangeOptEl.textContent = t("colorOrange");
   colorRedOptEl.textContent = t("colorRed");
   colorPurpleOptEl.textContent = t("colorPurple");
-  if (dashboardTitleEl) dashboardTitleEl.textContent = getLabel("dashboard", "Stalk modus");
-  dashboardToggleBtn.textContent = getLabel("dashboard", "Stalk modus");
-  dashboardToggleBtn.title = getLabel("dashboardButtonTitle", "Stalk modus");
   if (halteSearchToggleBtn) {
     halteSearchToggleBtn.textContent = getLabel("haltSearch", "Halte zoeken");
     halteSearchToggleBtn.title = getLabel("haltSearch", "Halte zoeken");
     halteSearchToggleBtn.setAttribute("aria-label", getLabel("haltSearch", "Halte zoeken"));
   }
-  if (dashboardEditBtn) dashboardEditBtn.textContent = getLabel("dashboardEdit", "Aanpassen");
-  if (dashboardCloseBtn) {
-    dashboardCloseBtn.setAttribute("aria-label", getLabel("dashboardClose", "Stalk modus sluiten"));
-    dashboardCloseBtn.title = getLabel("close", "Sluiten");
-    dashboardCloseBtn.hidden = isAndroidTvPlatform;
-  }
-  if (dashboardMapEl) dashboardMapEl.setAttribute("aria-label", getLabel("dashboardMapAria", "Kaart met live voertuigen"));
   if (homeGtfsMapTitleEl) homeGtfsMapTitleEl.textContent = getLabel("homeGtfsMapTitle", "Realtime kaart");
   if (homeGtfsMapSummaryEl) homeGtfsMapSummaryEl.remove();
   if (homeGtfsMapRefreshBtn) {
@@ -7136,25 +6592,6 @@ function applyTranslations() {
   compareModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   compareModalCancelBtn.textContent = getLabel("cancel", "Annuleren");
   compareModalConfirmBtn.textContent = getLabel("compareConfirm", "Vergelijken");
-  if (dashboardSetupTitleEl) dashboardSetupTitleEl.textContent = getLabel("dashboardSetupTitle", "Stalk modus instellen");
-  if (dashboardSetupSummaryEl) dashboardSetupSummaryEl.textContent = getLabel("dashboardSetupSummary", "Vul tot negen voertuigen in. Alleen bussen met realtime verschijnen live.");
-  if (dashboardTvSettingsTitleEl) dashboardTvSettingsTitleEl.textContent = getLabel("dashboardTvSettingsTitle", "Weergave op tv");
-  if (dashboardTvSettingsSummaryEl) dashboardTvSettingsSummaryEl.textContent = getLabel("dashboardTvSettingsSummary", "Pas het uitzicht aan zonder naar het gewone instellingenmenu te gaan.");
-  if (dashboardThemeLabelEl) dashboardThemeLabelEl.textContent = t("theme");
-  if (dashboardThemeAutoOptEl) dashboardThemeAutoOptEl.textContent = t("themeAuto");
-  if (dashboardThemeLightOptEl) dashboardThemeLightOptEl.textContent = t("themeLight");
-  if (dashboardThemeDarkOptEl) dashboardThemeDarkOptEl.textContent = t("themeDark");
-  if (dashboardColorThemeLabelEl) dashboardColorThemeLabelEl.textContent = t("colorTheme");
-  if (dashboardColorClassicOptEl) dashboardColorClassicOptEl.textContent = t("colorClassic");
-  if (dashboardColorBlueOptEl) dashboardColorBlueOptEl.textContent = t("colorBlue");
-  if (dashboardColorGreenOptEl) dashboardColorGreenOptEl.textContent = t("colorGreen");
-  if (dashboardColorYellowOptEl) dashboardColorYellowOptEl.textContent = t("colorYellow");
-  if (dashboardColorOrangeOptEl) dashboardColorOrangeOptEl.textContent = t("colorOrange");
-  if (dashboardColorRedOptEl) dashboardColorRedOptEl.textContent = t("colorRed");
-  if (dashboardColorPurpleOptEl) dashboardColorPurpleOptEl.textContent = t("colorPurple");
-  dashboardSetupCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
-  dashboardSetupCancelBtn.textContent = getLabel("cancel", "Annuleren");
-  dashboardSetupConfirmBtn.textContent = getLabel("dashboardSetupConfirm", "Stalk modus openen");
   if (infoModalTitleEl) infoModalTitleEl.textContent = getLabel("infoTitle", "Site-info");
   if (infoModalSummaryEl) infoModalSummaryEl.textContent = getLabel("infoSummary", "Versie en laatste updates van de databronnen.");
   infoModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
@@ -7235,9 +6672,6 @@ function applyTranslations() {
   if (pageLoadingTextEl) pageLoadingTextEl.textContent = t("loading");
   lastUpdateEl.textContent = `${t("lastUpdate")}: -`;
   lastUpdateEl.hidden = true;
-  if (dashboardSummaryEl && dashboardPanelEl?.hidden) {
-    dashboardSummaryEl.textContent = getLabel("dashboardSummary", "Volg negen voertuigen tegelijk.");
-  }
   if (!currentVehicleId) {
     renderRealtimeUnavailableState("", { withTracker: false });
     vasteDataEl.innerHTML = t("noneSelected");
@@ -7246,10 +6680,6 @@ function applyTranslations() {
   updateFeedStatusText();
   updateFavoriteButtonState();
   if (compareVehicleId) renderComparison();
-  if (!dashboardSetupModalEl?.hidden) renderDashboardSetupInputs();
-  if (!dashboardPanelEl?.hidden && dashboardVehicleIds.length) {
-    void refreshDashboardPanel();
-  }
   if (!infoModalEl?.hidden) showInfoModal();
   if (realtimePausedByInactivity && currentVehicleId) {
     realtimeEl.textContent = t("idlePaused");
@@ -7684,10 +7114,6 @@ function closeInteractiveOverlay(overlayEl) {
     hideLineSearchModal();
     return true;
   }
-  if (overlayEl === dashboardSetupModalEl) {
-    hideDashboardSetupModal();
-    return true;
-  }
   if (overlayEl === reviewModalEl) {
     hideReviewModal();
     return true;
@@ -7741,13 +7167,7 @@ function closeTopInteractiveOverlay() {
 
 window.__BB_HAS_ACTIVE_OVERLAY__ = () => !!getTopInteractiveOverlay();
 window.__BB_CLOSE_TOP_OVERLAY__ = () => closeTopInteractiveOverlay();
-window.__BB_CLOSE_ACTIVE_VIEW__ = () => {
-  if (isDashboardPanelOpen()) {
-    closeDashboardPanel({ historyMode: "replace" });
-    return true;
-  }
-  return false;
-};
+window.__BB_CLOSE_ACTIVE_VIEW__ = () => false;
 
 function trapInteractiveOverlayFocus(event, overlayEl) {
   if (!overlayEl || event.key !== "Tab") return false;
@@ -7836,7 +7256,6 @@ async function resetSiteData() {
   }
 
   favorites = [];
-  dashboardVehicleIds = [];
   hasStoredSettings = false;
   settings = createDefaultSettings(DEFAULT_LANG);
   window.settings = settings;
@@ -9060,24 +8479,7 @@ function resolveVehicleQuery(query, preferredVehicleId = "") {
   return resolveVehicleSearch(query);
 }
 
-function isDashboardEligibleVehicleId(vehicleId = "") {
-  return /^\d{4}$|^\d{6}$/.test(getVisibleVehicleId(vehicleId));
-}
 
-function getDashboardVehicleValidationMessage(query, resolvedVehicleId, resolvedBus, isDuplicate) {
-  const trimmedQuery = normalize(query);
-  if (!trimmedQuery) return "";
-  if (!resolvedBus || !resolvedVehicleId) {
-    return getLabel("dashboardVehicleUnknown", "Dit voertuignummer bestaat niet.");
-  }
-  if (!isDashboardEligibleVehicleId(resolvedVehicleId)) {
-    return getLabel("dashboardVehicleFormat", "Alleen bestaande voertuignummers met 4 of 6 cijfers zijn geldig.");
-  }
-  if (isDuplicate) {
-    return getLabel("dashboardVehicleDuplicate", "Dit voertuig staat al in de stalkmodus.");
-  }
-  return "";
-}
 
 function buildSuggestionLabel(vehicle) {
   const vehicleType = normalize(vehicle.Type);
@@ -9823,32 +9225,7 @@ window.addEventListener("load", () => {
   window.requestAnimationFrame(clearInitialHeaderButtonFocus);
 }, { once: true });
 
-async function maybeAutoStartDashboardForAndroidTv() {
-  if (!isAndroidTvPlatform || dashboardAutoStarted || window.location.search.includes("bus=")) return;
-  dashboardAutoStarted = true;
-  if (voertuigen.length === 0) await laadVoertuigen();
-  const sanitizedIds = getSanitizedDashboardVehicleIds(settings.dashboardVehicleIds);
-  if (sanitizedIds.length !== settings.dashboardVehicleIds.length) {
-    persistDashboardVehicleIds(sanitizedIds);
-  } else {
-    dashboardVehicleIds = sanitizedIds;
-  }
 
-  if (dashboardVehicleIds.length) {
-    await openDashboardPanel();
-    window.setTimeout(() => dashboardEditBtn?.focus(), 40);
-    return;
-  }
-
-  showDashboardSetupModal();
-}
-
-function getDashboardFocusables() {
-  const focusScope = !dashboardSetupModalEl?.hidden ? dashboardSetupModalEl : !dashboardPanelEl?.hidden ? dashboardPanelEl : null;
-  if (!focusScope) return [];
-  return Array.from(focusScope.querySelectorAll('button:not([hidden]):not([disabled]), input:not([hidden]):not([disabled]), select:not([hidden]):not([disabled]), [tabindex="0"]'))
-    .filter((element) => element instanceof HTMLElement && !element.hasAttribute("hidden"));
-}
 
 function isTvSuggestionNavigationActive() {
   if (!isAndroidTvPlatform) return false;
@@ -9861,13 +9238,6 @@ function isTvSuggestionNavigationActive() {
   return !!listEl && !listEl.hidden && listEl.querySelectorAll("li").length > 0;
 }
 
-function moveDashboardFocus(step) {
-  const focusables = getDashboardFocusables();
-  if (!focusables.length) return;
-  const activeIndex = focusables.findIndex((element) => element === document.activeElement);
-  const nextIndex = activeIndex === -1 ? 0 : (activeIndex + step + focusables.length) % focusables.length;
-  focusables[nextIndex]?.focus();
-}
 
 function warmUpVehiclesAndDeepLinks() {
   scheduleNonCriticalTask(() => {
