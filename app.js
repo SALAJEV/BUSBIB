@@ -2269,6 +2269,7 @@ function setCurrentPageView(view) {
   pageElements.forEach((pageEl) => {
     if (!pageEl) return;
     const isActive = pageEl.dataset.routeView === view;
+    if (!isActive && pageEl.contains(document.activeElement)) document.activeElement.blur();
     pageEl.hidden = !isActive;
     pageEl.setAttribute("aria-hidden", String(!isActive));
   });
@@ -3955,12 +3956,35 @@ function addPublicTransportTileLayer(mapInstance) {
   return publicTransportLayer.addTo(mapInstance);
 }
 
+// Kaarten mogen de paginascroll niet vangen: wiel zoomt pas met Ctrl, slepen op touch vraagt twee vingers.
+function getScrollFriendlyMapOptions() {
+  const isTouch = !!(window.L?.Browser?.mobile || window.matchMedia?.("(pointer: coarse)").matches);
+  return {
+    scrollWheelZoom: false,
+    dragging: !isTouch,
+    tap: false
+  };
+}
+
+if (!window.__busbibCtrlWheelZoomBound) {
+  window.__busbibCtrlWheelZoomBound = true;
+  document.addEventListener("wheel", (event) => {
+    if (!(event.ctrlKey || event.metaKey)) return;
+    const mapContainer = event.target instanceof Element ? event.target.closest(".leaflet-container") : null;
+    const mapInstance = mapContainer === homeGtfsMapEl ? homeGtfsMap : mapContainer === document.getElementById("map") ? map : null;
+    if (!mapInstance) return;
+    event.preventDefault();
+    mapInstance.setZoom(mapInstance.getZoom() + (event.deltaY < 0 ? 1 : -1));
+  }, { passive: false });
+}
+
 async function initHomeGtfsMap() {
   if (!homeGtfsMapEl || homeGtfsMap) return;
   const L = await ensureLeafletLoaded();
   homeGtfsMap = L.map("homeGtfsMap", {
     zoomControl: true,
-    preferCanvas: true
+    preferCanvas: true,
+    ...getScrollFriendlyMapOptions()
   }).setView(HOME_GTFS_MAP_CENTER, HOME_GTFS_MAP_ZOOM);
   addPublicTransportTileLayer(homeGtfsMap);
   homeGtfsMapMarkers = L.layerGroup().addTo(homeGtfsMap);
@@ -6825,7 +6849,7 @@ function getProvinceForHalteCode(code = "") {
 }
 
 function renderHalteSearchResults(haltes = []) {
-  if (!haltSearchResultsListEl) return;
+  if (!ensureHalteSuggestionList()) return;
   haltSearchResultsListEl.innerHTML = "";
   haltSearchResultsListEl.hidden = haltes.length === 0;
   if (!haltes.length) return;
@@ -6857,6 +6881,7 @@ function renderHalteSearchResults(haltes = []) {
   });
 
   haltSearchResultsListEl.hidden = haltSearchResultsListEl.childElementCount === 0;
+  if (!haltSearchResultsListEl.hidden) positionSuggestionList(haltSearchResultsListEl, haltecodeInputEl);
 }
 
 async function updateHalteSuggestions() {
@@ -7115,6 +7140,7 @@ function setFavoritesPanel(open) {
   syncFavoritesMenuPlacement();
   favoritesPanelOpen = !!open || isMenuRoute;
   if (favoritesBackdropEl) {
+    if (!favoritesPanelOpen && favoritesBackdropEl.contains(document.activeElement)) document.activeElement.blur();
     favoritesBackdropEl.hidden = !favoritesPanelOpen;
     favoritesBackdropEl.setAttribute("aria-hidden", String(!favoritesPanelOpen));
     if (isMobileMenuOverlay() && favoritesPanelOpen) {
@@ -8755,13 +8781,12 @@ function getHomeGtfsCanvasLayerClass() {
         [size.x + iconSize + clusterSize, size.y + iconSize + clusterSize]
       );
       const clusters = new Map();
+      const favoriteKeys = new Set(favorites.map((favoriteId) => normalizeLookup(getVisibleVehicleId(favoriteId))));
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
         if (!paddedBounds.contains(point)) return;
         const vehicleId = normalizeLookup(getHomeGtfsMapVehicleLinkId(snapshot));
-        const isFavorite = !!vehicleId && favorites.some((favoriteId) =>
-          normalizeLookup(getVisibleVehicleId(favoriteId)) === vehicleId
-        );
+        const isFavorite = !!vehicleId && favoriteKeys.has(vehicleId);
         // Grid op vaste wereldcoördinaten, zodat slepen de clusters niet hergroepeert.
         const worldPoint = this._map.project([snapshot.latitude, snapshot.longitude], this._map.getZoom());
         const key = `${Math.floor(worldPoint.x / clusterSize)}:${Math.floor(worldPoint.y / clusterSize)}`;
@@ -8989,9 +9014,42 @@ function positionSuggestionList(listEl, inputEl) {
   const preferredWidth = inputEl.id === "voertuignummer" ? Math.max(rect.width, 280) : rect.width;
   const width = Math.min(preferredWidth, availableWidth);
   const left = Math.max(12, Math.min(rect.left, viewportWidth - width - 12));
-  listEl.style.top = `${Math.round(rect.bottom + 6)}px`;
+  const visual = window.visualViewport;
+  const visibleTop = visual ? visual.offsetTop : 0;
+  const visibleBottom = visibleTop + (visual ? visual.height : window.innerHeight);
+  const spaceBelow = visibleBottom - rect.bottom - 14;
+  const spaceAbove = rect.top - visibleTop - 14;
+  const wantedHeight = Math.min(listEl.scrollHeight || 0, 360);
+  const openAbove = spaceBelow < Math.min(wantedHeight, 220) && spaceAbove > spaceBelow;
+  const available = openAbove ? spaceAbove : spaceBelow;
+  listEl.style.maxHeight = `${Math.round(Math.max(110, Math.min(360, available)))}px`;
+  if (openAbove) {
+    const layoutHeight = document.documentElement.clientHeight || window.innerHeight;
+    listEl.style.top = "auto";
+    listEl.style.bottom = `${Math.round(layoutHeight - rect.top + 6)}px`;
+  } else {
+    listEl.style.bottom = "auto";
+    listEl.style.top = `${Math.round(rect.bottom + 6)}px`;
+  }
+  listEl.classList.toggle("opens-above", openAbove);
   listEl.style.left = `${Math.round(left)}px`;
   listEl.style.width = `${Math.round(width)}px`;
+}
+
+function ensureHalteSuggestionList() {
+  if (!haltSearchResultsListEl) return null;
+  if (haltSearchResultsListEl.dataset.floating !== "1") {
+    haltSearchResultsListEl.classList.add("floating-suggestion-list");
+    haltSearchResultsListEl.dataset.floating = "1";
+    document.body.appendChild(haltSearchResultsListEl);
+    const sync = () => {
+      if (!haltSearchResultsListEl.hidden) positionSuggestionList(haltSearchResultsListEl, haltecodeInputEl);
+    };
+    window.addEventListener("resize", sync, { passive: true });
+    window.addEventListener("scroll", sync, { capture: true, passive: true });
+    window.visualViewport?.addEventListener("resize", sync, { passive: true });
+  }
+  return haltSearchResultsListEl;
 }
 
 function bindVehicleSuggestions(inputEl, onSelect) {
@@ -9542,7 +9600,8 @@ async function initMap(lat,lon){
       attributionControl: true,
       preferCanvas: true,
       fadeAnimation: true,
-      markerZoomAnimation: true
+      markerZoomAnimation: true,
+      ...getScrollFriendlyMapOptions()
     }).setView([lat,lon],14);
 
     lastRealtimeMapCenter = { latitude: Number(lat), longitude: Number(lon) };

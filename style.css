@@ -525,6 +525,18 @@ p {
   transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
+/* Met de navigatiebalk zichtbaar zijn deze knoppen dubbel */
+.container:has(> .primary-nav:not([hidden])) ~ .menu-overlay .more-extra-functions,
+body:has(.container > .primary-nav) .more-extra-functions {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  body:has(.container > .primary-nav) .more-extra-functions {
+    display: block;
+  }
+}
+
 .primary-nav__link svg {
   flex: 0 0 19px;
   width: 19px;
@@ -3673,8 +3685,31 @@ footer {
   font-size: 0.87rem;
 }
 
-.halte-suggestion-list {
-  top: calc(100% + 5px);
+.halte-suggestion-item {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+}
+
+.halte-suggestion-item .vehicle-suggestion-primary {
+  font-weight: 700;
+}
+
+.halte-suggestion-item .vehicle-suggestion-secondary {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.floating-suggestion-list {
+  max-width: calc(100vw - 24px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.floating-suggestion-list.opens-above {
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.22);
 }
 
 .install-guide-steps {
