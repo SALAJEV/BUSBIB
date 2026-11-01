@@ -561,9 +561,7 @@ const lineSearchResultsEl = document.getElementById("lineSearchResults");
 const haltSearchResultsListEl = document.getElementById("haltSearchResultsList");
 
 routePageOutletEl?.append(
-  halteSearchModalEl,
-  lineSearchModalEl,
-  favoritesBackdropEl
+  ...[halteSearchModalEl, lineSearchModalEl, favoritesBackdropEl].filter(Boolean)
 );
 
 let voertuigen = [];

@@ -442,6 +442,10 @@ p {
   margin-block: 0;
 }
 
+.container > .home-gtfs-map-panel {
+  margin-top: 4px;
+}
+
 .container > footer {
   margin-top: auto;
 }
@@ -453,7 +457,7 @@ p {
   margin: 0 0 12px;
   padding: 12px 18px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--ink);
   text-align: center;
@@ -1110,14 +1114,14 @@ footer {
 .home-gtfs-map-panel,
 .card {
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
 
 .home-gtfs-map-panel {
   margin-bottom: 12px;
-  padding: 18px;
+  padding: clamp(18px, 3vw, 28px);
 }
 
 .home-gtfs-map-head,
@@ -1134,7 +1138,9 @@ footer {
 
 .home-gtfs-map-head {
   align-items: center;
-  margin-bottom: 13px;
+  margin-bottom: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 .home-gtfs-map-refresh-btn {
@@ -1198,14 +1204,18 @@ footer {
 .pdf-modal-header h3,
 .more-panel-header h3 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.28rem;
   letter-spacing: -0.025em;
 }
 
 .home-gtfs-map-status {
-  margin: 0 0 12px;
+  margin: 6px 0 0;
   color: var(--muted);
-  font-size: 0.87rem;
+  font-size: 0.9rem;
+}
+
+.home-gtfs-map-head + .home-gtfs-map {
+  margin-top: 18px;
 }
 
 .home-gtfs-map,
@@ -1327,17 +1337,16 @@ footer {
 
 .card {
   min-width: 0;
-  padding: 16px;
+  padding: clamp(18px, 3vw, 28px);
   overflow: hidden;
 }
 
 .card h2 {
-  margin: 0 0 18px;
-  padding-left: 12px;
-  border-left: 3px solid var(--accent);
-  font-family: "Sora", "Source Sans 3", sans-serif;
-  font-size: clamp(1.12rem, 1.7vw, 1.35rem);
-  letter-spacing: -0.035em;
+  margin: 0 0 16px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.28rem;
+  letter-spacing: -0.025em;
   line-height: 1.25;
 }
 
@@ -2848,12 +2857,12 @@ footer {
 
 .more-panel-header {
   align-items: center;
-  padding-bottom: 17px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
 }
 
 .more-panel-header h3 {
-  font-size: 1.4rem;
+  font-size: 1.28rem;
 }
 
 .more-panel-subtitle {
@@ -4098,8 +4107,8 @@ body.site-disabled {
 
   .home-gtfs-map-panel {
     margin-bottom: 10px;
-    padding: 14px;
-    border-radius: var(--radius-md);
+    padding: 16px;
+    border-radius: var(--radius-lg);
   }
 
   .home-gtfs-map,
@@ -4283,12 +4292,13 @@ body.site-disabled {
 
   .home-gtfs-map-panel,
   .card {
-    padding: 13px;
+    padding: 16px;
+    border-radius: var(--radius-lg);
   }
 
   #staticVehicleCard,
   #realtimeVehicleCard {
-    padding: 13px;
+    padding: 16px;
   }
 
   .chip-row,
@@ -4347,7 +4357,7 @@ body.route-page-open .container > footer {
   display: none;
 }
 
-.route-page-outlet:empty {
+.route-page-outlet:not(:has(> :not([hidden]))) {
   display: none;
 }
 
@@ -4414,6 +4424,10 @@ body.route-page-open .container > footer {
     margin-block: 0 10px;
   }
 
+  .container > .home-gtfs-map-panel {
+    margin-top: 0;
+  }
+
   #routePageOutlet .pdf-modal.app-route-page,
   #routePageOutlet #favoritesPanel.favorites-panel {
     padding: 16px;
@@ -4475,4 +4489,98 @@ body.route-page-open .container > footer {
 .vehicle-not-found-btn:disabled {
   opacity: 0.6;
   cursor: wait;
+}
+
+/* Eén standaard voor alle paginakaarten: home, halte, lijn, menu en resultaatkaarten. */
+:root {
+  --page-card-pad: clamp(20px, 3vw, 28px);
+  --page-card-radius: var(--radius-xl);
+  --page-card-gap: 20px;
+}
+
+.home-gtfs-map-panel,
+.card,
+#routePageOutlet .pdf-modal.app-route-page,
+#routePageOutlet #favoritesPanel.favorites-panel {
+  position: relative;
+  width: 100%;
+  max-height: none;
+  margin: 0;
+  padding: var(--page-card-pad);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--page-card-radius);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, var(--surface)), var(--surface) 140px);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-gtfs-map-head,
+#routePageOutlet .pdf-modal-header,
+#routePageOutlet .more-panel-header,
+.card > h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 var(--page-card-gap);
+  padding: 0 0 var(--page-card-gap);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-gtfs-map-head h2,
+.pdf-modal-header h3,
+.more-panel-header h3,
+.card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Sora", "Source Sans 3", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.home-gtfs-map-status,
+.pdf-modal-summary,
+.more-panel-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+#routePageOutlet .pdf-modal-body,
+.home-gtfs-map-head + .home-gtfs-map {
+  padding: 0;
+  margin-top: 0;
+}
+
+#routePageOutlet .more-panel-section:first-of-type {
+  padding-top: 0;
+}
+
+@media (max-width: 680px) {
+  :root {
+    --page-card-pad: 18px;
+    --page-card-radius: var(--radius-lg);
+    --page-card-gap: 16px;
+  }
+
+  .home-gtfs-map-head h2,
+  .pdf-modal-header h3,
+  .more-panel-header h3,
+  .card h2 {
+    font-size: 1.2rem;
+  }
+
+  .home-gtfs-map-panel,
+  .card,
+  #routePageOutlet .pdf-modal.app-route-page,
+  #routePageOutlet #favoritesPanel.favorites-panel,
+  #staticVehicleCard,
+  #realtimeVehicleCard {
+    padding: var(--page-card-pad);
+    border-radius: var(--page-card-radius);
+  }
 }
