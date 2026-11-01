@@ -8629,8 +8629,11 @@ function getHomeGtfsCanvasLayerClass() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size.x, size.y);
       const iconSize = isIosPlatform || isTouchPlatform() ? 24 : 30;
-      const paddedBounds = L.bounds([-iconSize, -iconSize], [size.x + iconSize, size.y + iconSize]);
       const clusterSize = this._map.getZoom() < 10 ? 56 : 36;
+      const paddedBounds = L.bounds(
+        [-iconSize - clusterSize, -iconSize - clusterSize],
+        [size.x + iconSize + clusterSize, size.y + iconSize + clusterSize]
+      );
       const clusters = new Map();
       this._snapshots.forEach((snapshot) => {
         const point = this._map.latLngToLayerPoint([snapshot.latitude, snapshot.longitude]).subtract(topLeft);
@@ -8639,7 +8642,9 @@ function getHomeGtfsCanvasLayerClass() {
         const isFavorite = !!vehicleId && favorites.some((favoriteId) =>
           normalizeLookup(getVisibleVehicleId(favoriteId)) === vehicleId
         );
-        const key = `${Math.floor(point.x / clusterSize)}:${Math.floor(point.y / clusterSize)}`;
+        // Grid op vaste wereldcoördinaten, zodat slepen de clusters niet hergroepeert.
+        const worldPoint = this._map.project([snapshot.latitude, snapshot.longitude], this._map.getZoom());
+        const key = `${Math.floor(worldPoint.x / clusterSize)}:${Math.floor(worldPoint.y / clusterSize)}`;
         let cluster = clusters.get(key);
         if (!cluster) {
           cluster = { x: 0, y: 0, latitude: 0, longitude: 0, snapshots: [], hasFavorite: false };
