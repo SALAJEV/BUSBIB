@@ -41,7 +41,6 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen en heeft
 - Vergelijken van voertuigen.
 - Voertuigfoto's tonen uit lokale `media/` assets.
 - EXIF- en locatieverrijking voor foto's.
-- Dashboard of "Stalk modus" om meerdere voertuigen tegelijk te volgen.
 - PWA-installatie en offline fallback.
 - Meertalige interface: Nederlands, Frans, Engels, Duits, Pools, Spaans en Russisch.
 
@@ -60,7 +59,7 @@ De frontend wordt rechtstreeks geladen vanuit de rootbestanden:
 
 Er wordt bewust geen framework zoals React, Vue of Angular gebruikt. De app is volledig geschreven in vanilla JavaScript en werkt met DOM-manipulatie, lokale state, `localStorage`, `fetch`, `history` en een service worker.
 
-De hoofdnavigatie gebruikt deelbare URL's via de `view`-queryparameter, zoals `?view=halte`, `?view=lijn`, `?view=stalk` en `?view=menu`. Navigeren werkt samen met de browsergeschiedenis; voertuiglinks blijven beschikbaar via `?bus=<nummer>` en optioneel `&compare=<nummer>`.
+De hoofdnavigatie gebruikt deelbare URL's via de `view`-queryparameter, zoals `?view=halte`, `?view=lijn` en `?view=menu`. Navigeren werkt samen met de browsergeschiedenis; voertuiglinks blijven beschikbaar via `?bus=<nummer>` en optioneel `&compare=<nummer>`.
 
 ### API-laag
 

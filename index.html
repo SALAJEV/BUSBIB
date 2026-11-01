@@ -115,10 +115,6 @@
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="18" r="2.2"></circle><circle cx="18" cy="6" r="2.2"></circle><path d="M8 18h3a3 3 0 0 0 3-3v-3a3 3 0 0 1 3-3"></path></svg>
       <span id="navLineText">Lijn zoeken</span>
     </button>
-    <button id="navDashboardBtn" class="primary-nav__link" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 16V7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5V16H4Z"></path><path d="M3 16h18v2H3zM7 18v1.5M17 18v1.5M8 9h8M8 12h8"></path><circle cx="7.5" cy="16" r=".7"></circle><circle cx="16.5" cy="16" r=".7"></circle></svg>
-      <span id="navDashboardText">Stalk modus</span>
-    </button>
     <button id="navMoreBtn" class="primary-nav__link" type="button" aria-label="Menu" aria-controls="favoritesPanel" aria-expanded="false">
       <svg class="more-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M6.5 7.25h11"></path>
@@ -144,29 +140,6 @@
     <div id="homeGtfsMapStatus" class="home-gtfs-map-status" role="status">Klik op Vernieuwen om de live kaart te laden.</div>
     <div id="homeGtfsMap" class="home-gtfs-map" aria-label="Kaart met alle live GTFS-bussen"></div>
   </section>
-  <section id="dashboardPanel" class="dashboard-panel app-route-page" data-route-view="stalk" aria-labelledby="dashboardTitle" hidden aria-hidden="true">
-    <div class="dashboard-panel-header">
-      <div>
-        <h2 id="dashboardTitle">Stalk modus</h2>
-        <p id="dashboardSummary" class="dashboard-summary">Volg negen voertuigen tegelijk.</p>
-      </div>
-      <div class="dashboard-panel-actions">
-        <button id="dashboardEditBtn" class="btn" type="button">Aanpassen</button>
-          <button id="dashboardCloseBtn" class="settings-close-btn dashboard-close-btn" type="button" aria-label="Stalk modus sluiten">&times;</button>
-      </div>
-    </div>
-    <div id="dashboardLoadingState" class="dashboard-loading-state" hidden aria-hidden="true">
-      <span class="page-loading-spinner" aria-hidden="true"></span>
-      <p id="dashboardLoadingText">Stalk modus wordt geladen...</p>
-    </div>
-    <div class="dashboard-panel-content">
-      <div id="dashboardMapWrap" class="dashboard-map-wrap hidden">
-        <div id="dashboardMap" class="dashboard-map" aria-label="Kaart met live voertuigen"></div>
-      </div>
-      <div id="dashboardGrid" class="dashboard-grid"></div>
-    </div>
-  </section>
-
   <div class="results-wrap">
     <div class="results-toolbar">
       <button class="close-btn" id="closeBtn" title="Terug" aria-label="Terug">
@@ -296,7 +269,6 @@
         <h4 id="moreFunctionsTitle">Extra functies</h4>
       </div>
       <div class="more-action-grid">
-        <button id="dashboardToggleBtn" class="btn" type="button" title="Stalk modus">Stalk modus</button>
         <button id="halteSearchToggleBtn" class="btn more-secondary-btn" type="button" title="Halte zoeken" aria-label="Halte zoeken">Halte zoeken</button>
         <button id="lineSearchToggleBtn" class="btn more-secondary-btn" type="button">Lijn zoeken</button>
       </div>
@@ -469,52 +441,6 @@
     <div class="pdf-modal-actions">
       <button id="compareModalCancelBtn" type="button">Annuleren</button>
       <button id="compareModalConfirmBtn" class="btn" type="button">Vergelijken</button>
-    </div>
-  </div>
-</div>
-
-<div id="dashboardSetupModal" class="pdf-modal" hidden role="dialog" aria-modal="true" aria-labelledby="dashboardSetupTitle">
-  <div class="pdf-modal-card dashboard-setup-card">
-    <div class="pdf-modal-header">
-      <div>
-        <h3 id="dashboardSetupTitle">Stalk modus instellen</h3>
-        <p id="dashboardSetupSummary" class="pdf-modal-summary">Vul tot negen voertuigen in. Alleen bussen met realtime verschijnen live.</p>
-      </div>
-      <button id="dashboardSetupCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
-    </div>
-    <div id="dashboardTvSettings" class="dashboard-tv-settings" hidden>
-      <div class="dashboard-tv-settings-head">
-        <h4 id="dashboardTvSettingsTitle">Weergave op tv</h4>
-        <p id="dashboardTvSettingsSummary" class="dashboard-tv-settings-summary">Pas het uitzicht aan zonder naar het gewone instellingenmenu te gaan.</p>
-      </div>
-      <div class="dashboard-tv-settings-grid">
-        <label class="dashboard-tv-setting" for="dashboardThemeSelect">
-          <span id="dashboardThemeLabel">Thema</span>
-          <select id="dashboardThemeSelect">
-            <option value="auto" id="dashboardThemeAutoOpt">Automatisch</option>
-            <option value="light" id="dashboardThemeLightOpt">Licht</option>
-            <option value="dark" id="dashboardThemeDarkOpt">Donker</option>
-          </select>
-        </label>
-        <label class="dashboard-tv-setting" for="dashboardColorThemeSelect">
-          <span id="dashboardColorThemeLabel">Kleurthema</span>
-          <select id="dashboardColorThemeSelect">
-            <option value="classic" id="dashboardColorClassicOpt">Standaard</option>
-            <option value="blue" id="dashboardColorBlueOpt">Blauw</option>
-            <option value="green" id="dashboardColorGreenOpt">Groen</option>
-            <option value="yellow" id="dashboardColorYellowOpt">Geel</option>
-            <option value="orange" id="dashboardColorOrangeOpt">Oranje</option>
-            <option value="red" id="dashboardColorRedOpt">Rood</option>
-            <option value="purple" id="dashboardColorPurpleOpt">Paars</option>
-          </select>
-        </label>
-      </div>
-    </div>
-    <div id="dashboardSetupGrid" class="dashboard-setup-grid"></div>
-    <p id="dashboardSetupError" class="dashboard-setup-error" hidden></p>
-    <div class="pdf-modal-actions">
-      <button id="dashboardSetupCancelBtn" type="button">Annuleren</button>
-      <button id="dashboardSetupConfirmBtn" class="btn" type="button">Stalk modus openen</button>
     </div>
   </div>
 </div>
