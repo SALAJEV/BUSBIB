@@ -399,8 +399,6 @@ const vehiclePhotoNextBtn = document.getElementById("vehiclePhotoNextBtn");
 const vehiclePhotoCounterEl = document.getElementById("vehiclePhotoCounter");
 const vehiclePhotoMetaEl = document.getElementById("vehiclePhotoMeta");
 const vehiclePhotoCaptionEl = document.getElementById("vehiclePhotoCaption");
-const vehiclePhotoUploadCtaEl = document.getElementById("vehiclePhotoUploadCta");
-const vehiclePhotoUploadHintEl = document.getElementById("vehiclePhotoUploadHint");
 const vehiclePhotoEmptyStateEl = document.getElementById("vehiclePhotoEmptyState");
 const vehiclePhotoEmptyTitleEl = document.getElementById("vehiclePhotoEmptyTitle");
 const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText");
@@ -4253,15 +4251,12 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   }
   if (vehiclePhotoEmptyTextEl) {
     vehiclePhotoEmptyTextEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyText", "Heb je een foto van deze bus? Stuur ze in via het formulier."), visibleVehicleId)
-      : getLabel("photoUploadEmptyTextGeneric", "Heb je een foto van deze bus? Stuur ze in via het formulier.");
+      ? fillTemplate(getLabel("photoUploadEmptyText", "Stuur jouw foto van voertuig {id} in via het formulier en help BUSBIB de fotobibliotheek aan te vullen."), visibleVehicleId)
+      : getLabel("photoUploadEmptyTextGeneric", "Stuur jouw foto van deze bus in via het formulier en help BUSBIB de fotobibliotheek aan te vullen.");
   }
-  if (vehiclePhotoUploadHintEl) {
-    vehiclePhotoUploadHintEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadSummary", "Met jouw foto maken we de fotobibliotheek van voertuig {id} compleet."), visibleVehicleId)
-      : getLabel("photoUploadSummaryGeneric", "Met jouw foto help je onze fotobibliotheek compleet te maken.");
+  if (vehiclePhotoUploadBtn) {
+    vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Foto insturen");
   }
-  if (vehiclePhotoUploadBtn) vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Foto insturen");
   if (photoUploadModalTitleEl) photoUploadModalTitleEl.textContent = getLabel("photoUploadTitle", "Foto uploaden");
   if (photoUploadModalSummaryEl) {
     photoUploadModalSummaryEl.textContent = hasSpecificVehicleId
@@ -4358,10 +4353,7 @@ function setVehiclePhotoEmptyStateVisible(visible) {
     if (vehiclePhotoCaptionEl) vehiclePhotoCaptionEl.hidden = true;
   }
   if (vehiclePhotoInfoEl) vehiclePhotoInfoEl.hidden = visible;
-  if (vehiclePhotoUploadCtaEl) {
-    vehiclePhotoUploadCtaEl.hidden = !visible;
-    vehiclePhotoUploadCtaEl.setAttribute("aria-hidden", String(!visible));
-  }
+  if (vehiclePhotoUploadBtn) vehiclePhotoUploadBtn.hidden = !visible;
   if (vehiclePhotoEmptyStateEl) {
     vehiclePhotoEmptyStateEl.hidden = !visible;
     vehiclePhotoEmptyStateEl.setAttribute("aria-hidden", String(!visible));
@@ -5518,10 +5510,6 @@ function hideVehiclePhotoCard() {
   if (vehiclePhotoCounterEl) {
     vehiclePhotoCounterEl.hidden = true;
     vehiclePhotoCounterEl.textContent = "";
-  }
-  if (vehiclePhotoUploadCtaEl) {
-    vehiclePhotoUploadCtaEl.hidden = true;
-    vehiclePhotoUploadCtaEl.setAttribute("aria-hidden", "true");
   }
   setVehiclePhotoEmptyStateVisible(false);
 }
@@ -9022,7 +9010,7 @@ function positionSuggestionList(listEl, inputEl) {
   const wantedHeight = Math.min(listEl.scrollHeight || 0, 360);
   const openAbove = spaceBelow < Math.min(wantedHeight, 220) && spaceAbove > spaceBelow;
   const available = openAbove ? spaceAbove : spaceBelow;
-  listEl.style.maxHeight = `${Math.round(Math.max(110, Math.min(360, available)))}px`;
+  listEl.style.maxHeight = `${Math.round(Math.max(0, Math.min(360, available)))}px`;
   if (openAbove) {
     const layoutHeight = document.documentElement.clientHeight || window.innerHeight;
     listEl.style.top = "auto";

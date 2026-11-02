@@ -26,34 +26,38 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB</title>
-<link rel="stylesheet" href="style.css?v=20261101-9">
+<link rel="stylesheet" href="style.css?v=20261103-1">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261101-9";
+  window.BB_ASSET_VERSION = "20261103-1";
 </script>
 </head>
 <body>
 <div class="app-shell">
-<div id="splash" role="img" aria-label="BUSBIB laden">
+<div id="splash" aria-hidden="true">
   <picture class="logo">
-    <img src="media/logo/logo.png" alt="BUSBIB" fetchpriority="high" decoding="async">
+    <img src="media/logo/logo.png" alt="" fetchpriority="high" decoding="async">
   </picture>
   <h1 id="splashTitle" class="splash-title">BUSBIB</h1>
   <p id="splashCredit" class="splash-credit">Made by Busspotter 95</p>
 </div>
 <div class="container">
-  <div id="trackingStatusBanner" class="tracking-status-banner" hidden aria-hidden="true" role="status">
+  <div id="trackingStatusBanner" class="tracking-status-banner" hidden role="status">
     <span id="trackingStatusBannerText" class="tracking-status-banner__text">Trackinginformatie is tijdelijk niet beschikbaar.</span>
-  </div>  <div id="photoDelayBanner" class="tracking-status-banner" hidden aria-hidden="true" role="status">
+  </div>
+  <div id="photoDelayBanner" class="tracking-status-banner" hidden role="status">
     <span id="photoDelayBannerText" class="tracking-status-banner__text">Foto's worden later online gezet.</span>
-  </div>  <div class="header-bar">
-    <div class="header-intro">  
-      <button id="appTitleBtn" class="title-home-btn" type="button">
-        <img class="title-home-logo" src="media/logo/logo.png" alt="" aria-hidden="true">
-        <h1 id="appTitle">BUSBIB</h1>
-      </button>
+  </div>
+  <div class="header-bar">
+    <div class="header-intro">
+      <h1 class="title-home-heading">
+        <button id="appTitleBtn" class="title-home-btn" type="button">
+          <img class="title-home-logo" src="media/logo/logo.png" alt="" aria-hidden="true">
+          <span id="appTitle">BUSBIB</span>
+        </button>
+      </h1>
       <div class="header-copy">
         <p id="appSubtitle">Zoek een voertuig en volg het in realtime</p>
       </div>
@@ -138,7 +142,7 @@
         </svg>
       </button>
     </div>
-    <div id="homeGtfsMap" class="home-gtfs-map" aria-label="Kaart met alle live GTFS-bussen"></div>
+    <div id="homeGtfsMap" class="home-gtfs-map" role="region" aria-label="Kaart met alle live GTFS-bussen"></div>
   </section>
   <div class="results-wrap">
     <div class="results-toolbar">
@@ -158,12 +162,12 @@
       <div id="realtimeVehicleCard" class="card" hidden>
         <h2 id="realtimeCardTitle">Realtimegegevens</h2>
         <div id="realtime" class="loading">Geen gegevens beschikbaar.</div>
-        <div id="weatherBlock" class="weather-block" hidden aria-hidden="true"></div>
+        <div id="weatherBlock" class="weather-block" hidden></div>
         <div id="map"></div>
         <div id="lastUpdate" hidden>Laatste update: -</div>
       </div>
 
-      <div id="vehiclePhotoCard" class="card photo-card" hidden aria-hidden="true">
+      <div id="vehiclePhotoCard" class="card photo-card" hidden>
         <div class="vehicle-photo-shell">
           <div class="vehicle-photo-header">
             <h2 id="photoCardTitle">Voertuigfoto</h2>
@@ -178,30 +182,27 @@
                 <button id="vehiclePhotoNextBtn" class="photo-nav-btn photo-nav-btn--next" type="button" hidden aria-label="Volgende foto">
                   <svg class="photo-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 5 7 7-7 7"></path></svg>
                 </button>
-                <div id="vehiclePhotoEmptyState" class="vehicle-photo-empty" hidden aria-hidden="true">
+                <div id="vehiclePhotoEmptyState" class="vehicle-photo-empty" hidden>
                   <span class="vehicle-photo-empty-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
                   </span>
                   <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Nog geen foto van voertuig.</strong>
                   <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb je een foto van deze bus? Deel ze met BUSBIB.</p>
-                  <div id="vehiclePhotoUploadCta" class="vehicle-photo-upload-cta" hidden aria-hidden="true">
-                    <p id="vehiclePhotoUploadHint" class="vehicle-photo-upload-hint">Help ons de fotobibliotheek aan te vullen.</p>
-                    <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn vehicle-photo-upload-btn--footer" type="button">Foto insturen</button>
-                  </div>
+                  <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn" type="button" hidden>Foto insturen</button>
                 </div>
               </div>
             </div>
             <aside class="vehicle-photo-side-panel">
               <p id="vehiclePhotoCaption" class="vehicle-photo-caption"></p>
               <div class="vehicle-photo-info">
-                <div id="vehiclePhotoMeta" class="vehicle-photo-meta" hidden aria-hidden="true"></div>
+                <div id="vehiclePhotoMeta" class="vehicle-photo-meta" hidden></div>
               </div>
             </aside>
           </div>
         </div>
       </div>
 
-      <div id="compareCard" class="card compare-card" hidden aria-hidden="true">
+      <div id="compareCard" class="card compare-card" hidden>
         <div class="compare-card-header">
           <div>
             <h2 id="compareCardTitle">Vergelijking</h2>
@@ -249,8 +250,8 @@
 
 </div>
 
-<section id="favoritesBackdrop" class="menu-overlay app-route-page" data-route-view="menu" aria-labelledby="morePanelTitle" hidden aria-hidden="true">
-  <div id="favoritesPanel" class="favorites-panel more-panel" role="region" aria-labelledby="morePanelTitle" aria-hidden="true" hidden>
+<section id="favoritesBackdrop" class="menu-overlay app-route-page" data-route-view="menu" aria-labelledby="morePanelTitle" hidden>
+  <div id="favoritesPanel" class="favorites-panel more-panel" role="region" aria-labelledby="morePanelTitle" hidden>
     <div class="more-panel-header">
       <div>
         <h3 id="morePanelTitle">Meer</h3>
@@ -313,7 +314,7 @@
                 <option value="largest" id="textScaleLargestOpt">Extra groot</option>
               </select>
             </div>
-          </section>
+          </div>
         </section>
         <section class="settings-category" aria-labelledby="settingsRealtimeTitle">
           <div class="settings-category-heading">
@@ -394,14 +395,14 @@
     </section>
   </div>
 </section>
-<div id="pageLoadingOverlay" class="page-loading-overlay" hidden aria-hidden="true">
+<div id="pageLoadingOverlay" class="page-loading-overlay" hidden>
   <div class="page-loading-shell">
     <span class="page-loading-bar" aria-hidden="true"></span>
     <span class="sr-only" id="pageLoadingText">Laden</span>
   </div>
 </div>
 
-<div id="offlineOverlay" class="offline-overlay" hidden aria-hidden="true">
+<div id="offlineOverlay" class="offline-overlay" hidden>
   <div class="offline-shell" role="alert" aria-live="assertive">
     <span id="offlinePill" class="offline-pill">Offline</span>
     <h2 id="offlineTitle">Geen internetverbinding</h2>
@@ -429,12 +430,12 @@
       <button id="compareModalCloseBtn" class="settings-close-btn" type="button" aria-label="Sluiten">&times;</button>
     </div>
     <div class="pdf-modal-body">
-      <label class="pdf-theme-field compare-field" for="compareVehicleInput">
-        <span id="compareFieldLabel">Voertuignummer of nummerplaat</span>
+      <div class="pdf-theme-field compare-field">
+        <label id="compareFieldLabel" for="compareVehicleInput">Voertuignummer of nummerplaat</label>
         <div class="suggestion-input-shell">
           <input id="compareVehicleInput" type="text" placeholder="Bijvoorbeeld 5292">
         </div>
-      </label>
+      </div>
       <p id="compareModalNote" class="pdf-modal-note">De vergelijking toont vaste voertuiggegevens van beide bussen.</p>
     </div>
     <div class="pdf-modal-actions">
@@ -581,7 +582,7 @@
   </div>
 </div>
 
-<section id="halteSearchModal" class="pdf-modal app-route-page" data-route-view="halte" aria-labelledby="haltModuleTitle" hidden aria-hidden="true">
+<section id="halteSearchModal" class="pdf-modal app-route-page" data-route-view="halte" aria-labelledby="haltModuleTitle" hidden>
   <div class="pdf-modal-card halte-search-modal-card">
     <div class="pdf-modal-header">
       <div>
@@ -604,7 +605,7 @@
   </div>
 </section>
 
-<section id="lineSearchModal" class="pdf-modal app-route-page" data-route-view="lijn" aria-labelledby="lineSearchTitle" hidden aria-hidden="true">
+<section id="lineSearchModal" class="pdf-modal app-route-page" data-route-view="lijn" aria-labelledby="lineSearchTitle" hidden>
   <div class="pdf-modal-card line-search-modal-card">
     <div class="pdf-modal-header">
       <div>
@@ -639,7 +640,7 @@
     </div>
     <div class="pdf-modal-body legal-modal-body">
       <div class="review-embed-shell">
-        <iframe id="reviewFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform?embedded=true" width="640" height="2843" frameborder="0" marginheight="0" marginwidth="0" title="BUSBIB reviewformulier" loading="lazy">Laden…</iframe>
+        <iframe id="reviewFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform?embedded=true" width="640" height="2843" title="BUSBIB reviewformulier" loading="lazy"></iframe>
       </div>
     </div>
     <div class="pdf-modal-actions">
@@ -659,7 +660,7 @@
     </div>
     <div class="pdf-modal-body legal-modal-body">
       <div class="review-embed-shell">
-        <iframe id="reportFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform?embedded=true" width="640" height="623" frameborder="0" marginheight="0" marginwidth="0" title="BUSBIB meldformulier" loading="lazy">Laden…</iframe>
+        <iframe id="reportFormFrame" class="review-form-frame" data-src="https://docs.google.com/forms/d/e/1FAIpQLScrSDIN__F9mfOxpuMd2Kvw2GbGB3djKZrao1dB-Ry2-a67TA/viewform?embedded=true" width="640" height="623" title="BUSBIB meldformulier" loading="lazy"></iframe>
       </div>
       <div class="review-mobile-fallback">
         <a id="reportMobileLink" class="btn" href="https://forms.gle/DKKPFHfSAgA2jo6B7" target="_blank" rel="noopener noreferrer">Open meldformulier</a>
