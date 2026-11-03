@@ -3031,7 +3031,6 @@ function findLineSearchRoutes(query, { limit = 30 } = {}) {
       if (!Number.isFinite(score) && fields.some((field) => field.startsWith(normalizedQuery))) score = 1;
       const allTermsMatch = terms.every((term) => searchText.includes(term));
       if (!Number.isFinite(score) && allTermsMatch) score = 2;
-      if (!Number.isFinite(score) && terms.some((term) => searchText.includes(term))) score = 3;
       return Number.isFinite(score) ? { route, score } : null;
     })
     .filter(Boolean)
@@ -3044,67 +3043,27 @@ function findLineSearchRoutes(query, { limit = 30 } = {}) {
     .map(({ route }) => route);
 }
 
-function findLineSearchStops(query, { limit = 8 } = {}) {
-  const terms = getLineSearchTerms(query);
-  if (!terms.length) return [];
-  const normalizedQuery = normalizeSearchText(query);
-  const groupedStops = new Map();
-
-  ensureHalteSearchIndex().forEach((entry) => {
-    const searchableText = `${entry.normalizedName} ${entry.normalizedDesc}`.trim();
-    if (!searchableText) return;
-    const allTermsMatch = terms.every((term) => searchableText.includes(term));
-    if (!allTermsMatch && !terms.some((term) => searchableText.includes(term))) return;
-    const score = searchableText.includes(normalizedQuery)
-      ? 0
-      : allTermsMatch
-        ? 1
-        : 2;
-    const parentStation = normalize(entry.stop?.parent_station);
-    const groupKey = `${normalizeSearchText(entry.groupName || entry.stopName)}|${entry.normalizedDesc}`;
-    let group = groupedStops.get(groupKey);
-    if (!group) {
-      group = {
-        name: entry.groupName || entry.stopName,
-        municipality: entry.municipality,
-        score,
-        stopIds: new Set()
-      };
-      groupedStops.set(groupKey, group);
-    }
-    group.score = Math.min(group.score, score);
-    const stopId = cleanText(entry.stop?.stop_id);
-    if (stopId) group.stopIds.add(stopId);
-    if (parentStation) group.stopIds.add(parentStation);
-  });
-
-  return Array.from(groupedStops.values())
-    .map((stop) => ({ ...stop, stopIds: Array.from(stop.stopIds) }))
-    .sort((left, right) =>
-      left.score - right.score ||
-      left.name.localeCompare(right.name, "nl")
-    )
-    .slice(0, limit);
+function getLineSearchBadgeMarkup(route, className = "line-badge") {
+  const bgRaw = cleanText(route?.route_color).replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+  const fgRaw = cleanText(route?.route_text_color).replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+  const bg = bgRaw.length === 6 ? `#${bgRaw}` : "#2563eb";
+  const fg = fgRaw.length === 6 ? `#${fgRaw}` : "#ffffff";
+  const label = cleanText(route?.route_short_name) || cleanText(route?.route_id);
+  return `<span class="${className}" style="--line-badge-bg:${bg};--line-badge-fg:${fg};">${escapeHtml(label)}</span>`;
 }
 
-function renderLineSearchSuggestions(routeMatches, stopMatches) {
+function renderLineSearchSuggestions(routeMatches) {
   if (!lineSearchSuggestionsEl) return;
   const routeMarkup = routeMatches.length
     ? `<div class="line-search-suggestion-group"><span class="line-search-suggestion-heading">${escapeHtml(getLabel("lineSearchRoutesHeading", "Lijnen"))}</span>${routeMatches.map((route) => {
         const routeId = cleanText(route.route_id);
         const lineName = cleanText(route.route_short_name) || routeId;
         const routeName = cleanText(route.route_long_name);
-        return `<button class="line-search-suggestion" type="button" role="option" data-line-suggestion-type="route" data-route-id="${escapeHtml(routeId)}"><span class="line-search-suggestion-badge">${escapeHtml(lineName)}</span><span class="line-search-suggestion-copy"><strong>${escapeHtml(routeName || lineName)}</strong><small>${escapeHtml(routeId)}</small></span></button>`;
+        return `<button class="line-search-suggestion" type="button" role="option" data-line-suggestion-type="route" data-route-id="${escapeHtml(routeId)}">${getLineSearchBadgeMarkup(route)}<span class="line-search-suggestion-copy"><strong>${escapeHtml(routeName || lineName)}</strong><small>${escapeHtml(routeId)}</small></span></button>`;
       }).join("")}</div>`
     : "";
-  const stopMarkup = stopMatches.length
-    ? `<div class="line-search-suggestion-group"><span class="line-search-suggestion-heading">${escapeHtml(getLabel("lineSearchStopsHeading", "Haltes en stations"))}</span>${stopMatches.map((stop, index) =>
-        `<button class="line-search-suggestion" type="button" role="option" data-line-suggestion-type="stop" data-stop-index="${index}"><span class="line-search-suggestion-badge" aria-hidden="true">↔</span><span class="line-search-suggestion-copy"><strong>${escapeHtml(stop.name)}</strong><small>${escapeHtml(stop.municipality || getLabel("lineSearchStopLabel", "Halte of station"))}</small></span></button>`
-      ).join("")}</div>`
-    : "";
-
-  lineSearchSuggestionsEl.innerHTML = `${stopMarkup}${routeMarkup}`;
-  lineSearchSuggestionsEl.hidden = !stopMarkup && !routeMarkup;
+  lineSearchSuggestionsEl.innerHTML = routeMarkup;
+  lineSearchSuggestionsEl.hidden = !routeMarkup;
 }
 
 async function updateLineSearchSuggestions() {
@@ -3127,90 +3086,11 @@ async function updateLineSearchSuggestions() {
     return;
   }
   const routeMatches = findLineSearchRoutes(query, { limit: 8 });
-  const stopMatches = findLineSearchStops(query);
-  renderLineSearchSuggestions(routeMatches, stopMatches);
-  if (routeMatches.length || stopMatches.length) {
+  renderLineSearchSuggestions(routeMatches);
+  if (routeMatches.length) {
     setLineSearchStatus("");
   } else {
     setLineSearchStatus(getLabel("lineSearchNoRoutes", "Geen lijnen gevonden die overeenkomen met je zoekopdracht."));
-  }
-}
-
-function getLineSearchRoutesServingStops(stopMatches, derivedData) {
-  const wantedStopIds = new Set(stopMatches.flatMap((stop) => stop.stopIds).map(normalizeLookup));
-  const routeIds = new Set();
-  if (!wantedStopIds.size) return [];
-
-  derivedData.entities.forEach((entity) => {
-    const tripUpdate = getEntityTripUpdatePayload(entity);
-    if (!tripUpdate) return;
-    const updates = tripUpdate.stopTimeUpdate || tripUpdate.stop_time_update;
-    if (!Array.isArray(updates)) return;
-    const includesStop = updates.some((stopUpdate) => {
-      const stopId = normalizeLookup(stopUpdate?.stopId || stopUpdate?.stop_id || "");
-      return stopId && wantedStopIds.has(stopId);
-    });
-    if (!includesStop) return;
-
-    const descriptor = extractTripDescriptor(tripUpdate);
-    const tripData = descriptor.tripId ? tripsById.get(cleanText(descriptor.tripId)) : null;
-    const routeId = normalizeLookup(
-      tripData?.route_id ||
-      descriptor.routeId ||
-      getRouteKeyFromTripId(descriptor.tripId)
-    );
-    const route = findRouteDataByRouteId(routeId, descriptor.tripId);
-    if (route?.route_id) routeIds.add(normalizeLookup(route.route_id));
-  });
-
-  return routes.filter((route) => routeIds.has(normalizeLookup(route.route_id)));
-}
-
-async function selectLineSearchStop(stopIndex) {
-  const query = cleanText(lineSearchInputEl?.value);
-  const selectedStops = findLineSearchStops(query, { limit: 8 });
-  const stop = selectedStops[stopIndex];
-  if (!stop) return;
-  await showLineSearchRoutesForStop(stop);
-}
-
-async function showLineSearchRoutesForStop(stop) {
-  const requestToken = ++lineSearchRequestToken;
-  clearLineSearchSuggestions();
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
-  setLineSearchStatus(getLabel("lineSearchLoading", "Lijnen en actuele voertuigen worden geladen..."));
-  if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = true;
-
-  try {
-    await Promise.all([laadRoutes(), laadTrips(), laadVoertuigen()]);
-    const realtimeData = await fetchRealtimeFeed({ force: true });
-    if (requestToken !== lineSearchRequestToken) return;
-    const derivedData = getRealtimeFeedDerivedData(realtimeData);
-    const relatedRoutes = getLineSearchRoutesServingStops([stop], derivedData);
-    const textualRoutes = findLineSearchRoutes(`${stop.name} ${stop.municipality}`, { limit: 30 });
-    const routeById = new Map();
-    [...relatedRoutes, ...textualRoutes].forEach((route) => {
-      const routeId = normalizeLookup(route.route_id);
-      if (routeId) routeById.set(routeId, route);
-    });
-    const matchedRoutes = Array.from(routeById.values());
-    if (!matchedRoutes.length) {
-      setLineSearchStatus(getLabel("lineSearchNoRoutes", "Geen lijnen gevonden die overeenkomen met je zoekopdracht."));
-      return;
-    }
-    renderLineSearchResults(matchedRoutes, derivedData);
-  } catch (error) {
-    console.warn("Lijnen voor halte zoeken mislukt", error);
-    if (requestToken === lineSearchRequestToken) {
-      setLineSearchStatus(
-        getLabel("lineSearchError", "Lijngegevens konden niet worden opgehaald. Probeer het later opnieuw."),
-        true
-      );
-    }
-  } finally {
-    if (requestToken === lineSearchRequestToken && lineSearchSubmitBtn) {
-      lineSearchSubmitBtn.disabled = false;
-    }
   }
 }
 
@@ -3354,7 +3234,7 @@ function renderLineSearchResults(matchedRoutes, derivedData) {
         }).join("")}</div>`
       : `<p class="line-search-empty">${escapeHtml(getLabel("lineSearchNoActiveVehicles", "Er zijn momenteel geen actieve ritten of voertuigen voor deze lijn gevonden."))}</p>`;
 
-    return `<section class="line-search-route"><header class="line-search-route-header"><span class="line-search-route-badge">${escapeHtml(routeShortName)}</span><div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span></header>${tripMarkup}</section>`;
+    return `<section class="line-search-route"><header class="line-search-route-header">${getLineSearchBadgeMarkup(route)}<div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span></header>${tripMarkup}</section>`;
   }).join("");
 
   lineSearchResultsEl.innerHTML = routeSections;
@@ -3397,14 +3277,7 @@ async function searchLines() {
     const realtimeData = await fetchRealtimeFeed({ force: true });
     if (requestToken !== lineSearchRequestToken) return;
     const derivedData = getRealtimeFeedDerivedData(realtimeData);
-    const stopMatches = findLineSearchStops(query);
-    const relatedRoutes = getLineSearchRoutesServingStops(stopMatches, derivedData);
-    const routeById = new Map();
-    [...findLineSearchRoutes(query), ...relatedRoutes].forEach((route) => {
-      const routeId = normalizeLookup(route.route_id);
-      if (routeId) routeById.set(routeId, route);
-    });
-    const matchedRoutes = Array.from(routeById.values());
+    const matchedRoutes = findLineSearchRoutes(query);
     if (!matchedRoutes.length) {
       setLineSearchStatus(getLabel("lineSearchNoRoutes", "Geen lijnen gevonden die overeenkomen met je zoekopdracht."));
       return;
@@ -7999,10 +7872,6 @@ lineSearchSuggestionsEl?.addEventListener("click", (event) => {
   if (!(target instanceof Element)) return;
   const suggestion = target.closest("[data-line-suggestion-type]");
   if (!(suggestion instanceof HTMLButtonElement)) return;
-  if (suggestion.dataset.lineSuggestionType === "stop") {
-    void selectLineSearchStop(Number(suggestion.dataset.stopIndex));
-    return;
-  }
   const routeId = normalize(suggestion.dataset.routeId);
   const route = routesById.get(routeId);
   if (route) void showLineSearchRoute(route);
