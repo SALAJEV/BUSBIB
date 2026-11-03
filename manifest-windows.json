@@ -31,16 +31,16 @@
       "icons": [{ "src": "media/icons/shortcut-home.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }]
     },
     {
-      "name": "Halte zoeken",
-      "short_name": "Halte",
-      "url": "/?view=halte&source=shortcut",
-      "icons": [{ "src": "media/icons/shortcut-halte.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }]
-    },
-    {
       "name": "Lijn zoeken",
       "short_name": "Lijn",
       "url": "/?view=lijn&source=shortcut",
       "icons": [{ "src": "media/icons/shortcut-lijn.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }]
+    },
+    {
+      "name": "Halte zoeken",
+      "short_name": "Halte",
+      "url": "/?view=halte&source=shortcut",
+      "icons": [{ "src": "media/icons/shortcut-halte.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }]
     },
     {
       "name": "Menu",

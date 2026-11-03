@@ -1915,6 +1915,7 @@ function registerOverlayModal(modalEl) {
 }
 
 [
+  compareCardEl,
   compareModalEl,
   infoModalEl,
   installGuideModalEl,
@@ -2128,6 +2129,7 @@ function closeOverlayModal(modalEl, options = {}) {
 function closeTransientOverlays() {
   setFavoritesPanel(false);
   hideCompareModal();
+  hideCompareResultModal();
   hideInfoModal();
   hideInstallGuideModal();
   closeAppDialog(false, { restoreFocus: false });
@@ -2973,13 +2975,17 @@ function showLineSearchModal() {
   navigateToPage("lijn");
 }
 
-function hideLineSearchModal() {
+function resetLineSearchPage() {
   lineSearchRequestToken += 1;
   if (lineSearchInputEl) lineSearchInputEl.value = "";
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
   setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+}
+
+function hideLineSearchModal() {
+  resetLineSearchPage();
   if (currentPageView === "lijn") goBackFromRoutePage();
 }
 
@@ -3022,11 +3028,21 @@ function getLineSearchRouteIndex() {
 
 function findLineSearchRoutes(query, { limit = 30 } = {}) {
   const normalizedQuery = normalizeSearchText(query);
-  const terms = getLineSearchTerms(query);
-  if (!normalizedQuery || !terms.length) return [];
+  if (!normalizedQuery) return [];
+  const words = normalizedQuery.replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean);
+  const hasLineNumber = /^\d+[a-z]?$/.test(words[0] || "");
+  const lineNumber = hasLineNumber ? words[0] : "";
+  const terms = getLineSearchTerms(hasLineNumber ? words.slice(1).join(" ") : query);
+  if (!hasLineNumber && !terms.length) return [];
 
   return getLineSearchRouteIndex()
     .map(({ route, fields, searchText }) => {
+      if (hasLineNumber) {
+        const shortName = normalizeSearchText(route.route_short_name);
+        if (shortName !== lineNumber) return null;
+        const destinationText = fields.filter((field) => field !== shortName).join(" ");
+        return terms.every((term) => destinationText.includes(term)) ? { route, score: 0 } : null;
+      }
       let score = fields.includes(normalizedQuery) ? 0 : Number.POSITIVE_INFINITY;
       if (!Number.isFinite(score) && fields.some((field) => field.startsWith(normalizedQuery))) score = 1;
       const allTermsMatch = terms.every((term) => searchText.includes(term));
@@ -3526,8 +3542,13 @@ function hideCompareModal() {
   closeOverlayModal(compareModalEl);
 }
 
+function hideCompareResultModal() {
+  if (compareCardEl && !compareCardEl.hidden) closeOverlayModal(compareCardEl);
+}
+
 function clearComparison() {
   compareVehicleId = "";
+  hideCompareResultModal();
   if (compareCardEl) {
     compareCardEl.hidden = true;
     compareCardEl.setAttribute("aria-hidden", "true");
@@ -3653,8 +3674,7 @@ function renderComparison() {
     compareCardSummaryEl.hidden = true;
     compareCardSummaryEl.removeAttribute("data-active-summary");
   }
-  compareCardEl.hidden = false;
-  compareCardEl.setAttribute("aria-hidden", "false");
+  if (compareCardEl.hidden) openOverlayModal(compareCardEl, { focusTarget: compareClearBtn, closeMenu: false });
   updateUrlState();
 }
 
@@ -6380,6 +6400,8 @@ function applyTranslations() {
   syncPhotoDelayBanner();
   appTitleEl.textContent = getLabel("appTitle", "BUSBIB");
   if (splashTitleEl) splashTitleEl.textContent = getLabel("appTitle", "BUSBIB");
+  const splashWelcomeEl = document.getElementById("splashWelcome");
+  if (splashWelcomeEl) splashWelcomeEl.textContent = getLabel("splashWelcome", "Welkom");
   appSubtitleEl.textContent = t("subtitle").replace(/\.\s*$/, "");
   if (splashCreditEl) splashCreditEl.textContent = getLabel("madeBy", "Made by @delijn_busspotter");
   if (headerVisualKickerEl) headerVisualKickerEl.textContent = getLabel("headerVisualKicker", "Realtime overzicht");
@@ -7090,6 +7112,10 @@ function closeInteractiveOverlay(overlayEl) {
   }
   if (overlayEl === appDialogModalEl) {
     closeAppDialog(false);
+    return true;
+  }
+  if (overlayEl === compareCardEl) {
+    clearComparison();
     return true;
   }
   if (overlayEl === compareModalEl) {
@@ -7803,6 +7829,9 @@ compareVehicleInputEl?.addEventListener("keydown", (event) => {
 compareModalEl?.addEventListener("click", (event) => {
   if (event.target === compareModalEl) hideCompareModal();
 });
+compareCardEl?.addEventListener("click", (event) => {
+  if (event.target === compareCardEl) clearComparison();
+});
 compareContentEl?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
@@ -7883,7 +7912,7 @@ lineSearchResultsEl?.addEventListener("click", (event) => {
   if (!(vehicleButton instanceof HTMLButtonElement)) return;
   const vehicleId = vehicleButton.getAttribute("data-line-vehicle-id") || "";
   if (!vehicleId) return;
-  hideLineSearchModal();
+  resetLineSearchPage();
   setVehicleInputResolvedId(voertuigInput, "");
   voertuigInput.value = getVisibleVehicleId(vehicleId);
   void zoekAlles({
@@ -8865,13 +8894,18 @@ function ensurePrimarySuggestionList() {
 
 function positionSuggestionList(listEl, inputEl) {
   if (!listEl || !inputEl || listEl.dataset.floating !== "1") return;
+  listEl._anchorInput = inputEl;
   const rect = inputEl.getBoundingClientRect();
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || rect.width;
+  const visual = window.visualViewport;
+  const viewportWidth = visual?.width || window.innerWidth || document.documentElement.clientWidth || rect.width;
+  const viewportLeft = visual?.offsetLeft || 0;
   const availableWidth = Math.max(0, viewportWidth - 24);
   const preferredWidth = inputEl.id === "voertuignummer" ? Math.max(rect.width, 280) : rect.width;
   const width = Math.min(preferredWidth, availableWidth);
-  const left = Math.max(12, Math.min(rect.left, viewportWidth - width - 12));
-  const visual = window.visualViewport;
+  const left = Math.max(
+    viewportLeft + 12,
+    Math.min(rect.left, viewportLeft + viewportWidth - width - 12)
+  );
   const visibleTop = visual ? visual.offsetTop : 0;
   const visibleBottom = visibleTop + (visual ? visual.height : window.innerHeight);
   const spaceBelow = visibleBottom - rect.bottom - 14;
@@ -8891,6 +8925,17 @@ function positionSuggestionList(listEl, inputEl) {
   listEl.classList.toggle("opens-above", openAbove);
   listEl.style.left = `${Math.round(left)}px`;
   listEl.style.width = `${Math.round(width)}px`;
+}
+
+if (!window.__busbibSuggestionViewportBound) {
+  window.__busbibSuggestionViewportBound = true;
+  const repositionOpenLists = () => {
+    document.querySelectorAll(".floating-suggestion-list").forEach((listEl) => {
+      if (!listEl.hidden && listEl._anchorInput) positionSuggestionList(listEl, listEl._anchorInput);
+    });
+  };
+  window.visualViewport?.addEventListener("resize", repositionOpenLists, { passive: true });
+  window.visualViewport?.addEventListener("scroll", repositionOpenLists, { passive: true });
 }
 
 function ensureHalteSuggestionList() {
