@@ -3803,6 +3803,32 @@ async function applyRouteStateFromLocation() {
 
 
 
+function positionHomeGtfsVehicleCard() {
+  const cardEl = document.getElementById("homeGtfsVehicleCard");
+  const map = cardEl?._map;
+  if (!cardEl || cardEl.hidden || !map || !cardEl._anchorLatLng) return;
+  const mapRect = map.getContainer().getBoundingClientRect();
+  const point = map.latLngToContainerPoint(cardEl._anchorLatLng);
+  const x = mapRect.left + point.x;
+  const y = mapRect.top + point.y;
+  const margin = 12;
+  const gap = 18;
+  const width = Math.min(340, window.innerWidth - margin * 2);
+  cardEl.style.width = `${width}px`;
+  const height = cardEl.offsetHeight;
+  const left = Math.min(Math.max(x - width / 2, margin), window.innerWidth - width - margin);
+  const placeAbove = y - gap - height >= margin || window.innerHeight - y - gap - height < margin;
+  const top = Math.min(
+    Math.max(placeAbove ? y - gap - height : y + gap, margin),
+    Math.max(margin, window.innerHeight - height - margin)
+  );
+  const tail = Math.min(Math.max(x - left, 26), width - 26);
+  cardEl.style.left = `${left}px`;
+  cardEl.style.top = `${top}px`;
+  cardEl.style.setProperty("--tail-x", `${tail}px`);
+  cardEl.classList.toggle("is-below", !placeAbove);
+}
+
 function buildVehicleMapPopup(snapshot) {
   const vehicleLinkId = getHomeGtfsMapVehicleLinkId(snapshot);
   const vehicleUrl = getHomeGtfsMapVehicleUrl(snapshot);
@@ -7643,7 +7669,6 @@ document.getElementById("homeGtfsVehicleCard")?.addEventListener("click", (event
     const cardEl = event.currentTarget;
     cardEl.hidden = true;
     cardEl.replaceChildren();
-    homeGtfsMap?.invalidateSize();
     return;
   }
   const vehicleButton = target.closest("[data-home-gtfs-vehicle-id]");
@@ -8846,12 +8871,19 @@ function getHomeGtfsCanvasLayerClass() {
       if (!closestSnapshot) return;
       const cardEl = document.getElementById("homeGtfsVehicleCard");
       if (!cardEl) return;
+      if (cardEl.parentElement !== document.body) document.body.appendChild(cardEl);
       cardEl.innerHTML = buildHomeGtfsMapPopup(closestSnapshot);
       cardEl.hidden = false;
-      window.setTimeout(() => {
-        this._map.invalidateSize();
-        cardEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }, 0);
+      cardEl._anchorLatLng = [closestSnapshot.latitude, closestSnapshot.longitude];
+      cardEl._map = this._map;
+      if (!cardEl._bound) {
+        cardEl._bound = true;
+        const reposition = () => positionHomeGtfsVehicleCard();
+        this._map.on("move zoom resize", reposition);
+        window.addEventListener("resize", reposition);
+        window.addEventListener("scroll", reposition, { passive: true });
+      }
+      positionHomeGtfsVehicleCard();
     }
   });
   return homeGtfsCanvasLayerClass;

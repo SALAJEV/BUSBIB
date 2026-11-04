@@ -778,13 +778,34 @@ textarea::placeholder {
 }
 
 .home-gtfs-vehicle-card {
-  position: relative;
-  margin: 0 0 12px;
+  position: fixed;
+  z-index: 2000;
+  max-height: calc(100dvh - 24px);
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--surface-raised);
-  box-shadow: var(--shadow-md);
-  animation: vehicle-card-in 180ms ease-out;
+  box-shadow: 0 18px 48px rgba(10, 18, 28, 0.35);
+  animation: vehicle-card-in 160ms ease-out;
+}
+
+.home-gtfs-vehicle-card::after {
+  content: "";
+  position: absolute;
+  left: var(--tail-x, 50%);
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 4px 0;
+  background: var(--surface-raised);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.home-gtfs-vehicle-card.is-below::after {
+  top: -8px;
+  bottom: auto;
+  transform: translateX(-50%) rotate(225deg);
 }
 
 .home-gtfs-vehicle-card[hidden] {
@@ -792,8 +813,8 @@ textarea::placeholder {
 }
 
 @keyframes vehicle-card-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; scale: 0.96; }
+  to { opacity: 1; scale: 1; }
 }
 
 .vehicle-card-close {
@@ -890,13 +911,7 @@ textarea::placeholder {
 
 @media (min-width: 720px) {
   .vehicle-map-popup {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 28px;
-  }
-
-  .vehicle-map-popup-head,
-  .vehicle-map-popup-route {
-    grid-column: 1 / -1;
   }
 }
 
