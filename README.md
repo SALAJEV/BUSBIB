@@ -105,7 +105,7 @@ De app gebruikt verschillende bronnen:
 - De Lijn halte-zoek API voor halte-opzoekingen.
 - Open-Meteo voor huidig weer op voertuiglocatie.
 - OpenStreetMap/CARTO als kaarttiles.
-- Voertuigdatasets (`vehicles.txt`, `trips.txt`, `routes.txt`, `stops.txt` en `feed_info.txt`) uit publieke R2-opslag, via de same-origin Pages-route `/dataset/<bestandsnaam>`.
+- Voertuigdatasets (`buses.txt`, `trams.txt`, `trips.txt`, `routes.txt`, `stops.txt` en `feed_info.txt`) uit publieke R2-opslag, via de same-origin Pages-route `/dataset/<bestandsnaam>`. Bussen en trams worden samen doorzocht en onderscheiden met hun eigen pictogram.
 - Foto-assets in het project of via externe statische hosting.
 - Externe formulieren voor uploads, meldingen en feedback.
 
@@ -144,10 +144,10 @@ http://localhost:8000
 
 ### Belangrijk bij lokaal testen
 
-- Realtime data via `/api` werkt pas correct als de serverless functie beschikbaar is.
-- Open de app via een lokale HTTP-server of de gedeployde website; rechtstreeks openen als `file:///.../index.html` werkt niet voor `/api`-requests.
+- Realtime data wordt opgehaald via `https://busbib.be/api`.
+- Open de app via een lokale HTTP-server of de gedeployde website; rechtstreeks openen als `file:///.../index.html` werkt niet.
 - Datasetbestanden worden via `/dataset/<bestandsnaam>` door een Cloudflare Pages Function opgehaald. Dit voorkomt browser-CORS-problemen met de R2-bucket.
-- Een eenvoudige server zoals `python -m http.server` serveert alleen de frontendbestanden; voor de API- en datasetroutes moet je de app op Cloudflare Pages draaien of lokaal met Cloudflare Pages/Wrangler Functions.
+- Een eenvoudige server zoals `python -m http.server` serveert alleen de frontendbestanden; datasets vereisen nog steeds de Cloudflare Pages-route of lokaal Cloudflare Pages/Wrangler Functions.
 - Zonder geldige `DELIJN_API_KEY` werken realtime-, halte- en GTFS-waarschuwingsverzoeken niet.
 - De service worker kan browsercache agressief vasthouden. Gebruik bij twijfel een harde refresh of verwijder de site data.
 
@@ -194,7 +194,7 @@ Belangrijke configuratie zit verspreid over de frontend en API.
 ### In `app.js`
 
 - `BASE_URL`: basis voor externe assets of datasets.
-- `API_URL`: endpoint voor proxied data via `/api`.
+- `API_URL`: endpoint voor proxied data via `https://busbib.be/api`.
 - `PYTHON_MAIN_DOWNLOAD_URL`
 - `PHOTO_UPLOAD_FORM_URL`
 - `REPORT_FORM_URL`

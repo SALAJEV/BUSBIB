@@ -1391,6 +1391,23 @@ footer {
   overflow-wrap: anywhere;
 }
 
+.vehicle-id-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.vehicle-kind-icon {
+  flex: 0 0 auto;
+  font-size: 0.72em;
+  letter-spacing: normal;
+  line-height: 1;
+}
+
+.vehicle-suggestion-primary .vehicle-id-display {
+  justify-content: center;
+}
+
 .vehicle-favorite-btn {
   display: inline-grid;
   flex: 0 0 42px;
@@ -4779,7 +4796,7 @@ body.route-page-open .container > footer {
     display: block;
     margin-bottom: 2px;
     color: var(--muted);
-    content: attr(data-column);
+    content: attr(data-column-icon) " " attr(data-column);
     font-size: 0.7rem;
     font-weight: 700;
   }

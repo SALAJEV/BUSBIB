@@ -103,7 +103,7 @@ function syncPhotoDelayBanner() {
 
 // Constants
 const BASE_URL = `${window.location.origin}/dataset`;
-const API_URL = `${window.location.origin}/api`;
+const API_URL = "https://busbib.be/api";
 const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/script.py";
 const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
 const REPORT_FORM_URL = "https://forms.gle/DKKPFHfSAgA2jo6B7";
@@ -632,7 +632,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.10.27-2";
+const APP_VERSION = "2026.11.04-1";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2361,11 +2361,16 @@ const REALTIME_MAP_RECENTER_MIN_INTERVAL_MS = 15000;
 const VEHICLE_DISPLAY_FIELD_MAP = {
   vehicle_id: "Voertuignummer",
   bus: "Type",
+  tram: "Type",
   license_plate: "Nummerplaat",
   id_date: "In dienst",
   ud_date: "Uit dienst",
+  nickname: "Bijnaam",
+  yearbuilt: "Bouwjaar",
   owner: "Eigenaar",
   spotted: "Gespot?",
+  service_area: "Werkgebied",
+  specs: "Specificaties",
   hansea_id: "Hansea nummer",
   intern_id: "Intern nummer",
   vin: "VIN",
@@ -2384,6 +2389,42 @@ const VEHICLE_FIELD_TRANSLATION_FALLBACKS = {
     pl: "Numer pojazdu",
     es: "Numero de vehiculo",
     ru: "\u041d\u043e\u043c\u0435\u0440 \u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442\u0430"
+  },
+  bijnaam: {
+    nl: "Bijnaam",
+    fr: "Surnom",
+    en: "Nickname",
+    de: "Spitzname",
+    pl: "Pseudonim",
+    es: "Apodo",
+    ru: "Прозвище"
+  },
+  bouwjaar: {
+    nl: "Bouwjaar",
+    fr: "Année de construction",
+    en: "Year built",
+    de: "Baujahr",
+    pl: "Rok produkcji",
+    es: "Año de fabricación",
+    ru: "Год выпуска"
+  },
+  werkgebied: {
+    nl: "Werkgebied",
+    fr: "Zone de service",
+    en: "Service area",
+    de: "Einsatzgebiet",
+    pl: "Obszar obsługi",
+    es: "Área de servicio",
+    ru: "Зона обслуживания"
+  },
+  specificaties: {
+    nl: "Specificaties",
+    fr: "Spécifications",
+    en: "Specifications",
+    de: "Spezifikationen",
+    pl: "Specyfikacje",
+    es: "Especificaciones",
+    ru: "Технические характеристики"
   },
   "gespot?": {
     nl: "Gespot?",
@@ -3206,6 +3247,7 @@ function getLineSearchActiveTrips(route, derivedData) {
       );
       tripGroup.vehicles.set(normalizeLookup(vehicleId), {
         id: cleanText(vehicleId),
+        vehicle,
         displayId
       });
     }
@@ -3234,7 +3276,7 @@ function renderLineSearchResults(matchedRoutes, derivedData) {
     const routeShortName = cleanText(route.route_short_name) || cleanText(route.route_id);
     const routeLongName = cleanText(route.route_long_name);
     const routeId = cleanText(route.route_id);
-    const routeCount = getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} bussen")
+    const routeCount = getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
       .replace("{trips}", String(activeTrips.length))
       .replace("{vehicles}", String(activeVehicleCount));
     const tripMarkup = activeTrips.length
@@ -3242,9 +3284,10 @@ function renderLineSearchResults(matchedRoutes, derivedData) {
           const tripLabel = trip.destination || getLabel("lineSearchTripFallback", "Rit {trip}")
             .replace("{trip}", trip.tripId || "?");
           const vehicleMarkup = trip.vehicles.map((vehicle) => {
-            const ariaLabel = getLabel("lineSearchVehicle", "Bus {vehicle}")
-              .replace("{vehicle}", vehicle.displayId);
-            return `<button class="line-search-vehicle" type="button" data-line-vehicle-id="${escapeHtml(vehicle.id)}" aria-label="${escapeHtml(ariaLabel)}">${escapeHtml(ariaLabel)}</button>`;
+            const ariaLabel = vehicle.vehicle?.Voertuigsoort === "tram"
+              ? getLabel("lineSearchTram", "Tram {vehicle}").replace("{vehicle}", vehicle.displayId)
+              : getLabel("lineSearchVehicle", "Bus {vehicle}").replace("{vehicle}", vehicle.displayId);
+            return `<button class="line-search-vehicle" type="button" data-line-vehicle-id="${escapeHtml(vehicle.id)}" aria-label="${escapeHtml(ariaLabel)}">${buildVehicleIdMarkup(vehicle.vehicle || vehicle.id, vehicle.displayId)}</button>`;
           }).join("");
           return `<article class="line-search-trip"><div class="line-search-trip-heading"><strong>${escapeHtml(tripLabel)}</strong>${trip.tripId ? `<span>${escapeHtml(trip.tripId)}</span>` : ""}</div><div class="line-search-vehicles">${vehicleMarkup}</div></article>`;
         }).join("")}</div>`
@@ -3493,7 +3536,7 @@ function collectVehicleDisplayRows(bus) {
   const shouldHideVin = getVehicleField(bus, vehicleHideVinFieldKey) === "1" && normalize(getVehicleField(bus, "VIN")) !== "/";
 
   for (const [fieldKey, rawValue] of Object.entries(bus)) {
-    if (fieldKey === "Vervoersmaatschappij" || fieldKey === "Voertuignummer" || fieldKey === "Type" || fieldKey === vehicleHideVinFieldKey) continue;
+    if (fieldKey === "Vervoersmaatschappij" || fieldKey === "Voertuignummer" || fieldKey === "Voertuigsoort" || fieldKey === "Type" || fieldKey === vehicleHideVinFieldKey) continue;
     if (fieldKey === "VIN" && shouldHideVin) continue;
     if (fieldKey === "Gespot?" || fieldKey === "Opmerkingen") continue;
 
@@ -3638,20 +3681,20 @@ function renderComparison() {
   const rowsHtml = Array.from(rowMap.values()).map((row) => `
     <tr>
       <th scope="row">${escapeHtml(row.label)}</th>
-      <td data-column="${escapeHtml(baseDisplayId)}">${renderCellValue(row.left, "left")}</td>
-      <td data-column="${escapeHtml(compareDisplayId)}">${renderCellValue(row.right, "right")}</td>
+      <td data-column="${escapeHtml(baseDisplayId)}" data-column-icon="${getVehicleKindIcon(baseBus)}">${renderCellValue(row.left, "left")}</td>
+      <td data-column="${escapeHtml(compareDisplayId)}" data-column-icon="${getVehicleKindIcon(compareBus)}">${renderCellValue(row.right, "right")}</td>
     </tr>
   `).join("");
 
   compareContentEl.innerHTML = `
     <div class="compare-vehicles-head">
       <button class="compare-vehicle-pill compare-vehicle-pill-btn" type="button" data-compare-target="base">
-        <strong>${escapeHtml(baseDisplayId)}</strong>
+        <strong>${buildVehicleIdMarkup(baseBus, baseDisplayId)}</strong>
         <span>${escapeHtml(getLabel("compareEditVehicle", "Klik om te wijzigen"))}</span>
       </button>
       <div class="compare-vs">vs</div>
       <button class="compare-vehicle-pill compare-vehicle-pill-btn" type="button" data-compare-target="compare">
-        <strong>${escapeHtml(compareDisplayId)}</strong>
+        <strong>${buildVehicleIdMarkup(compareBus, compareDisplayId)}</strong>
         <span>${escapeHtml(getLabel("compareEditVehicle", "Klik om te wijzigen"))}</span>
       </button>
     </div>
@@ -3660,8 +3703,8 @@ function renderComparison() {
         <thead>
           <tr>
             <th class="compare-table-corner" aria-hidden="true"></th>
-            <th scope="col">${escapeHtml(baseDisplayId)}</th>
-            <th scope="col">${escapeHtml(compareDisplayId)}</th>
+            <th scope="col">${buildVehicleIdMarkup(baseBus, baseDisplayId)}</th>
+            <th scope="col">${buildVehicleIdMarkup(compareBus, compareDisplayId)}</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
@@ -3772,7 +3815,7 @@ function buildVehicleMapPopup(snapshot) {
   return `
     <a class="vehicle-map-popup" href="${escapeHtml(vehicleUrl || "#")}" data-home-gtfs-vehicle-id="${escapeHtml(vehicleLinkId)}">
       <div class="vehicle-map-popup-head">
-        <strong>${escapeHtml(snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
+        <strong>${buildVehicleIdMarkup(snapshot.vehicle || snapshot.vehicleId, snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
       </div>
       <div class="route-destination-row vehicle-map-popup-route">
         <span class="line-badge" style="--line-badge-bg:${escapeHtml(routeColor)};--line-badge-fg:${escapeHtml(routeTextColor)};">${escapeHtml(routeShort)}</span>
@@ -7295,7 +7338,7 @@ function renderFavorites() {
     item.setAttribute("tabindex", "0");
     item.innerHTML = `
       <div class="favorite-chip">
-        <span class="chip-title">${escapeHtml(displayId)}</span>
+        <span class="chip-title">${buildVehicleIdMarkup(bus || id, displayId)}</span>
         ${vehicleType ? `<span class="chip-subtitle">${escapeHtml(vehicleType)}</span>` : ""}
       </div>
       <button class="favorite-action-btn favorite-action-btn--remove" type="button" data-action="remove" aria-label="${escapeHtml(t("favoriteRemove"))}">&times;</button>
@@ -8050,6 +8093,25 @@ function getVehicleDisplayId(vehicleOrId) {
   }
   return getVisibleVehicleId(vehicleOrId || "");
 }
+function getVehicleKind(vehicleOrId) {
+  const vehicle = vehicleOrId && typeof vehicleOrId === "object"
+    ? vehicleOrId
+    : findVehicleFromGtfsVehicleId(vehicleOrId);
+  return vehicle?.Voertuigsoort === "tram" ? "tram" : "bus";
+}
+function getVehicleKindIcon(vehicleOrId) {
+  return getVehicleKind(vehicleOrId) === "tram" ? "🚊" : "🚌";
+}
+function buildVehicleIdMarkup(vehicleOrId, fallbackId = "") {
+  const vehicle = vehicleOrId && typeof vehicleOrId === "object"
+    ? vehicleOrId
+    : findVehicleFromGtfsVehicleId(vehicleOrId);
+  const displayId = getVehicleDisplayId(vehicle || vehicleOrId) || normalize(fallbackId);
+  if (!displayId) return "";
+  const vehicleKind = getVehicleKind(vehicle);
+  const icon = getVehicleKindIcon(vehicle);
+  return `<span class="vehicle-id-display vehicle-id-display--${vehicleKind}"><span class="vehicle-kind-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(displayId)}</span></span>`;
+}
 function getVehicleInputResolvedId(inputEl) {
   if (!inputEl) return "";
   return normalize(inputEl.dataset.resolvedVehicleId || "");
@@ -8239,7 +8301,7 @@ function normalizeVehicleSourceKey(key) {
   return normalizeFieldKey(key).replace(/\s+/g, "_");
 }
 
-function mapVehicleRecord(headers, values) {
+function mapVehicleRecord(headers, values, vehicleKind = "bus") {
   const rawRecord = {};
   headers.forEach((header, index) => {
     rawRecord[header] = values[index] || "/";
@@ -8253,6 +8315,7 @@ function mapVehicleRecord(headers, values) {
     mappedRecord[targetKey] = rawRecord[header] || "/";
   });
 
+  mappedRecord.Voertuigsoort = vehicleKind;
   return mappedRecord;
 }
 
@@ -8289,6 +8352,10 @@ function buildVehicleSearchEntry(vehicle) {
 
   pushPrefix(vehicle.Voertuignummer);
   pushExactId(vehicle.Voertuignummer);
+  if (vehicle.Voertuigsoort === "tram") {
+    pushPrefix(vehicle.Type);
+    pushPrefix(getVehicleField(vehicle, "Bijnaam"));
+  }
   if (visiblePrimaryId && visiblePrimaryId !== primaryId) {
     pushPrefix(visiblePrimaryId);
   }
@@ -8792,7 +8859,7 @@ function renderSuggestionList(listEl, inputEl, onSelect) {
     li.setAttribute("role", "option");
     li.setAttribute("aria-selected", "false");
     li.innerHTML = `
-      <span class="vehicle-suggestion-primary">${escapeHtml(visibleVehicleId)}</span>
+      <span class="vehicle-suggestion-primary">${buildVehicleIdMarkup(vehicle, visibleVehicleId)}</span>
       ${secondaryLabel ? `<span class="vehicle-suggestion-secondary">${escapeHtml(secondaryLabel)}</span>` : ""}
     `;
     li.addEventListener("mousedown", (event) => {
@@ -9042,19 +9109,36 @@ async function laadVoertuigen() {
   if (voertuigenLoadPromise) return voertuigenLoadPromise;
   voertuigenLoadPromise = (async () => {
     try {
-      const res = await fetchWithTimeout(`${BASE_URL}/vehicles.txt`, { cache: "default" });
-      const text = await res.text();
-      vehiclesSourceUpdatedAt = parseVehiclesSourceUpdatedAt(text);
-      const { headers, rows } = parseDelimitedTable(text, {
+      const tramsPromise = fetchWithTimeout(`${BASE_URL}/trams.txt`, { cache: "default" })
+        .then((response) => response.text())
+        .then((text) => parseDelimitedTable(text, {
+          delimiter: ";",
+          commentPrefix: "#",
+          sourceLabel: "trams.txt"
+        }))
+        .catch((error) => {
+          console.warn("Trams laden mislukt; alleen bussen worden geladen.", error);
+          return { headers: [], rows: [] };
+        });
+      const [busesResponse, trams] = await Promise.all([
+        fetchWithTimeout(`${BASE_URL}/buses.txt`, { cache: "default" }),
+        tramsPromise
+      ]);
+      const busesText = await busesResponse.text();
+      vehiclesSourceUpdatedAt = parseVehiclesSourceUpdatedAt(busesText);
+      const buses = parseDelimitedTable(busesText, {
         delimiter: ";",
         commentPrefix: "#",
-        sourceLabel: "vehicles.txt"
+        sourceLabel: "buses.txt"
       });
       vehiclePlateFieldKey = "Nummerplaat";
       oldVehicleNumbersFieldKey = "Oude voertuignummers";
       oldLicensePlatesFieldKey = "Oude nummerplaten";
       vehicleHideVinFieldKey = "hide-vin";
-      voertuigen = rows.map((record) => mapVehicleRecord(headers, headers.map((header) => record[header] || "/")));
+      voertuigen = [
+        ...buses.rows.map((record) => mapVehicleRecord(buses.headers, buses.headers.map((header) => record[header] || "/"), "bus")),
+        ...trams.rows.map((record) => mapVehicleRecord(trams.headers, trams.headers.map((header) => record[header] || "/"), "tram"))
+      ];
       rebuildVehicleIndexes();
       renderFavorites();
     } catch (error) {
@@ -9461,7 +9545,7 @@ function toonVasteData(id){
   const safeFavoriteId = id.replace(/"/g, "&quot;");
   const favoriteClass = favorites.includes(id) ? "vehicle-favorite-btn is-favorite" : "vehicle-favorite-btn";
 
-  let html=`<div class="vehicle-title-row"><p class="voertuignummer-display">${escapeHtml(getVehicleDisplayId(bus) || bus.Voertuignummer)}</p><button id="favoriteInlineBtn" class="${favoriteClass}" type="button" title="${favoriteLabel}" aria-label="${favoriteLabel}" aria-pressed="${favorites.includes(id)}" data-id="${safeFavoriteId}">${favoriteStateSymbol}</button></div>`;
+  let html=`<div class="vehicle-title-row"><p class="voertuignummer-display">${buildVehicleIdMarkup(bus, getVehicleDisplayId(bus) || bus.Voertuignummer)}</p><button id="favoriteInlineBtn" class="${favoriteClass}" type="button" title="${favoriteLabel}" aria-label="${favoriteLabel}" aria-pressed="${favorites.includes(id)}" data-id="${safeFavoriteId}">${favoriteStateSymbol}</button></div>`;
   if(bus.Type) html += `<p class="vehicle-type">${bus.Type}</p>`;
   html+="<table>";
   for (const row of collectVehicleDisplayRows(bus)) {

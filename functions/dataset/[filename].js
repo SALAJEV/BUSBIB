@@ -4,7 +4,8 @@ const ALLOWED_DATA_FILES = new Set([
   "routes.txt",
   "stops.txt",
   "trips.txt",
-  "vehicles.txt"
+  "buses.txt",
+  "trams.txt"
 ]);
 const UPSTREAM_TIMEOUT_MS = 8000;
 
