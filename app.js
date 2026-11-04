@@ -3081,6 +3081,11 @@ function findLineSearchRoutes(query, { limit = 30 } = {}) {
       if (/^\d{5}$/.test(normalizedQuery) && words.length === 1) {
         return normalizeLookup(route.route_id) === normalizedQuery ? { route, score: 0 } : null;
       }
+      // 4 cijfers = lijncode (beide richtingen), 5de cijfer = richting
+      if (/^\d{4}$/.test(normalizedQuery) && words.length === 1) {
+        const routeId = normalizeLookup(route.route_id);
+        if (/^\d{5}$/.test(routeId) && routeId.slice(0, 4) === normalizedQuery) return { route, score: 0 };
+      }
       if (hasLineNumber) {
         const shortName = normalizeSearchText(route.route_short_name);
         if (shortName !== lineNumber) return null;
@@ -3818,7 +3823,11 @@ function buildVehicleMapPopup(snapshot) {
     : getLabel("unknownStop", "Onbekende halte");
   const updatedText = formatRealtimeTimestampForUi(snapshot.updatedAt);
 
+  const closeLabel = getLabel("close", "Sluiten");
   return `
+    <button type="button" class="vehicle-card-close" data-vehicle-card-close aria-label="${escapeHtml(closeLabel)}" title="${escapeHtml(closeLabel)}">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
     <a class="vehicle-map-popup" href="${escapeHtml(vehicleUrl || "#")}" data-home-gtfs-vehicle-id="${escapeHtml(vehicleLinkId)}">
       <div class="vehicle-map-popup-head">
         <strong>${buildVehicleIdMarkup(snapshot.vehicle || snapshot.vehicleId, snapshot.displayVehicleId || snapshot.vehicleId)}</strong>
@@ -7627,9 +7636,16 @@ homeGtfsMapRefreshBtn?.addEventListener("click", () => {
   startHomeGtfsMapRefresh();
   void refreshHomeGtfsMap({ force: true });
 });
-homeGtfsMapEl?.addEventListener("click", (event) => {
+document.getElementById("homeGtfsVehicleCard")?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
+  if (target.closest("[data-vehicle-card-close]")) {
+    const cardEl = event.currentTarget;
+    cardEl.hidden = true;
+    cardEl.replaceChildren();
+    homeGtfsMap?.invalidateSize();
+    return;
+  }
   const vehicleButton = target.closest("[data-home-gtfs-vehicle-id]");
   if (!vehicleButton) return;
   event.preventDefault();
@@ -8828,14 +8844,14 @@ function getHomeGtfsCanvasLayerClass() {
         return !closest || distance < closest.distance ? { snapshot, distance } : closest;
       }, null)?.snapshot;
       if (!closestSnapshot) return;
-      L.popup({
-        closeButton: true,
-        maxWidth: 280,
-        className: "home-gtfs-map-popup-shell"
-      })
-        .setLatLng([closestSnapshot.latitude, closestSnapshot.longitude])
-        .setContent(buildHomeGtfsMapPopup(closestSnapshot))
-        .openOn(this._map);
+      const cardEl = document.getElementById("homeGtfsVehicleCard");
+      if (!cardEl) return;
+      cardEl.innerHTML = buildHomeGtfsMapPopup(closestSnapshot);
+      cardEl.hidden = false;
+      window.setTimeout(() => {
+        this._map.invalidateSize();
+        cardEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }, 0);
     }
   });
   return homeGtfsCanvasLayerClass;
