@@ -8150,9 +8150,9 @@ function getVehicleKind(vehicleOrId) {
 }
 function buildVehicleKindIconMarkup(vehicleOrId) {
   if (getVehicleKind(vehicleOrId) === "tram") {
-    return '<svg class="vehicle-kind-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M7 3.75h10A3.25 3.25 0 0 1 20.25 7v9A3.25 3.25 0 0 1 17 19.25H7A3.25 3.25 0 0 1 3.75 16V7A3.25 3.25 0 0 1 7 3.75Z"/><path d="M6.75 7h10.5v5.25H6.75zM7 15.5h.1m9.8 0h.1M8 19.5l-1.5 2m9.5-2 1.5 2"/></svg>';
+    return '<svg class="vehicle-kind-icon vehicle-kind-icon--tram" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M2.5 2.5h19M12 2.5v2M8.5 7 12 4.5 15.5 7"/><path d="M7 7h10a2 2 0 0 1 2 2v8H5V9a2 2 0 0 1 2-2Z"/><path d="M8 9.5h8V13H8zM8.5 15.5h.1m6.8 0h.1"/><path d="M2.5 21.5h19M8 17l-1.5 4.5m9.5-4.5 1.5 4.5"/></svg>';
   }
-  return '<svg class="vehicle-kind-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6.75 3.75h10.5A2.75 2.75 0 0 1 20 6.5V16a2.75 2.75 0 0 1-2.75 2.75H6.75A2.75 2.75 0 0 1 4 16V6.5a2.75 2.75 0 0 1 2.75-2.75Z"/><path d="M6.75 6.5h10.5v5.25H6.75zM7.25 15.5h.1m9.3 0h.1M8 18.75l-1.5 2m9.5-2 1.5 2"/></svg>';
+  return '<svg class="vehicle-kind-icon vehicle-kind-icon--bus" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4.5 5h15A1.5 1.5 0 0 1 21 6.5V15.5H3V6.5A1.5 1.5 0 0 1 4.5 5Z"/><path d="M3 11h18M8.5 5v6M14 5v6M19.5 11V5"/><circle cx="7.5" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/></svg>';
 }
 function buildVehicleIdMarkup(vehicleOrId, fallbackId = "") {
   const vehicle = vehicleOrId && typeof vehicleOrId === "object"

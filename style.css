@@ -1485,6 +1485,17 @@ footer {
   vertical-align: middle;
 }
 
+.vehicle-kind-icon--bus {
+  width: 1em;
+  height: 1em;
+}
+
+.vehicle-kind-icon--tram {
+  width: 1em;
+  height: 1em;
+  stroke-width: 1.9;
+}
+
 .vehicle-suggestion-primary .vehicle-id-display {
   justify-content: center;
 }
@@ -5207,4 +5218,84 @@ body.route-page-open .container > footer {
   .splash-credit {
     animation: none;
   }
+}
+
+/* ==== Standaardthema: grijs-leisteen, rustige layout, zichtbaar patroon ==== */
+.container {
+  gap: 16px;
+  padding: calc(max(env(safe-area-inset-top), 0px) + clamp(28px, 5vw, 44px)) 0 calc(max(env(safe-area-inset-bottom), 0px) + 40px);
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: calc(100% - 28px);
+    padding-top: calc(max(env(safe-area-inset-top), 0px) + 32px);
+  }
+}
+
+:root[data-color-theme="classic"] {
+  --accent: #3d6a8f;
+  --accent-hover: #2f5575;
+  --accent-soft: #e6ecf1;
+  --gold: #b99a52;
+  --gold-soft: #e3d29c;
+  --header-surface-a: #34495c;
+  --header-surface-b: #24333f;
+  --page-pattern:
+    linear-gradient(0deg, color-mix(in srgb, #5b6b7a 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, #5b6b7a 13%, transparent) 1px, transparent 1px),
+    radial-gradient(circle, color-mix(in srgb, var(--gold) 38%, transparent) 1.5px, transparent 2px);
+  --page-pattern-size: 56px 56px, 56px 56px, 28px 28px;
+}
+
+:root[data-color-theme="classic"]:not([data-theme="dark"]):not([data-resolved-theme="dark"]) {
+  --page: #e3e7eb;
+  --page-top: #eef0f3;
+  --surface: #fbfbfc;
+  --surface-raised: #ffffff;
+  --surface-soft: #f0f2f4;
+  --surface-tint: #e5e9ed;
+  --ink: #1d2730;
+  --muted: #586571;
+  --faint: #85909b;
+  --line: #d5dae0;
+  --line-strong: #bcc4cc;
+}
+
+:root[data-color-theme="classic"][data-theme="dark"],
+:root[data-color-theme="classic"][data-resolved-theme="dark"] {
+  --accent: #8fb0cf;
+  --accent-hover: #aac4dc;
+  --accent-ink: #12191f;
+  --page: #14181c;
+  --page-top: #1b2025;
+  --surface: #1e2429;
+  --surface-raised: #242b31;
+  --surface-soft: #2a323a;
+  --surface-tint: #303942;
+  --ink: #eceff2;
+  --muted: #aab3bc;
+  --faint: #7f8993;
+  --line: #333c45;
+  --line-strong: #46515c;
+  --accent-soft: #2b3a48;
+  --page-pattern:
+    linear-gradient(0deg, rgba(160, 178, 196, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160, 178, 196, 0.09) 1px, transparent 1px),
+    radial-gradient(circle, rgba(207, 177, 106, 0.3) 1.5px, transparent 2px);
+}
+
+:root[data-color-theme="classic"] .card,
+:root[data-color-theme="classic"] .home-gtfs-map-panel,
+:root[data-color-theme="classic"] .header-intro {
+  border-top-width: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+:root[data-color-theme="classic"] .primary-nav {
+  border-bottom-width: 2px;
+}
+
+.header-bar {
+  gap: 16px;
 }
