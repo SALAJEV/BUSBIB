@@ -3078,6 +3078,9 @@ function findLineSearchRoutes(query, { limit = 30 } = {}) {
 
   return getLineSearchRouteIndex()
     .map(({ route, fields, searchText }) => {
+      if (/^\d{5}$/.test(normalizedQuery) && words.length === 1) {
+        return normalizeLookup(route.route_id) === normalizedQuery ? { route, score: 0 } : null;
+      }
       if (hasLineNumber) {
         const shortName = normalizeSearchText(route.route_short_name);
         if (shortName !== lineNumber) return null;
@@ -3519,6 +3522,9 @@ function getVehicleDisplayValue(bus, fieldKey, rawValue) {
     return formatDateForUi(value, { year: "numeric", month: "long", day: "numeric" });
   }
   if (key.includes("uit dienst")) {
+    if (getVehicleKind(bus) === "tram" && /^[01]$/.test(value)) {
+      return value === "1" ? getLabel("yes", "Ja") : getLabel("no", "Nee");
+    }
     if (!value || value === "/") return t("notOutOfService");
     return formatDateForUi(value, { year: "numeric", month: "long", day: "numeric" });
   }
@@ -3681,8 +3687,8 @@ function renderComparison() {
   const rowsHtml = Array.from(rowMap.values()).map((row) => `
     <tr>
       <th scope="row">${escapeHtml(row.label)}</th>
-      <td data-column="${escapeHtml(baseDisplayId)}" data-column-icon="${getVehicleKindIcon(baseBus)}">${renderCellValue(row.left, "left")}</td>
-      <td data-column="${escapeHtml(compareDisplayId)}" data-column-icon="${getVehicleKindIcon(compareBus)}">${renderCellValue(row.right, "right")}</td>
+      <td data-column="${escapeHtml(baseDisplayId)}"><span class="compare-mobile-vehicle-label">${buildVehicleIdMarkup(baseBus, baseDisplayId)}</span>${renderCellValue(row.left, "left")}</td>
+      <td data-column="${escapeHtml(compareDisplayId)}"><span class="compare-mobile-vehicle-label">${buildVehicleIdMarkup(compareBus, compareDisplayId)}</span>${renderCellValue(row.right, "right")}</td>
     </tr>
   `).join("");
 
@@ -5675,8 +5681,10 @@ function buildComparisonDateDetails(baseBus, compareBus, baseDisplayId, compareD
     });
   }
 
-  const baseOutOfServiceDate = parseDateValueToUtc(getVehicleField(baseBus, "Uit dienst"));
-  const compareOutOfServiceDate = parseDateValueToUtc(getVehicleField(compareBus, "Uit dienst"));
+  const parseOutOfServiceDate = (bus) =>
+    getVehicleKind(bus) === "tram" ? null : parseDateValueToUtc(getVehicleField(bus, "Uit dienst"));
+  const baseOutOfServiceDate = parseOutOfServiceDate(baseBus);
+  const compareOutOfServiceDate = parseOutOfServiceDate(compareBus);
   if (baseOutOfServiceDate && compareOutOfServiceDate) {
     const baseRetiredAge = baseInServiceDate ? formatComparisonDuration(baseInServiceDate, baseOutOfServiceDate) : "";
     const compareRetiredAge = compareInServiceDate ? formatComparisonDuration(compareInServiceDate, compareOutOfServiceDate) : "";
@@ -8099,8 +8107,11 @@ function getVehicleKind(vehicleOrId) {
     : findVehicleFromGtfsVehicleId(vehicleOrId);
   return vehicle?.Voertuigsoort === "tram" ? "tram" : "bus";
 }
-function getVehicleKindIcon(vehicleOrId) {
-  return getVehicleKind(vehicleOrId) === "tram" ? "🚊" : "🚌";
+function buildVehicleKindIconMarkup(vehicleOrId) {
+  if (getVehicleKind(vehicleOrId) === "tram") {
+    return '<svg class="vehicle-kind-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M7 3.75h10A3.25 3.25 0 0 1 20.25 7v9A3.25 3.25 0 0 1 17 19.25H7A3.25 3.25 0 0 1 3.75 16V7A3.25 3.25 0 0 1 7 3.75Z"/><path d="M6.75 7h10.5v5.25H6.75zM7 15.5h.1m9.8 0h.1M8 19.5l-1.5 2m9.5-2 1.5 2"/></svg>';
+  }
+  return '<svg class="vehicle-kind-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6.75 3.75h10.5A2.75 2.75 0 0 1 20 6.5V16a2.75 2.75 0 0 1-2.75 2.75H6.75A2.75 2.75 0 0 1 4 16V6.5a2.75 2.75 0 0 1 2.75-2.75Z"/><path d="M6.75 6.5h10.5v5.25H6.75zM7.25 15.5h.1m9.3 0h.1M8 18.75l-1.5 2m9.5-2 1.5 2"/></svg>';
 }
 function buildVehicleIdMarkup(vehicleOrId, fallbackId = "") {
   const vehicle = vehicleOrId && typeof vehicleOrId === "object"
@@ -8109,8 +8120,7 @@ function buildVehicleIdMarkup(vehicleOrId, fallbackId = "") {
   const displayId = getVehicleDisplayId(vehicle || vehicleOrId) || normalize(fallbackId);
   if (!displayId) return "";
   const vehicleKind = getVehicleKind(vehicle);
-  const icon = getVehicleKindIcon(vehicle);
-  return `<span class="vehicle-id-display vehicle-id-display--${vehicleKind}"><span class="vehicle-kind-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(displayId)}</span></span>`;
+  return `<span class="vehicle-id-display vehicle-id-display--${vehicleKind}">${buildVehicleKindIconMarkup(vehicle)}<span>${escapeHtml(displayId)}</span></span>`;
 }
 function getVehicleInputResolvedId(inputEl) {
   if (!inputEl) return "";
@@ -9526,6 +9536,7 @@ function buildInstagramSearchUrl(bus, vehicleId) {
 function isOutOfService(bus) {
   if (!bus) return false;
   const outOfServiceDate = getVehicleField(bus, "Uit dienst");
+  if (getVehicleKind(bus) === "tram" && /^[01]$/.test(outOfServiceDate)) return outOfServiceDate === "1";
   return !!outOfServiceDate && outOfServiceDate !== "/";
 }
 

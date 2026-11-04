@@ -1398,10 +1398,16 @@ footer {
 }
 
 .vehicle-kind-icon {
+  display: block;
   flex: 0 0 auto;
-  font-size: 0.72em;
-  letter-spacing: normal;
-  line-height: 1;
+  width: 0.82em;
+  height: 0.82em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
 }
 
 .vehicle-suggestion-primary .vehicle-id-display {
@@ -4796,8 +4802,14 @@ body.route-page-open .container > footer {
     display: block;
     margin-bottom: 2px;
     color: var(--muted);
-    content: attr(data-column-icon) " " attr(data-column);
+    content: attr(data-column);
     font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .compare-mobile-vehicle-label {
+    display: inline-flex;
+    margin-bottom: 4px;
     font-weight: 700;
   }
 
