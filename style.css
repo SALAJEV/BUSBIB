@@ -43,8 +43,8 @@
   --header-surface-b: color-mix(in srgb, var(--accent) 42%, #101720);
   --page-pattern: repeating-linear-gradient(
     135deg,
-    transparent 0 46px,
-    color-mix(in srgb, var(--accent) 6%, transparent) 46px 47px
+    transparent 0 52px,
+    color-mix(in srgb, var(--accent) 3%, transparent) 52px 53px
   );
   --page-pattern-size: auto;
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
@@ -94,10 +94,10 @@
   --accent-soft: #e7f1fc;
   --page-pattern: radial-gradient(
     circle,
-    color-mix(in srgb, var(--accent) 8%, transparent) 1.2px,
-    transparent 1.6px
+    color-mix(in srgb, var(--accent) 3%, transparent) 1px,
+    transparent 1.5px
   );
-  --page-pattern-size: 28px 28px;
+  --page-pattern-size: 36px 36px;
 }
 
 :root[data-color-theme="green"] {
@@ -108,7 +108,7 @@
   --page-pattern: repeating-linear-gradient(
     90deg,
     transparent 0 34px,
-    color-mix(in srgb, var(--accent) 7%, transparent) 34px 35px
+    color-mix(in srgb, var(--accent) 3%, transparent) 34px 35px
   );
 }
 
@@ -119,7 +119,7 @@
   --page-pattern: radial-gradient(
     circle at 50% 50%,
     transparent 0 7px,
-    color-mix(in srgb, var(--accent) 5%, transparent) 7.5px 8.5px,
+    color-mix(in srgb, var(--accent) 2%, transparent) 7.5px 8.5px,
     transparent 9px
   );
   --page-pattern-size: 44px 44px;
@@ -132,9 +132,9 @@
   --page-pattern-size: 56px 56px;
   --page-pattern: repeating-linear-gradient(
     45deg,
-    transparent 0 20px,
-    color-mix(in srgb, var(--accent) 7%, transparent) 20px 21px,
-    transparent 21px 40px
+    transparent 0 26px,
+    color-mix(in srgb, var(--accent) 3%, transparent) 26px 27px,
+    transparent 27px 52px
   );
 }
 
@@ -145,7 +145,7 @@
   --page-pattern: repeating-conic-gradient(
     from 15deg at 50% 50%,
     transparent 0deg 28deg,
-    color-mix(in srgb, var(--accent) 3.5%, transparent) 28deg 29deg,
+    color-mix(in srgb, var(--accent) 1.5%, transparent) 28deg 29deg,
     transparent 29deg 60deg
   );
   --page-pattern-size: 64px 64px;
@@ -159,12 +159,12 @@
     repeating-linear-gradient(
       45deg,
       transparent 0 30px,
-      color-mix(in srgb, var(--accent) 4%, transparent) 30px 31px
+      color-mix(in srgb, var(--accent) 2.5%, transparent) 30px 31px
     ),
     repeating-linear-gradient(
       -45deg,
       transparent 0 30px,
-      color-mix(in srgb, var(--accent) 4%, transparent) 30px 31px
+      color-mix(in srgb, var(--accent) 2.5%, transparent) 30px 31px
     );
   --page-pattern-size: 84px 84px, 84px 84px;
 }
@@ -177,23 +177,12 @@
   --warning: #987638;
   --header-surface-a: #304f6b;
   --header-surface-b: #263f56;
-  --page-pattern:
-    linear-gradient(
-      0deg,
-      transparent calc(100% - 1px),
-      color-mix(in srgb, var(--accent) 3%, transparent) 100%
-    ),
-    linear-gradient(
-      90deg,
-      transparent calc(100% - 1px),
-      color-mix(in srgb, var(--accent) 3%, transparent) 100%
-    ),
-    radial-gradient(
-      circle,
-      color-mix(in srgb, #c6a24f 5%, transparent) 1px,
-      transparent 1.5px
-    );
-  --page-pattern-size: 80px 80px, 80px 80px, 32px 32px;
+  --page-pattern: repeating-linear-gradient(
+    135deg,
+    transparent 0 55px,
+    color-mix(in srgb, var(--accent) 3%, transparent) 55px 56px
+  );
+  --page-pattern-size: 56px 56px;
 }
 
 :root[data-color-theme="classic"] .card h2 {
@@ -5234,68 +5223,215 @@ body.route-page-open .container > footer {
 }
 
 :root[data-color-theme="classic"] {
-  --accent: #3d6a8f;
-  --accent-hover: #2f5575;
-  --accent-soft: #e6ecf1;
-  --gold: #b99a52;
-  --gold-soft: #e3d29c;
-  --header-surface-a: #34495c;
-  --header-surface-b: #24333f;
-  --page-pattern:
-    linear-gradient(0deg, color-mix(in srgb, #5b6b7a 13%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, #5b6b7a 13%, transparent) 1px, transparent 1px),
-    radial-gradient(circle, color-mix(in srgb, var(--gold) 38%, transparent) 1.5px, transparent 2px);
-  --page-pattern-size: 56px 56px, 56px 56px, 28px 28px;
+  --accent: #647887;
+  --accent-hover: #4f626f;
+  --accent-soft: #e7ecef;
+  --gold: #8696a2;
+  --gold-soft: #dce3e7;
+  --header-surface-a: #4a5d6a;
+  --header-surface-b: #354550;
+  --page-pattern: repeating-linear-gradient(
+    0deg,
+    transparent 0 55px,
+    color-mix(in srgb, var(--accent) 3%, transparent) 55px 56px
+  );
+  --page-pattern-size: 56px 56px;
 }
 
 :root[data-color-theme="classic"]:not([data-theme="dark"]):not([data-resolved-theme="dark"]) {
-  --page: #e3e7eb;
-  --page-top: #eef0f3;
-  --surface: #fbfbfc;
+  --page: #edf0f2;
+  --page-top: #f7f8f9;
+  --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-soft: #f0f2f4;
-  --surface-tint: #e5e9ed;
-  --ink: #1d2730;
-  --muted: #586571;
-  --faint: #85909b;
-  --line: #d5dae0;
-  --line-strong: #bcc4cc;
+  --surface-soft: #f4f6f7;
+  --surface-tint: #e7ecef;
+  --ink: #26313a;
+  --muted: #5d6972;
+  --faint: #84909a;
+  --line: #d9dfe3;
+  --line-strong: #c4cdd3;
 }
 
 :root[data-color-theme="classic"][data-theme="dark"],
 :root[data-color-theme="classic"][data-resolved-theme="dark"] {
-  --accent: #8fb0cf;
-  --accent-hover: #aac4dc;
-  --accent-ink: #12191f;
-  --page: #14181c;
-  --page-top: #1b2025;
-  --surface: #1e2429;
-  --surface-raised: #242b31;
-  --surface-soft: #2a323a;
-  --surface-tint: #303942;
-  --ink: #eceff2;
-  --muted: #aab3bc;
-  --faint: #7f8993;
-  --line: #333c45;
-  --line-strong: #46515c;
-  --accent-soft: #2b3a48;
-  --page-pattern:
-    linear-gradient(0deg, rgba(160, 178, 196, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(160, 178, 196, 0.09) 1px, transparent 1px),
-    radial-gradient(circle, rgba(207, 177, 106, 0.3) 1.5px, transparent 2px);
+  --accent: #a1b3c0;
+  --accent-hover: #bac8d1;
+  --accent-ink: #182027;
+  --page: #171c20;
+  --page-top: #1d2429;
+  --surface: #22292f;
+  --surface-raised: #293138;
+  --surface-soft: #2b343b;
+  --surface-tint: #323d45;
+  --ink: #edf1f3;
+  --muted: #b0bbc2;
+  --faint: #87949d;
+  --line: #39434a;
+  --line-strong: #4d5a63;
+  --accent-soft: #35434d;
+  --page-pattern: repeating-linear-gradient(
+    0deg,
+    transparent 0 55px,
+    rgba(174, 190, 202, 0.045) 55px 56px
+  );
 }
 
 :root[data-color-theme="classic"] .card,
 :root[data-color-theme="classic"] .home-gtfs-map-panel,
 :root[data-color-theme="classic"] .header-intro {
   border-top-width: 2px;
+  border-top-color: var(--line-strong);
   box-shadow: var(--shadow-sm);
 }
 
 :root[data-color-theme="classic"] .primary-nav {
   border-bottom-width: 2px;
+  border-bottom-color: var(--line-strong);
 }
 
 .header-bar {
   gap: 16px;
+}
+
+:root[data-color-theme="classic"] {
+  --shadow-sm: 0 1px 2px rgba(31, 43, 52, 0.04), 0 5px 16px rgba(31, 43, 52, 0.045);
+  --shadow-md: 0 2px 5px rgba(31, 43, 52, 0.06), 0 14px 30px rgba(31, 43, 52, 0.1);
+}
+
+:root[data-color-theme="classic"] .header-intro {
+  background:
+    radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 24rem),
+    var(--surface);
+}
+
+:root[data-color-theme="classic"] .header-visual {
+  background:
+    radial-gradient(circle at 83% 4%, rgba(255, 255, 255, 0.1), transparent 34%),
+    linear-gradient(135deg, var(--header-surface-a), var(--header-surface-b) 76%);
+}
+
+:root[data-color-theme="classic"] .primary-nav {
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent));
+  backdrop-filter: blur(12px);
+}
+
+:root[data-color-theme="classic"] .primary-nav__link[aria-current="page"] {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+:root[data-color-theme="classic"] #searchBtn {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+:root[data-color-theme="classic"] .card:hover,
+:root[data-color-theme="classic"] .home-gtfs-map-panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.container {
+  width: min(var(--content-width), calc(100% - clamp(40px, 6vw, 88px)));
+  padding-top: calc(max(env(safe-area-inset-top), 0px) + clamp(24px, 3vw, 36px));
+  padding-bottom: calc(max(env(safe-area-inset-bottom), 0px) + 36px);
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: min(1280px, calc(100% - 88px));
+  }
+
+  .header-bar {
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+  .container {
+    width: calc(100% - 40px);
+  }
+
+  .header-bar {
+    grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+    gap: 14px;
+  }
+
+  .header-intro {
+    padding: 22px;
+  }
+
+  .header-visual {
+    grid-template-columns: minmax(0, 1fr) minmax(96px, 130px);
+    gap: 10px;
+    padding: 20px;
+  }
+
+  .card,
+  .home-gtfs-map-panel {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 760px) {
+  .header-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .header-side {
+    display: grid;
+    grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+    align-items: stretch;
+  }
+
+  .header-actions {
+    align-items: start;
+    justify-content: stretch;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    width: calc(100% - 28px);
+    gap: 13px;
+    padding-top: calc(max(env(safe-area-inset-top), 0px) + 20px);
+    padding-bottom: calc(max(env(safe-area-inset-bottom), 0px) + 24px);
+  }
+
+  .header-bar {
+    gap: 10px;
+  }
+
+  .header-intro {
+    padding: 19px 16px;
+  }
+
+  .card,
+  .home-gtfs-map-panel {
+    padding: 20px 17px;
+  }
+
+  .primary-nav {
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@media (max-width: 380px) {
+  .container {
+    width: calc(100% - 22px);
+  }
+
+  .header-intro {
+    padding: 17px 14px;
+  }
+
+  .card,
+  .home-gtfs-map-panel {
+    padding: 18px 14px;
+  }
 }
