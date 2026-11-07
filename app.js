@@ -2738,8 +2738,8 @@ function renderInfoModalContent() {
     },
     {
       label: getLabel("infoGithubProject", "Dit project op GitHub"),
-      value: "SALAJEV/Busbibliotheek",
-      href: "https://github.com/SALAJEV/Busbibliotheek",
+      value: "SALAJEV/BUSBIB",
+      href: "https://github.com/SALAJEV/BUSBIB",
       icon: "github"
     }
   ];
