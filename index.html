@@ -26,12 +26,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB</title>
-<link rel="stylesheet" href="style.css?v=20261105-1">
+<link rel="stylesheet" href="style.css?v=20261108-3">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261105-1";
+  window.BB_ASSET_VERSION = "20261108-3";
 </script>
 </head>
 <body>
@@ -189,7 +189,7 @@
                   <span class="vehicle-photo-empty-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
                   </span>
-                  <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Nog geen foto van voertuig.</strong>
+                  <strong id="vehiclePhotoEmptyTitle" class="vehicle-photo-empty-title">Foto niet beschikbaar</strong>
                   <p id="vehiclePhotoEmptyText" class="vehicle-photo-empty-text">Heb je een foto van deze bus? Deel ze met BUSBIB.</p>
                   <button id="vehiclePhotoUploadBtn" class="btn vehicle-photo-upload-btn" type="button" hidden>Foto insturen</button>
                 </div>
@@ -741,7 +741,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261105-1";
+    var assetVersion = window.BB_ASSET_VERSION || "20261108-3";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

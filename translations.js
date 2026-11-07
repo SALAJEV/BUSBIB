@@ -87,6 +87,9 @@ nl: {
   feedCurrentUntil: "Gegevens actueel tot {date}.",
   headerVisualKicker: "Realtime overzicht",
   headerVisualTitle: "Open meteen de juiste bus en volg de rit live.",
+  mapCurrentLocation: "Toon mijn locatie",
+  mapLocationUnsupported: "Locatie bepalen wordt niet ondersteund door deze browser.",
+  mapLocationError: "Je locatie kon niet worden bepaald. Controleer de locatietoegang en probeer opnieuw.",
   trackingStatusBanner: "Trackinginformatie is tijdelijk niet beschikbaar."
 },
 
@@ -170,6 +173,9 @@ fr: {
   feedCurrentUntil: "Données à jour jusqu’au {date}.",
   headerVisualKicker: "Aperçu en temps réel",
   headerVisualTitle: "Ouvrez immédiatement le bon bus et suivez le trajet en direct.",
+  mapCurrentLocation: "Afficher ma position",
+  mapLocationUnsupported: "La géolocalisation n’est pas prise en charge par ce navigateur.",
+  mapLocationError: "Impossible de déterminer votre position. Vérifiez l’autorisation de localisation et réessayez.",
   trackingStatusBanner: "Les informations de suivi sont temporairement indisponibles."
 },
 
@@ -260,6 +266,9 @@ en: {
   feedCurrentUntil: "Data updated until {date}.",
   headerVisualKicker: "Realtime overview",
   headerVisualTitle: "Open the right bus right away and follow the trip live.",
+  mapCurrentLocation: "Show my location",
+  mapLocationUnsupported: "Location is not supported by this browser.",
+  mapLocationError: "Your location could not be determined. Check location access and try again.",
   trackingStatusBanner: "Tracking information is temporarily unavailable."
 },
 
@@ -344,7 +353,10 @@ de: {
   story44xx: "Die Geschichte von 44xx",
   feedCurrentUntil: "Daten aktuell bis {date}.",
   headerVisualKicker: "Echtzeitübersicht",
-  headerVisualTitle: "Öffne sofort den richtigen Bus und verfolge die Fahrt live."
+  headerVisualTitle: "Öffne sofort den richtigen Bus und verfolge die Fahrt live.",
+  mapCurrentLocation: "Meinen Standort anzeigen",
+  mapLocationUnsupported: "Dieser Browser unterstützt keine Standortbestimmung.",
+  mapLocationError: "Dein Standort konnte nicht ermittelt werden. Überprüfe den Standortzugriff und versuche es erneut."
 },
 
 
@@ -428,7 +440,10 @@ pl: {
   story44xx: "Historia 44xx",
   feedCurrentUntil: "Dane aktualne do {date}.",
   headerVisualKicker: "Podgląd na żywo",
-  headerVisualTitle: "Otwórz od razu właściwy autobus i śledź kurs na żywo."
+  headerVisualTitle: "Otwórz od razu właściwy autobus i śledź kurs na żywo.",
+  mapCurrentLocation: "Pokaż moją lokalizację",
+  mapLocationUnsupported: "Ta przeglądarka nie obsługuje geolokalizacji.",
+  mapLocationError: "Nie udało się określić Twojej lokalizacji. Sprawdź dostęp do lokalizacji i spróbuj ponownie."
 },
 
 
@@ -512,7 +527,10 @@ es: {
   story44xx: "La historia de 44xx",
   feedCurrentUntil: "Datos actualizados hasta {date}.",
   headerVisualKicker: "Resumen en tiempo real",
-  headerVisualTitle: "Abre enseguida el autobús correcto y sigue el trayecto en directo."
+  headerVisualTitle: "Abre enseguida el autobús correcto y sigue el trayecto en directo.",
+  mapCurrentLocation: "Mostrar mi ubicación",
+  mapLocationUnsupported: "Este navegador no admite la geolocalización.",
+  mapLocationError: "No se pudo determinar tu ubicación. Comprueba el acceso a la ubicación e inténtalo de nuevo."
 },
 
 
@@ -596,7 +614,10 @@ ru: {
   story44xx: "История 44xx",
   feedCurrentUntil: "Данные актуальны до {date}",
   headerVisualKicker: "Обзор в реальном времени",
-  headerVisualTitle: "Сразу откройте нужный автобус и следите за рейсом вживую."
+  headerVisualTitle: "Сразу откройте нужный автобус и следите за рейсом вживую.",
+  mapCurrentLocation: "Показать мое местоположение",
+  mapLocationUnsupported: "Этот браузер не поддерживает геолокацию.",
+  mapLocationError: "Не удалось определить ваше местоположение. Проверьте доступ к геолокации и попробуйте снова."
 }
   },
 
@@ -1487,8 +1508,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   photoUploadEmptyBadge: "Nog geen foto",
   photoUploadEmptyText: "Deel jouw foto van voertuig {id} via het formulier en help BUSBIB de fotobibliotheek aan te vullen.",
   photoUploadEmptyTextGeneric: "Deel jouw foto van deze bus via het formulier en help BUSBIB de fotobibliotheek aan te vullen.",
-  photoUploadEmptyTitle: "Van voertuig {id} is nog geen foto beschikbaar.",
-  photoUploadEmptyTitleGeneric: "Van dit voertuig is nog geen foto beschikbaar.",
+  photoUploadEmptyTitle: "Foto niet beschikbaar",
+  photoUploadEmptyTitleGeneric: "Foto niet beschikbaar",
   photoUploadModalBadge: "Voertuigfoto ontbreekt",
   photoUploadNote: "We zoeken nog een duidelijke foto van voertuig {id}. Heb jij er eentje? Dan kan je die hieronder doorsturen.",
   photoUploadNoteGeneric: "We zoeken nog een duidelijke foto van dit voertuig. Heb jij er eentje? Dan kan je die hieronder doorsturen.",
@@ -1737,8 +1758,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   photoUploadEmptyBadge: "Pas encore de photo",
   photoUploadEmptyText: "Partagez une belle photo du véhicule {id} via le formulaire et aidez BUSBIB à enrichir sa photothèque.",
   photoUploadEmptyTextGeneric: "Partagez une belle photo de ce véhicule via le formulaire et aidez BUSBIB à enrichir sa photothèque.",
-  photoUploadEmptyTitle: "Pas encore de photo disponible du véhicule {id}.",
-  photoUploadEmptyTitleGeneric: "Pas encore de photo disponible pour ce véhicule.",
+  photoUploadEmptyTitle: "Photo indisponible",
+  photoUploadEmptyTitleGeneric: "Photo indisponible",
   photoUploadModalBadge: "Photo du véhicule manquante",
   photoUploadNote: "Nous cherchons encore une photo claire du véhicule {id}. Vous en avez une ? Vous pouvez l'envoyer ci-dessous.",
   photoUploadNoteGeneric: "Nous cherchons encore une photo claire de ce véhicule. Vous en avez une ? Vous pouvez l'envoyer ci-dessous.",
@@ -1850,8 +1871,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   photoUploadEmptyBadge: "No photo yet",
   photoUploadEmptyText: "Share a great photo of vehicle {id} through the form and help complete BUSBIB's photo library.",
   photoUploadEmptyTextGeneric: "Share a great photo of this vehicle through the form and help complete BUSBIB's photo library.",
-  photoUploadEmptyTitle: "No photo available yet for vehicle {id}.",
-  photoUploadEmptyTitleGeneric: "No photo available yet for this vehicle.",
+  photoUploadEmptyTitle: "Photo unavailable",
+  photoUploadEmptyTitleGeneric: "Photo unavailable",
   photoUploadModalBadge: "Vehicle photo missing",
   photoUploadNote: "We are still looking for a clear photo of vehicle {id}. Do you have one? You can send it below.",
   photoUploadNoteGeneric: "We are still looking for a clear photo of this vehicle. Do you have one? You can send it below.",
@@ -1964,8 +1985,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   photoUploadEmptyBadge: "Noch kein Foto",
   photoUploadEmptyText: "Teile ein schönes Foto von Fahrzeug {id} über das Formular und hilf BUSBIB, die Fotobibliothek zu vervollständigen.",
   photoUploadEmptyTextGeneric: "Teile ein schönes Foto dieses Fahrzeugs über das Formular und hilf BUSBIB, die Fotobibliothek zu vervollständigen.",
-  photoUploadEmptyTitle: "Noch kein Foto von Fahrzeug {id} verfügbar.",
-  photoUploadEmptyTitleGeneric: "Noch kein Foto für dieses Fahrzeug verfügbar.",
+  photoUploadEmptyTitle: "Foto nicht verfügbar",
+  photoUploadEmptyTitleGeneric: "Foto nicht verfügbar",
   photoUploadModalBadge: "Fahrzeugfoto fehlt",
   photoUploadNote: "Wir suchen noch ein deutliches Foto von Fahrzeug {id}. Hast du eins? Dann kannst du es unten senden.",
   photoUploadNoteGeneric: "Wir suchen noch ein deutliches Foto dieses Fahrzeugs. Hast du eins? Dann kannst du es unten senden.",
@@ -2078,8 +2099,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   photoUploadEmptyBadge: "Brak zdjęcia",
   photoUploadEmptyText: "Prześlij dobre zdjęcie pojazdu {id} za pomocą formularza i pomóż uzupełnić bibliotekę zdjęć BUSBIB.",
   photoUploadEmptyTextGeneric: "Prześlij dobre zdjęcie tego pojazdu za pomocą formularza i pomóż uzupełnić bibliotekę zdjęć BUSBIB.",
-  photoUploadEmptyTitle: "Brak dostępnego zdjęcia pojazdu {id}.",
-  photoUploadEmptyTitleGeneric: "Brak dostępnego zdjęcia tego pojazdu.",
+  photoUploadEmptyTitle: "Zdjęcie niedostępne",
+  photoUploadEmptyTitleGeneric: "Zdjęcie niedostępne",
   photoUploadModalBadge: "Brakuje zdjęcia pojazdu",
   photoUploadNote: "Nadal szukamy wyraźnego zdjęcia pojazdu {id}. Masz takie? Możesz je wysłać poniżej.",
   photoUploadNoteGeneric: "Nadal szukamy wyraźnego zdjęcia tego pojazdu. Masz takie? Możesz je wysłać poniżej.",
@@ -2192,8 +2213,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   photoUploadEmptyBadge: "Aún sin foto",
   photoUploadEmptyText: "Comparte una buena foto del vehículo {id} a través del formulario y ayuda a completar la fototeca de BUSBIB.",
   photoUploadEmptyTextGeneric: "Comparte una buena foto de este vehículo a través del formulario y ayuda a completar la fototeca de BUSBIB.",
-  photoUploadEmptyTitle: "Aún no hay foto disponible del vehículo {id}.",
-  photoUploadEmptyTitleGeneric: "Aún no hay foto disponible de este vehículo.",
+  photoUploadEmptyTitle: "Foto no disponible",
+  photoUploadEmptyTitleGeneric: "Foto no disponible",
   photoUploadModalBadge: "Falta la foto del vehículo",
   photoUploadNote: "Seguimos buscando una foto clara del vehículo {id}. ¿Tienes una? Puedes enviarla abajo.",
   photoUploadNoteGeneric: "Seguimos buscando una foto clara de este vehículo. ¿Tienes una? Puedes enviarla abajo.",
@@ -2306,8 +2327,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   photoUploadEmptyBadge: "Фото ещё нет",
   photoUploadEmptyText: "Отправьте хорошее фото транспорта {id} через форму и помогите дополнить фотобиблиотеку BUSBIB.",
   photoUploadEmptyTextGeneric: "Отправьте хорошее фото этого транспорта через форму и помогите дополнить фотобиблиотеку BUSBIB.",
-  photoUploadEmptyTitle: "Для транспорта {id} пока нет фото.",
-  photoUploadEmptyTitleGeneric: "Для этого транспорта пока нет фото.",
+  photoUploadEmptyTitle: "Фото недоступно",
+  photoUploadEmptyTitleGeneric: "Фото недоступно",
   photoUploadModalBadge: "Не хватает фото транспорта",
   photoUploadNote: "Мы всё ещё ищем чёткое фото транспорта {id}. У вас есть такое? Вы можете отправить его ниже.",
   photoUploadNoteGeneric: "Мы всё ещё ищем чёткое фото этого транспорта. У вас есть такое? Вы можете отправить его ниже.",

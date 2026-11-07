@@ -595,7 +595,6 @@ let homeGtfsMap = null;
 let homeGtfsMapMarkers = null;
 let homeGtfsMapRefreshHandle = null;
 let homeGtfsMapRequestToken = 0;
-let homeGtfsMapHasLoaded = false;
 let homeGtfsMapStarted = false;
 let homeGtfsMapTripsDeferred = false;
 let homeGtfsMapIsRefreshing = false;
@@ -632,7 +631,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.04-1";
+const APP_VERSION = "2026.11.08-2";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -667,7 +666,7 @@ let appDialogResolve = null;
 const usesOverlayCompatibilityMode = () =>
   isAndroidWebView ||
   isAndroidTvPlatform;
-// Generated from the current contents of media/bus on 2026-10-27.
+// Updated from the current contents of media/bus on 2026-11-08.
 const PHOTO_LIBRARY_INDEX = {
     "089024": [
         "@busspotter_04/089024.jpeg"
@@ -684,6 +683,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "2159": [
         "@delijn_busspotter/2159.jpeg"
+    ],
+    "2160": [
+        "@delijn_busspotter/2160.jpeg"
     ],
     "220169": [
         "@delijn_busspotter/220169.jpeg",
@@ -727,6 +729,9 @@ const PHOTO_LIBRARY_INDEX = {
     "4563": [
         "@delijn_busspotter/4563.jpeg"
     ],
+    "4591": [
+        "@delijn_busspotter/4591.jpeg"
+    ],
     "4594": [
         "@delijn_busspotter/4594.jpeg"
     ],
@@ -736,6 +741,10 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "4598": [
         "@delijn_busspotter/4598.jpeg"
+    ],
+    "4854": [
+        "@delijn_busspotter/4854 (2).jpeg",
+        "@delijn_busspotter/4854.jpeg"
     ],
     "4952": [
         "@delijn_busspotter/4952.jpeg",
@@ -748,6 +757,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/4956.jpeg"
     ],
     "4978": [
+        "@delijn_busspotter/4978 (2).jpeg",
         "@delijn_busspotter/4978.jpeg"
     ],
     "4979": [
@@ -759,6 +769,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "5000": [
         "@delijn_busspotter/5000.jpeg"
+    ],
+    "5005": [
+        "@delijn_busspotter/5005.jpeg"
     ],
     "5006": [
         "@delijn_busspotter/5006 (2).jpeg",
@@ -851,8 +864,14 @@ const PHOTO_LIBRARY_INDEX = {
     "635070": [
         "@delijn_busspotter/635070.jpeg"
     ],
+    "646054": [
+        "@delijn_busspotter/646054.jpeg"
+    ],
     "646055": [
         "@delijn_busspotter/646055.jpeg"
+    ],
+    "646061": [
+        "@delijn_busspotter/646061.jpeg"
     ],
     "646063": [
         "@delijn_busspotter/646063.jpeg",
@@ -880,6 +899,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@van.de.ven.robin/647017.jpeg"
     ],
     "647019": [
+        "@delijn_busspotter/647019 (2).jpeg",
         "@delijn_busspotter/647019.jpeg"
     ],
     "647026": [
@@ -899,8 +919,15 @@ const PHOTO_LIBRARY_INDEX = {
     "668019": [
         "@delijn_busspotter/668019.jpeg"
     ],
+    "668024": [
+        "@delijn_busspotter/668024.jpeg"
+    ],
     "686043": [
+        "@delijn_busspotter/686043 (2).jpeg",
         "@delijn_busspotter/686043.jpeg"
+    ],
+    "686055": [
+        "@delijn_busspotter/686055.jpeg"
     ],
     "689031": [
         "@delijn_busspotter/689031 (2).jpeg",
@@ -936,6 +963,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "689049": [
         "@delijn_busspotter/689049.jpeg"
+    ],
+    "689060": [
+        "@delijn_busspotter/689060.jpeg"
     ],
     "2144": [
         "@delijn_spotter/2144.jpeg"
@@ -1044,6 +1074,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_spotter/4998.jpeg"
     ],
     "5007": [
+        "@delijn_busspotter/5007.jpeg",
         "@delijn_spotter/5007.jpeg"
     ],
     "5058": [
@@ -1439,6 +1470,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/644081.jpeg"
     ],
     "646079": [
+        "@delijn_busspotter/646079.jpeg",
         "@dln.spotter/646079.jpeg",
         "@dln.spotter/646079.jpeg"
     ],
@@ -1558,6 +1590,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@van.de.ven.robin/2877.jpeg"
     ],
     "2899": [
+        "@delijn_busspotter/2899.jpeg",
         "@van.de.ven.robin/2899.jpeg"
     ],
     "2947": [
@@ -1613,6 +1646,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@van.de.ven.robin/441520.jpeg"
     ],
     "4458": [
+        "@delijn_busspotter/4458.jpeg",
         "@van.de.ven.robin/4458.jpeg"
     ],
     "4575": [
@@ -3962,7 +3996,71 @@ async function initHomeGtfsMap() {
     ...getScrollFriendlyMapOptions()
   }).setView(HOME_GTFS_MAP_CENTER, HOME_GTFS_MAP_ZOOM);
   addPublicTransportTileLayer(homeGtfsMap);
+  addCurrentLocationControl(homeGtfsMap);
   homeGtfsMapMarkers = L.layerGroup().addTo(homeGtfsMap);
+}
+
+function addCurrentLocationControl(mapInstance) {
+  const L = window.L;
+  const locationLayer = L.layerGroup().addTo(mapInstance);
+  const control = L.control({ position: "topleft" });
+
+  control.onAdd = () => {
+    const container = L.DomUtil.create("div", "leaflet-control-location leaflet-bar");
+    const button = L.DomUtil.create("button", "leaflet-control-location-button", container);
+    button.type = "button";
+    button.title = t("mapCurrentLocation");
+    button.setAttribute("aria-label", t("mapCurrentLocation"));
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>';
+
+    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.on(button, "click", (event) => {
+      L.DomEvent.stop(event);
+      if (!navigator.geolocation) {
+        window.alert(t("mapLocationUnsupported"));
+        return;
+      }
+
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          locationLayer.clearLayers();
+          L.circle([coords.latitude, coords.longitude], {
+            radius: coords.accuracy,
+            color: "#1677d2",
+            weight: 2,
+            fillColor: "#1677d2",
+            fillOpacity: 0.12
+          }).addTo(locationLayer);
+          L.marker([coords.latitude, coords.longitude], {
+            icon: L.divIcon({
+              className: "leaflet-location-marker",
+              html: '<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C5.9 1 1 5.9 1 12c0 7.3 11 19 11 19s11-11.7 11-19C23 5.9 18.1 1 12 1Z"></path><circle cx="12" cy="12" r="4"></circle></svg>',
+              iconSize: [32, 40],
+              iconAnchor: [16, 40]
+            })
+          }).addTo(locationLayer);
+          mapInstance.setView(
+            [coords.latitude, coords.longitude],
+            Math.max(mapInstance.getZoom(), 16)
+          );
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+        },
+        (error) => {
+          console.warn("Eigen locatie ophalen mislukt", error);
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          window.alert(t("mapLocationError"));
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      );
+    });
+
+    return container;
+  };
+  control.addTo(mapInstance);
 }
 
 function findVehicleFromGtfsVehicleId(vehicleId = "") {
@@ -4021,7 +4119,7 @@ function getHomeGtfsMapSnapshot(vehicleId, entity, derivedData = null) {
     routeTextColor: routeTextColorRaw.length === 6 ? `#${routeTextColorRaw}` : "#ffffff",
     destinationText: getDestinationDisplayName(
       pickFirstText(tripData?.trip_headsign, descriptor.headsign, tripData?.trip_short_name)
-    ),
+    ) || getTripUpdateDestination(tripUpdate),
     currentStopName,
     updatedAt: timestamp
   };
@@ -4042,6 +4140,27 @@ function getHomeGtfsMapVehicleUrl(snapshot) {
 
 function buildHomeGtfsMapPopup(snapshot) {
   return buildVehicleMapPopup(snapshot);
+}
+
+function updateOpenHomeGtfsMapVehicleCard(snapshots) {
+  const cardEl = document.getElementById("homeGtfsVehicleCard");
+  if (!cardEl || cardEl.hidden) return;
+  const vehicleLink = cardEl.querySelector("[data-home-gtfs-vehicle-id]");
+  const vehicleId = vehicleLink?.getAttribute("data-home-gtfs-vehicle-id") || "";
+  if (!vehicleId) return;
+
+  const snapshot = snapshots.find(
+    (candidate) => normalizeLookup(getHomeGtfsMapVehicleLinkId(candidate)) === normalizeLookup(vehicleId)
+  );
+  if (!snapshot) {
+    cardEl.hidden = true;
+    cardEl.replaceChildren();
+    return;
+  }
+
+  cardEl.innerHTML = buildHomeGtfsMapPopup(snapshot);
+  cardEl._anchorLatLng = [snapshot.latitude, snapshot.longitude];
+  positionHomeGtfsVehicleCard();
 }
 
 async function renderHomeGtfsMap(snapshots) {
@@ -4112,14 +4231,16 @@ async function refreshHomeGtfsMap(options = {}) {
   homeGtfsMapRefreshBtn?.setAttribute("disabled", "disabled");
 
   try {
-    const [, , , , data] = await Promise.all([
+    const [, , , data] = await Promise.all([
       voertuigen.length === 0 ? laadVoertuigen() : Promise.resolve(),
-      Promise.resolve(),
       routes.length === 0 ? laadRoutes() : Promise.resolve(),
       stopsById.size === 0 ? laadStops() : Promise.resolve(),
       fetchRealtimeFeed({ force })
     ]);
     if (requestToken !== homeGtfsMapRequestToken) return;
+    if (!voertuigen.length || !routes.length || !stopsById.size) {
+      throw new Error("Voertuigen-, lijn- of haltegegevens zijn niet volledig geladen");
+    }
     const derivedData = getRealtimeFeedDerivedData(data);
     const snapshots = [];
     let processedVehicles = 0;
@@ -4139,7 +4260,7 @@ async function refreshHomeGtfsMap(options = {}) {
 
     await renderHomeGtfsMap(snapshots);
     if (requestToken !== homeGtfsMapRequestToken) return;
-    homeGtfsMapHasLoaded = true;
+    updateOpenHomeGtfsMapVehicleCard(snapshots);
     setHomeGtfsMapStatus(
       snapshots.length
         ? getLabel(
@@ -4176,7 +4297,7 @@ async function refreshHomeGtfsMap(options = {}) {
 function startHomeGtfsMapRefresh() {
   if (!homeGtfsMapEl || homeGtfsMapRefreshHandle) return;
   homeGtfsMapRefreshHandle = setInterval(() => {
-    if (!homeGtfsMapHasLoaded || document.hidden || homeGtfsMapPanelEl?.hidden) return;
+    if (!homeGtfsMapStarted || document.hidden || homeGtfsMapPanelEl?.hidden) return;
     if (Date.now() - lastUserInteractionAt >= HOME_GTFS_MAP_INACTIVITY_LIMIT_MS) {
       pauseHomeGtfsMapForInactivity();
       return;
@@ -4222,9 +4343,7 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   const visibleVehicleId = getVehicleDisplayId(vehicleId);
   const hasSpecificVehicleId = !!visibleVehicleId;
   if (vehiclePhotoEmptyTitleEl) {
-    vehiclePhotoEmptyTitleEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadEmptyTitle", "Van voertuig {id} is nog geen foto beschikbaar."), visibleVehicleId)
-      : getLabel("photoUploadEmptyTitleGeneric", "Van dit voertuig is nog geen foto beschikbaar.");
+    vehiclePhotoEmptyTitleEl.textContent = getLabel("photoUploadEmptyTitle", "Foto niet beschikbaar");
   }
   if (vehiclePhotoEmptyTextEl) {
     vehiclePhotoEmptyTextEl.textContent = hasSpecificVehicleId
@@ -8050,7 +8169,7 @@ window.addEventListener("resize", () => {
   setFavoritesPanel(getRouteStateFromLocation().view === "menu");
 });
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && homeGtfsMapStarted && homeGtfsMapHasLoaded && !homeGtfsMapPanelEl?.hidden) {
+  if (!document.hidden && homeGtfsMapStarted && !homeGtfsMapPanelEl?.hidden) {
     void refreshHomeGtfsMap().catch((error) => console.warn("GTFS-overzichtskaart hervatten mislukt", error));
   }
 });
@@ -8296,6 +8415,20 @@ function findTripData(routeId, tripId, headsign) {
 
   const candidates = getTripsForRoute(routeId, tripId);
   if (!candidates.length) return null;
+
+  const tripIdParts = getTripIdParts(tripId);
+  const routePrefix = tripIdParts[0] || "";
+  const stableTripSuffix = tripIdParts.at(-2) || "";
+  if (routePrefix && stableTripSuffix) {
+    const suffixCandidates = candidates.filter((trip) => {
+      const candidateParts = getTripIdParts(trip.trip_id);
+      return candidateParts[0] === routePrefix && candidateParts.at(-2) === stableTripSuffix;
+    });
+    const suffixHeadsigns = [...new Set(
+      suffixCandidates.map((trip) => cleanText(trip.trip_headsign)).filter(Boolean)
+    )];
+    if (suffixHeadsigns.length === 1) return suffixCandidates[0];
+  }
 
   const normalizedHeadsign = normalizeHeadsignLookup(headsign);
   if (normalizedHeadsign) {
@@ -9239,6 +9372,10 @@ async function laadTrips() {
         addTripToLookup(tripsByRouteId, routeId, trip);
         const routeKey = getRouteKey(routeId);
         addTripToLookup(tripsByRouteKey, routeKey, trip);
+        const tripRouteKey = getRouteKeyFromTripId(tripId);
+        if (tripRouteKey && tripRouteKey !== routeKey) {
+          addTripToLookup(tripsByRouteKey, tripRouteKey, trip);
+        }
       });
     } catch (error) {
       console.warn("Trips laden mislukt; gebruik lege state.", error);
@@ -9654,6 +9791,7 @@ async function initMap(lat,lon){
 
     // Use the same keyless transit map as the overview; CARTO now requires a key.
     addPublicTransportTileLayer(map);
+    addCurrentLocationControl(map);
     refreshRealtimeMapSize();
   }
 }
@@ -9837,6 +9975,20 @@ function getTripUpdateForVehicleFromDerivedData(derivedData, vehicleId, tripId =
   const normalizedVehicleId = cleanText(vehicleId);
   const normalizedTripId = cleanText(tripId);
   if (!derivedData) return null;
+
+  if (normalizedTripId) {
+    const matchingTripUpdates = derivedData.tripUpdatesByTripId.get(normalizedTripId) || [];
+    const exactTripUpdates = matchingTripUpdates.filter(
+      (tripUpdate) => extractTripDescriptor(tripUpdate).tripId === normalizedTripId
+    );
+    if (exactTripUpdates.length) {
+      const vehicleTripUpdates = exactTripUpdates.filter(
+        (tripUpdate) => getVehicleIdFromTripUpdate(tripUpdate) === normalizedVehicleId
+      );
+      const candidates = vehicleTripUpdates.length ? vehicleTripUpdates : exactTripUpdates;
+      return candidates.reduce((best, current) => chooseMostRecentEntity(best, current), null);
+    }
+  }
 
   const directMatch = derivedData.tripUpdatesByVehicleId.get(normalizedVehicleId);
   if (directMatch) return directMatch;
@@ -10054,6 +10206,24 @@ function getDestinationDisplayName(destination) {
     : normalized;
 }
 
+function getTripUpdateDestination(tripUpdate) {
+  const updates = tripUpdate?.stopTimeUpdate || tripUpdate?.stop_time_update;
+  if (!Array.isArray(updates)) return "";
+
+  const stops = updates.map((stop, index) => ({
+    stopId: cleanText(stop?.stopId || stop?.stop_id || stop?.assignedStopId || stop?.assigned_stop_id || ""),
+    sequence: normalizeStopSequence(stop?.stopSequence ?? stop?.stop_sequence),
+    index
+  })).filter((stop) => stop.stopId);
+  if (stops.length < 2) return "";
+
+  if (stops.every((stop) => Number.isFinite(stop.sequence))) {
+    stops.sort((left, right) => left.sequence - right.sequence || left.index - right.index);
+  }
+  const destinationStop = getStopByStopId(stops[stops.length - 1].stopId);
+  return cleanText(destinationStop?.stop_name);
+}
+
 async function updateRealtime(id){
   const requestToken = ++realtimeRequestToken;
   const bus = findBusById(id);
@@ -10151,7 +10321,9 @@ async function updateRealtime(id){
     );
     const routeShort = routeShortRaw || "?";
     const tripHeadsign = pickFirstText(tripData?.trip_headsign, descriptor.headsign);
-    const destinationText = getDestinationDisplayName(tripHeadsign) || "-";
+    const destinationText = getDestinationDisplayName(tripHeadsign) ||
+      (canUseTripUpdateStop ? getTripUpdateDestination(tripUpdate) : "") ||
+      "-";
     if (routeShort === "?" || destinationText === "-") {
       console.warn("[BUSBIB] lijn/bestemming niet gevonden", {
         vehicleId: normalizedRequestedId,
