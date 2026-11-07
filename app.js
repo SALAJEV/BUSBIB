@@ -3930,11 +3930,19 @@ function setHomeGtfsMapStatus(message, tone = "") {
   homeGtfsMapStatusEl.dataset.tone = tone;
 }
 
+function closeHomeGtfsVehicleCard() {
+  const cardEl = document.getElementById("homeGtfsVehicleCard");
+  if (!cardEl) return;
+  cardEl.hidden = true;
+  cardEl.replaceChildren();
+}
+
 function setHomeGtfsMapVisible(visible) {
   if (!homeGtfsMapPanelEl) return;
   const shouldShow = visible && settings.showHomeRealtimeMap;
   homeGtfsMapPanelEl.hidden = !shouldShow;
   homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!shouldShow));
+  if (!shouldShow) closeHomeGtfsVehicleCard();
   if (shouldShow && homeGtfsMap) {
     window.setTimeout(() => homeGtfsMap.invalidateSize(), 0);
   }
@@ -4153,8 +4161,7 @@ function updateOpenHomeGtfsMapVehicleCard(snapshots) {
     (candidate) => normalizeLookup(getHomeGtfsMapVehicleLinkId(candidate)) === normalizeLookup(vehicleId)
   );
   if (!snapshot) {
-    cardEl.hidden = true;
-    cardEl.replaceChildren();
+    closeHomeGtfsVehicleCard();
     return;
   }
 
@@ -4310,6 +4317,7 @@ async function openHomeGtfsMapVehicle(vehicleId = "") {
   const vehicle = findVehicleFromGtfsVehicleId(vehicleId);
   const resolvedId = normalize(vehicle?.Voertuignummer || vehicleId);
   if (!resolvedId) return false;
+  closeHomeGtfsVehicleCard();
   document.body.classList.add("home-map-opening-vehicle");
   setVehicleInputResolvedId(voertuigInput, vehicle ? resolvedId : "");
   voertuigInput.value = getVehicleDisplayId(vehicle) || getVisibleVehicleId(vehicleId);
@@ -7785,9 +7793,7 @@ document.getElementById("homeGtfsVehicleCard")?.addEventListener("click", (event
   const target = event.target;
   if (!(target instanceof Element)) return;
   if (target.closest("[data-vehicle-card-close]")) {
-    const cardEl = event.currentTarget;
-    cardEl.hidden = true;
-    cardEl.replaceChildren();
+    closeHomeGtfsVehicleCard();
     return;
   }
   const vehicleButton = target.closest("[data-home-gtfs-vehicle-id]");

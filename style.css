@@ -3360,11 +3360,20 @@ footer {
   width: 58px;
   height: 58px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
-  border-radius: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  font-size: 1.9rem;
+  color: var(--ink);
+}
+
+.first-run-hero-icon svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .first-run-hero-kicker {
