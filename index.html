@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261108-31">
-<link rel="stylesheet" href="redesign.css?v=20261108-31">
+<link rel="stylesheet" href="style.css?v=20261108-32">
+<link rel="stylesheet" href="redesign.css?v=20261108-32">
 <script src="site-config.js?v=20261018-14"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261108-31";
+  window.BB_ASSET_VERSION = "20261108-32";
 </script>
 </head>
 <body>
@@ -151,13 +151,6 @@
       </section>
     </div>
   </section>
-  <section id="homePhotoWidget" class="home-photo-widget" aria-labelledby="homePhotoWidgetTitle" hidden>
-    <div class="home-favorites-head">
-      <h2 id="homePhotoWidgetTitle">Voertuigen in beeld</h2>
-      <p id="homePhotoWidgetSummary">Kies maximaal drie voertuigen met foto in de instellingen.</p>
-    </div>
-    <div id="homePhotoWidgetList" class="home-photo-widget-list"></div>
-  </section>
   <section id="favoriteAlertsPanel" class="home-favorites-panel home-alerts-panel" hidden>
     <section id="favoriteAlerts" class="favorite-alerts" hidden aria-labelledby="favoriteAlertsTitle">
       <h3 id="favoriteAlertsTitle">Meldingen voor je favoriete lijnen</h3>
@@ -192,6 +185,13 @@
       <p id="homeGtfsMapErrorMessage" role="status">De realtime kaart is tijdelijk niet beschikbaar. Probeer het later opnieuw.</p>
       <button id="homeGtfsMapRetryBtn" class="btn more-secondary-btn" type="button">Opnieuw proberen</button>
     </div>
+  </section>
+  <section id="homePhotoWidget" class="home-photo-widget" aria-labelledby="homePhotoWidgetTitle" hidden>
+    <div class="home-favorites-head">
+      <h2 id="homePhotoWidgetTitle">Voertuigen in beeld</h2>
+      <p id="homePhotoWidgetSummary">Kies maximaal drie voertuigen met foto in de instellingen.</p>
+    </div>
+    <div id="homePhotoWidgetList" class="home-photo-widget-list"></div>
   </section>
   <div class="results-wrap">
     <div class="results-toolbar">
@@ -869,7 +869,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261108-31";
+    var assetVersion = window.BB_ASSET_VERSION || "20261108-32";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {
