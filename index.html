@@ -26,12 +26,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB</title>
-<link rel="stylesheet" href="style.css?v=20261108-10">
+<link rel="stylesheet" href="style.css?v=20261108-11">
 <script src="site-config.js?v=20261018-13"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261108-10";
+  window.BB_ASSET_VERSION = "20261108-11";
 </script>
 </head>
 <body>
@@ -125,6 +125,28 @@
     </button>
   </nav>
   <main id="routePageOutlet" class="route-page-outlet"></main>
+  <section id="homeFavoritesPanel" class="home-favorites-panel" aria-labelledby="homeFavoritesTitle">
+    <div class="home-favorites-head">
+      <div>
+        <h2 id="homeFavoritesTitle">Mijn favorieten</h2>
+        <p id="homeFavoritesSummary">Je favoriete voertuigen, lijnen en haltes op één plek.</p>
+      </div>
+    </div>
+    <div class="home-favorites-grid">
+      <section class="home-favorites-group" aria-labelledby="homeFavoriteVehiclesTitle">
+        <h3 id="homeFavoriteVehiclesTitle">Voertuigen</h3>
+        <div id="homeFavoriteVehicles" class="home-favorites-list"></div>
+      </section>
+      <section class="home-favorites-group" aria-labelledby="homeFavoriteLinesTitle">
+        <h3 id="homeFavoriteLinesTitle">Lijnen</h3>
+        <div id="homeFavoriteLines" class="home-favorites-list"></div>
+      </section>
+      <section class="home-favorites-group" aria-labelledby="homeFavoriteStopsTitle">
+        <h3 id="homeFavoriteStopsTitle">Haltes</h3>
+        <div id="homeFavoriteStops" class="home-favorites-list"></div>
+      </section>
+    </div>
+  </section>
   <section id="homeGtfsMapPanel" class="home-gtfs-map-panel" aria-labelledby="homeGtfsMapTitle">
     <div class="home-gtfs-map-head">
       <div>
@@ -600,6 +622,17 @@
       </div>
       <p id="haltSearchHelp" class="halte-module-help">Als je op zoeken drukt, kom je op de site van De Lijn terecht.</p>
       <p id="haltecodeError" class="halte-module-error" hidden>Voer een haltecode of haltenaam in.</p>
+      <section class="halte-nearby" aria-labelledby="halteNearbyTitle">
+        <div class="halte-nearby-heading">
+          <div>
+            <h4 id="halteNearbyTitle">Haltes in de buurt</h4>
+            <p id="halteNearbyDescription">Deel je locatie alleen wanneer je nabije haltes wilt zoeken.</p>
+          </div>
+          <button id="halteNearbyBtn" class="btn more-secondary-btn" type="button">Gebruik mijn locatie</button>
+        </div>
+        <p id="halteNearbyStatus" class="halte-nearby-status" role="status" aria-live="polite"></p>
+        <div id="halteNearbyResults" class="halte-nearby-results"></div>
+      </section>
     </div>
   </div>
 </section>
@@ -735,7 +768,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261108-10";
+    var assetVersion = window.BB_ASSET_VERSION || "20261108-11";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

@@ -36,8 +36,8 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen en heeft
 - Live voertuigtracking via De Lijn realtime data.
 - Realtime kaartweergave met Leaflet en OpenStreetMap/CARTO tiles.
 - Weerkaart op basis van de huidige voertuiglocatie via Open-Meteo.
-- Halte zoeken.
-- Favorieten bewaren in `localStorage`.
+- Halte zoeken op code of naam, plus optioneel nabije haltes op basis van browserlocatie met beschikbare realtime vertrekken.
+- Voertuig-, lijn- en haltefavorieten bewaren in `localStorage`.
 - Vergelijken van voertuigen.
 - Voertuigfoto's tonen uit lokale `media/` assets.
 - EXIF- en locatieverrijking voor foto's.
@@ -288,6 +288,7 @@ Dit project verwerkt of gebruikt mogelijk:
 Let op:
 
 - favorieten en instellingen worden lokaal in de browser bewaard;
+- browserlocatie wordt alleen op expliciete vraag gebruikt om haltes in de buurt te rangschikken; BUSBIB stuurt deze locatie niet door naar de API;
 - realtime data en weerdata komen van externe bronnen;
 - voertuigfoto's kunnen EXIF-metadata bevatten;
 
