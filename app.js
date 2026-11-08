@@ -3043,7 +3043,7 @@ function prepareLineSearchPage() {
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
-  setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+  setLineSearchStatus("");
 }
 
 function showLineSearchModal() {
@@ -3056,7 +3056,7 @@ function resetLineSearchPage() {
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
-  setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+  setLineSearchStatus("");
 }
 
 function hideLineSearchModal() {
@@ -3172,7 +3172,7 @@ async function updateLineSearchSuggestions() {
   if (query.length < 2) {
     lineSearchSuggestionsEl.replaceChildren();
     lineSearchSuggestionsEl.hidden = true;
-    setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+    setLineSearchStatus("");
     return;
   }
 
@@ -3361,7 +3361,7 @@ async function searchLines() {
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
   if (!query) {
     if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
-    setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."), true);
+    setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, bestemming of lijncode in."), true);
     lineSearchInputEl?.focus();
     return;
   }
@@ -6728,9 +6728,9 @@ function applyTranslations() {
     lineSearchToggleBtn.title = lineSearchLabel;
   }
   if (lineSearchTitleEl) lineSearchTitleEl.textContent = getLabel("lineSearch", "Lijn zoeken");
-  if (lineSearchSummaryEl) lineSearchSummaryEl.textContent = getLabel("lineSearchSummary", "Zoek op lijnnummer, routenaam of lijncode en bekijk de actieve ritten met hun bussen.");
-  if (lineSearchInputLabelEl) lineSearchInputLabelEl.textContent = getLabel("lineSearchInputLabel", "Lijnnummer, routenaam of lijncode");
-  if (lineSearchInputEl) lineSearchInputEl.placeholder = getLabel("lineSearchPlaceholder", "Bijvoorbeeld 95, Bussegem of route_id");
+  if (lineSearchSummaryEl) lineSearchSummaryEl.textContent = getLabel("lineSearchSummary", "Zoek op lijnnummer, bestemming of lijncode.");
+  if (lineSearchInputLabelEl) lineSearchInputLabelEl.textContent = getLabel("lineSearchInputLabel", "Lijnnummer, bestemming of lijncode");
+  if (lineSearchInputEl) lineSearchInputEl.placeholder = getLabel("lineSearchPlaceholder", "Bijvoorbeeld 95 of Bussegem");
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.textContent = getLabel("lineSearchSubmit", "Zoek lijn");
   if (lineSearchCloseBtn) lineSearchCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
   if (lineSearchSuggestionsEl) {
@@ -6740,7 +6740,7 @@ function applyTranslations() {
     );
   }
   if (!lineSearchResultsEl?.children.length) {
-    setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+    setLineSearchStatus("");
   }
   if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.setAttribute("aria-label", getLabel("photoPrevious", "Vorige foto"));
   if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.setAttribute("aria-label", getLabel("photoNext", "Volgende foto"));
@@ -8102,7 +8102,7 @@ lineSearchInputEl?.addEventListener("input", () => {
   lineSearchRequestToken += 1;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
-  setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, routenaam of lijncode in."));
+  setLineSearchStatus("");
   scheduleLineSearchSuggestions();
 });
 lineSearchInputEl?.addEventListener("keydown", (event) => {
