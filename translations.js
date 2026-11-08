@@ -2569,4 +2569,16 @@ Object.entries({
       uploadSubmit, photoUploadUnavailable, uploadInvalidImage, uploadSending, uploadSuccess, uploadFailed
     });
   });
+
+  Object.entries({
+    nl: "De uploadlimiet is bereikt. Probeer later opnieuw.",
+    fr: "La limite d'envoi est atteinte. Réessayez plus tard.",
+    en: "The upload limit has been reached. Please try again later.",
+    de: "Das Upload-Limit ist erreicht. Bitte versuche es später erneut.",
+    pl: "Osiągnięto limit przesyłania. Spróbuj ponownie później.",
+    es: "Se ha alcanzado el límite de subida. Inténtalo de nuevo más tarde.",
+    ru: "Достигнут лимит загрузки. Повторите попытку позже."
+  }).forEach(([language, uploadLimitReached]) => {
+    window.BB_TRANSLATIONS.i18n[language].uploadLimitReached = uploadLimitReached;
+  });
 });

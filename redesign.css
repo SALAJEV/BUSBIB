@@ -104,6 +104,138 @@ body.map-fullscreen-open {
   overflow: hidden;
 }
 
+#photoUploadModal .photo-upload-card {
+  width: min(100%, 580px);
+  padding: clamp(20px, 3vw, 30px);
+}
+
+#photoUploadModal .pdf-modal-header {
+  gap: 16px;
+}
+
+#photoUploadModal .pdf-modal-body {
+  max-height: min(65vh, 660px);
+  padding: 20px 2px 2px;
+}
+
+.photo-upload-form {
+  gap: 16px;
+}
+
+.photo-upload-form > label:not(.photo-upload-consent) {
+  gap: 7px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#photoUploadModal .photo-upload-form input:not([type="checkbox"]) {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+#photoUploadModal .photo-upload-form input[type="file"] {
+  padding: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 400;
+}
+
+.photo-upload-form input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-tint);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.photo-upload-consent {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+#photoUploadPrivacy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.photo-upload-status {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.photo-upload-status:empty,
+#photoUploadChallenge:empty {
+  display: none;
+}
+
+.photo-upload-status[data-state="error"],
+.photo-upload-status[data-state="unavailable"] {
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+#photoUploadModal .photo-upload-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.photo-upload-submit svg,
+.photo-upload-success-icon svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.photo-upload-success {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.photo-upload-success-icon {
+  display: grid;
+  flex: 0 0 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.photo-upload-success p {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .home-gtfs-map:fullscreen,
 #realtimeVehicleCard #map:fullscreen,
 .home-gtfs-map.map-fullscreen-fallback,

@@ -503,13 +503,15 @@ const photoUploadModalEl = document.getElementById("photoUploadModal");
 const photoUploadModalTitleEl = document.getElementById("photoUploadModalTitle");
 const photoUploadModalSummaryEl = document.getElementById("photoUploadModalSummary");
 const photoUploadModalCloseBtn = document.getElementById("photoUploadModalCloseBtn");
-const photoUploadModalDoneBtn = document.getElementById("photoUploadModalDoneBtn");
 const photoUploadFormEl = document.getElementById("photoUploadForm");
 const photoUploadVehicleEl = document.getElementById("photoUploadVehicle");
 const photoUploadChallengeEl = document.getElementById("photoUploadChallenge");
 const photoUploadStatusEl = document.getElementById("photoUploadStatus");
 const photoUploadSubmitEl = document.getElementById("photoUploadSubmit");
+const photoUploadSuccessEl = document.getElementById("photoUploadSuccess");
+const photoUploadSuccessTextEl = document.getElementById("photoUploadSuccessText");
 let photoUploadChallengeId = null;
+let photoUploadSubmitting = false;
 const termsModalEl = document.getElementById("termsModal");
 const termsModalTitleEl = document.getElementById("termsModalTitle");
 const termsModalSummaryEl = document.getElementById("termsModalSummary");
@@ -666,7 +668,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.08-20";
+const APP_VERSION = "2026.11.09-22";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2579,7 +2581,9 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_M
   try {
     const response = await fetch(url, { ...options, signal: controller.signal });
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} voor ${url}`);
+      const error = new Error(`HTTP ${response.status} voor ${url}`);
+      error.photoUploadError = response.headers.get("X-Photo-Upload-Error");
+      throw error;
     }
     return response;
   } catch (error) {
@@ -3519,6 +3523,12 @@ function hideReportModal() {
 
 function showPhotoUploadModal() {
   if (!photoUploadModalEl) return;
+  if (photoUploadSuccessEl && !photoUploadSuccessEl.hidden) {
+    photoUploadSuccessEl.hidden = true;
+    if (photoUploadFormEl) photoUploadFormEl.hidden = false;
+    if (photoUploadStatusEl) photoUploadStatusEl.textContent = "";
+    if (photoUploadChallengeId !== null && window.turnstile) window.turnstile.reset(photoUploadChallengeId);
+  }
   updatePhotoUploadCopy(currentPhotoVehicleId);
   if (photoUploadVehicleEl) photoUploadVehicleEl.value = getVehicleDisplayId(currentPhotoVehicleId);
   openOverlayModal(photoUploadModalEl, { focusTarget: photoUploadVehicleEl || photoUploadModalCloseBtn });
@@ -3534,6 +3544,7 @@ async function initializePhotoUploadChallenge() {
   if (!photoUploadChallengeEl || !photoUploadSubmitEl || !photoUploadStatusEl) return;
   if (!siteKey) {
     photoUploadSubmitEl.disabled = true;
+    photoUploadStatusEl.dataset.state = "unavailable";
     photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
     return;
   }
@@ -3544,15 +3555,23 @@ async function initializePhotoUploadChallenge() {
     if (!window.turnstile) throw new Error("Turnstile ontbreekt");
     photoUploadChallengeId = window.turnstile.render(photoUploadChallengeEl, {
       sitekey: siteKey,
-      callback: () => { photoUploadSubmitEl.disabled = false; photoUploadStatusEl.textContent = ""; },
+      callback: () => {
+        photoUploadSubmitEl.disabled = photoUploadSubmitting;
+        if (photoUploadStatusEl.dataset.state === "unavailable") {
+          photoUploadStatusEl.textContent = "";
+          delete photoUploadStatusEl.dataset.state;
+        }
+      },
       "expired-callback": () => { photoUploadSubmitEl.disabled = true; },
       "error-callback": () => {
         photoUploadSubmitEl.disabled = true;
+        photoUploadStatusEl.dataset.state = "unavailable";
         photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
       }
     });
   } catch (error) {
     console.warn("Uploadbeveiliging laden mislukt", error);
+    photoUploadStatusEl.dataset.state = "unavailable";
     photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
   }
 }
@@ -4647,7 +4666,8 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
     photoUploadFileLabel: ["uploadFileLabel", "Foto (JPEG, PNG of WebP, maximaal 8 MB)"],
     photoUploadConsentLabel: ["uploadConsentLabel", "Ik heb het recht om deze foto te delen en geef BUSBIB toestemming om ze met mijn naam te publiceren."],
     photoUploadPrivacy: ["uploadPrivacy", "De foto wordt eerst gecontroleerd. De foto kan locatie en andere metadata bevatten; verwijder die vooraf als je ze niet wilt delen."],
-    photoUploadSubmit: ["uploadSubmit", "Foto insturen"]
+    photoUploadSubmitText: ["uploadSubmit", "Foto insturen"],
+    photoUploadSuccessText: ["uploadSuccess", "Bedankt! Je foto is ontvangen en wordt gecontroleerd."]
   };
   Object.entries(uploadLabels).forEach(([id, [key, fallback]]) => {
     const element = document.getElementById(id);
@@ -7202,7 +7222,6 @@ function applyTranslations() {
   }
   if (reportMobileLinkEl) reportMobileLinkEl.textContent = getLabel("reportMobileOpen", "Open meldformulier");
   if (photoUploadModalCloseBtn) photoUploadModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
-  if (photoUploadModalDoneBtn) photoUploadModalDoneBtn.textContent = getLabel("close", "Sluiten");
   if (termsModalTitleEl) termsModalTitleEl.textContent = getLabel("footerTerms", "Gebruiksvoorwaarden");
   if (termsModalSummaryEl) termsModalSummaryEl.textContent = getLabel("termsSummary", "Korte standaardvoorwaarden voor het gebruik van BUSBIB.");
   if (termsModalCloseBtn) termsModalCloseBtn.setAttribute("aria-label", getLabel("close", "Sluiten"));
@@ -8989,27 +9008,39 @@ reportModalEl?.addEventListener("click", (event) => {
 vehiclePhotoUploadBtn?.addEventListener("click", showPhotoUploadModal);
 vehiclePhotoAddBtn?.addEventListener("click", showPhotoUploadModal);
 photoUploadModalCloseBtn?.addEventListener("click", hidePhotoUploadModal);
-photoUploadModalDoneBtn?.addEventListener("click", hidePhotoUploadModal);
 photoUploadFormEl?.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!photoUploadSubmitEl || !photoUploadStatusEl) return;
+  if (!photoUploadSubmitEl || !photoUploadStatusEl || photoUploadSubmitting) return;
   const formData = new FormData(photoUploadFormEl);
   const photo = formData.get("photo");
   if (!(photo instanceof File) || photo.size > 8 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(photo.type)) {
     photoUploadStatusEl.textContent = getLabel("uploadInvalidImage", "Kies een JPEG-, PNG- of WebP-foto van maximaal 8 MB.");
+    photoUploadStatusEl.dataset.state = "error";
     return;
   }
+  photoUploadSubmitting = true;
   photoUploadSubmitEl.disabled = true;
+  photoUploadStatusEl.dataset.state = "sending";
   photoUploadStatusEl.textContent = getLabel("uploadSending", "Foto wordt verstuurd...");
   try {
     await fetchWithTimeout("/photo-upload", { method: "POST", body: formData }, 90000);
     photoUploadFormEl.reset();
-    photoUploadStatusEl.textContent = getLabel("uploadSuccess", "Bedankt! Je foto is ontvangen en wordt gecontroleerd.");
+    photoUploadStatusEl.textContent = "";
+    delete photoUploadStatusEl.dataset.state;
+    if (photoUploadSuccessTextEl) photoUploadSuccessTextEl.textContent = getLabel("uploadSuccess", "Bedankt! Je foto is ontvangen en wordt gecontroleerd.");
+    photoUploadFormEl.hidden = true;
+    if (photoUploadSuccessEl) photoUploadSuccessEl.hidden = false;
+    if (!photoUploadModalEl?.hidden) photoUploadModalCloseBtn?.focus();
   } catch (error) {
     console.warn("Foto insturen mislukt", error);
-    photoUploadStatusEl.textContent = getLabel("uploadFailed", "Versturen mislukt. Probeer het later opnieuw.");
-  } finally {
+    photoUploadStatusEl.dataset.state = "error";
+    photoUploadStatusEl.textContent = error?.photoUploadError === "monthly-limit"
+      ? getLabel("uploadLimitReached", "De uploadlimiet is bereikt. Probeer later opnieuw.")
+      : getLabel("uploadFailed", "Versturen mislukt. Probeer het later opnieuw.");
+    photoUploadSubmitting = false;
     if (photoUploadChallengeId !== null && window.turnstile) window.turnstile.reset(photoUploadChallengeId);
+  } finally {
+    photoUploadSubmitting = false;
   }
 });
 photoUploadModalEl?.addEventListener("click", (event) => {

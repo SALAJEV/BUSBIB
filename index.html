@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261108-32">
-<link rel="stylesheet" href="redesign.css?v=20261108-32">
+<link rel="stylesheet" href="style.css?v=20261109-34">
+<link rel="stylesheet" href="redesign.css?v=20261109-34">
 <script src="site-config.js?v=20261018-14"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261108-32";
+  window.BB_ASSET_VERSION = "20261109-34";
 </script>
 </head>
 <body>
@@ -806,7 +806,7 @@
 </div>
 
 <div id="photoUploadModal" class="pdf-modal" hidden role="dialog" aria-modal="true" aria-labelledby="photoUploadModalTitle">
-  <div class="pdf-modal-card legal-modal-card">
+  <div class="pdf-modal-card legal-modal-card photo-upload-card">
     <div class="pdf-modal-header">
       <div>
         <h3 id="photoUploadModalTitle">Foto uploaden</h3>
@@ -823,13 +823,17 @@
           <label class="photo-upload-consent"><input name="consent" type="checkbox" value="yes" required><span id="photoUploadConsentLabel">Ik heb het recht om deze foto te delen en geef BUSBIB toestemming om ze met mijn naam te publiceren.</span></label>
           <p id="photoUploadPrivacy">De foto wordt eerst gecontroleerd. De foto kan locatie en andere metadata bevatten; verwijder die vooraf als je ze niet wilt delen.</p>
           <div id="photoUploadChallenge"></div>
-          <p id="photoUploadStatus" role="status"></p>
-          <button id="photoUploadSubmit" class="btn" type="submit">Foto insturen</button>
+          <p id="photoUploadStatus" class="photo-upload-status" role="status"></p>
+          <button id="photoUploadSubmit" class="btn photo-upload-submit" type="submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>
+            <span id="photoUploadSubmitText">Foto insturen</span>
+          </button>
         </form>
+        <div id="photoUploadSuccess" class="photo-upload-success" role="status" hidden>
+          <span class="photo-upload-success-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg></span>
+          <p id="photoUploadSuccessText"></p>
+        </div>
       </div>
-    </div>
-    <div class="pdf-modal-actions">
-      <button id="photoUploadModalDoneBtn" class="btn" type="button">Sluiten</button>
     </div>
   </div>
 </div>
@@ -869,7 +873,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261108-32";
+    var assetVersion = window.BB_ASSET_VERSION || "20261109-34";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {
