@@ -643,7 +643,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.08-3";
+const APP_VERSION = "2026.11.08-7";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2186,15 +2186,19 @@ function closeTransientOverlays() {
   hideFunnyModal();
 }
 
+const PAGE_PATHS = { home: "/", lijn: "/line", halte: "/stop", menu: "/menu" };
+
 function getRouteStateFromLocation() {
   const params = new URLSearchParams(window.location.search);
   const bus = normalize(params.get("bus") || "");
   const compare = normalize(params.get("compare") || "");
   const requestedView = params.get("view") || "";
   const pageViews = new Set(["halte", "lijn", "menu"]);
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  const pathView = Object.keys(PAGE_PATHS).find((view) => PAGE_PATHS[view] === pathname);
   const view = bus
     ? "vehicle"
-    : (pageViews.has(requestedView) ? requestedView : "home");
+    : (pathView && pathView !== "home" ? pathView : (pageViews.has(requestedView) ? requestedView : "home"));
   return {
     view,
     bus,
@@ -2237,8 +2241,8 @@ function buildUrlForRouteState(routeState = {}) {
     else url.searchParams.delete("compare");
   }
 
-  if (pageViews.has(normalizedState.view)) url.searchParams.set("view", normalizedState.view);
-  else url.searchParams.delete("view");
+  url.pathname = PAGE_PATHS[normalizedState.view] || PAGE_PATHS.home;
+  url.searchParams.delete("view");
 
   return `${url.pathname}${url.search}${url.hash}`;
 }
@@ -3528,7 +3532,7 @@ function updateDocumentTitle(vehicleId = "") {
   const pageTitle = pageTitleByView[currentPageView]?.textContent.trim();
   document.title = pageTitle
     ? `${pageTitle} - ${getLabel("appTitle", "BUSBIB")}`
-    : getLabel("appTitle", "BUSBIB");
+    : getLabel("homePageTitle", "BUSBIB | Bussen en trams van De Lijn live volgen");
 }
 
 const DEFAULT_HEADER_ROUTE = "95";
@@ -5109,7 +5113,7 @@ function buildAppAssetPath(relativePath) {
   const normalizedPath = (relativePath || "").toString().replace(/^\/+/, "");
   if (!normalizedPath) return "";
   try {
-    return new URL(normalizedPath, window.location.href).pathname;
+    return new URL(normalizedPath, document.baseURI).pathname;
   } catch (_) {
     return normalizedPath;
   }
@@ -6619,9 +6623,8 @@ window.addEventListener("resize", debounce(syncHeaderActionPlacement, 120), { pa
 
 function applyTranslations() {
   document.documentElement.lang = settings.language || DEFAULT_LANG;
-  updateDocumentTitle();
   updateCopyrightText();
-  if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", getLabel("metaDescription", "BUSBIB voor bussen van De Lijn: zoek een voertuig en volg het live."));
+  if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", getLabel("metaDescription", "Ontdek BUSBIB: zoek bussen en trams van De Lijn, volg voertuigen live op de kaart en bekijk lijnen, haltes, foto's en voertuiggegevens."));
   splash?.setAttribute("aria-label", getLabel("splashAria", "BUSBIB laden"));
   syncTrackingStatusBanner();
   syncPhotoDelayBanner();
@@ -6758,6 +6761,7 @@ function applyTranslations() {
     lineSearchToggleBtn.title = lineSearchLabel;
   }
   if (lineSearchTitleEl) lineSearchTitleEl.textContent = getLabel("lineSearch", "Lijn zoeken");
+  updateDocumentTitle();
   if (lineSearchSummaryEl) lineSearchSummaryEl.textContent = getLabel("lineSearchSummary", "Zoek op lijnnummer, bestemming of lijncode.");
   if (lineSearchInputLabelEl) lineSearchInputLabelEl.textContent = getLabel("lineSearchInputLabel", "Lijnnummer, bestemming of lijncode");
   if (lineSearchInputEl) lineSearchInputEl.placeholder = getLabel("lineSearchPlaceholder", "Bijvoorbeeld 95 of Bussegem");
@@ -8123,10 +8127,18 @@ closeBtnEl?.addEventListener("click", () => {
   terug({ historyMode: "replace" });
 });
 appTitleBtnEl?.addEventListener("click", () => navigateToPage("home"));
-navHomeBtn?.addEventListener("click", () => navigateToPage("home"));
-navHalteBtn?.addEventListener("click", () => navigateToPage("halte"));
-navLineBtn?.addEventListener("click", () => navigateToPage("lijn"));
-navMoreBtn?.addEventListener("click", () => navigateToPage(currentPageView === "menu" ? "home" : "menu"));
+[
+  [navHomeBtn, "home"],
+  [navHalteBtn, "halte"],
+  [navLineBtn, "lijn"],
+  [navMoreBtn, "menu"]
+].forEach(([link, view]) => {
+  link?.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    navigateToPage(view === "menu" && currentPageView === "menu" ? "home" : view);
+  });
+});
 favoritesBackdropEl?.addEventListener("click", (event) => {
   if (event.target === favoritesBackdropEl && isMobileMenuOverlay()) goBackFromRoutePage();
 });

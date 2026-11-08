@@ -792,7 +792,8 @@ localeMap: {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB voor bussen van De Lijn: zoek een voertuig en volg het live.",
+  homePageTitle: "BUSBIB | Bussen en trams van De Lijn live volgen",
+  metaDescription: "Ontdek BUSBIB: zoek bussen en trams van De Lijn, volg voertuigen live op de kaart en bekijk lijnen, haltes, foto's en voertuiggegevens.",
   splashAria: "BUSBIB laden",
   splashWelcome: "Welkom",
   madeBy: "Made by @delijn_busspotter",
@@ -948,7 +949,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB pour les bus de De Lijn : recherchez un véhicule et suivez-le en direct.",
+  homePageTitle: "BUSBIB | Suivez les bus et trams De Lijn en direct",
+  metaDescription: "Découvrez BUSBIB : recherchez les bus et trams De Lijn, suivez-les sur la carte et consultez les lignes, arrêts, photos et données des véhicules.",
   splashAria: "Chargement de BUSBIB",
   splashWelcome: "Bienvenue",
   madeBy: "Made by @delijn_busspotter",
@@ -1000,7 +1002,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB for De Lijn buses: search for a vehicle and track it live.",
+  homePageTitle: "BUSBIB | Track De Lijn buses and trams live",
+  metaDescription: "Discover BUSBIB: find De Lijn buses and trams, track vehicles live on the map, and explore routes, stops, photos and vehicle details.",
   splashAria: "Loading BUSBIB",
   splashWelcome: "Welcome",
   madeBy: "Made by @delijn_busspotter",
@@ -1052,7 +1055,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB für Busse von De Lijn: Suche ein Fahrzeug und verfolge es live.",
+  homePageTitle: "BUSBIB | Busse und Straßenbahnen von De Lijn live verfolgen",
+  metaDescription: "Entdecke BUSBIB: Finde Busse und Straßenbahnen von De Lijn, verfolge Fahrzeuge live auf der Karte und erkunde Linien, Haltestellen und Fotos.",
   splashAria: "BUSBIB wird geladen",
   splashWelcome: "Willkommen",
   madeBy: "Made by @delijn_busspotter",
@@ -1104,7 +1108,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB dla autobusów De Lijn: wyszukaj pojazd i śledź go na żywo.",
+  homePageTitle: "BUSBIB | Śledź autobusy i tramwaje De Lijn na żywo",
+  metaDescription: "Odkryj BUSBIB: znajdź autobusy i tramwaje De Lijn, śledź pojazdy na mapie oraz przeglądaj linie, przystanki, zdjęcia i dane pojazdów.",
   splashAria: "Ładowanie BUSBIB",
   splashWelcome: "Witamy",
   madeBy: "Made by @delijn_busspotter",
@@ -1156,7 +1161,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB para autobuses de De Lijn: busca un vehículo y síguelo en directo.",
+  homePageTitle: "BUSBIB | Sigue los autobuses y tranvías de De Lijn en directo",
+  metaDescription: "Descubre BUSBIB: busca autobuses y tranvías de De Lijn, sigue vehículos en directo en el mapa y consulta líneas, paradas, fotos y datos.",
   splashAria: "Cargando BUSBIB",
   splashWelcome: "Bienvenido",
   madeBy: "Made by @delijn_busspotter",
@@ -1208,7 +1214,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
 
 Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   appTitle: "BUSBIB",
-  metaDescription: "BUSBIB для автобусов De Lijn: найдите транспорт и отслеживайте его вживую.",
+  homePageTitle: "BUSBIB | Автобусы и трамваи De Lijn в реальном времени",
+  metaDescription: "Откройте BUSBIB: ищите автобусы и трамваи De Lijn, следите за ними на карте и изучайте маршруты, остановки, фотографии и данные транспорта.",
   splashAria: "Загрузка BUSBIB",
   splashWelcome: "Добро пожаловать",
   madeBy: "Made by @delijn_busspotter",

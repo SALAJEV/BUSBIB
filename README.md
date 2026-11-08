@@ -59,7 +59,7 @@ De frontend wordt rechtstreeks geladen vanuit de rootbestanden:
 
 Er wordt bewust geen framework zoals React, Vue of Angular gebruikt. De app is volledig geschreven in vanilla JavaScript en werkt met DOM-manipulatie, lokale state, `localStorage`, `fetch`, `history` en een service worker.
 
-De hoofdnavigatie gebruikt deelbare URL's via de `view`-queryparameter, zoals `?view=halte`, `?view=lijn` en `?view=menu`. Navigeren werkt samen met de browsergeschiedenis; voertuiglinks blijven beschikbaar via `?bus=<nummer>` en optioneel `&compare=<nummer>`.
+De hoofdnavigatie gebruikt de deelbare URL's `/`, `/line`, `/stop` en `/menu`. De pagina's delen dezelfde frontend-shell en navigeren via de browsergeschiedenis. Oude links met `?view=lijn`, `?view=halte` of `?view=menu` blijven werken en worden omgezet naar de nieuwe paden. Voertuiglinks blijven beschikbaar via `/?bus=<nummer>` en optioneel `&compare=<nummer>`.
 
 ### API-laag
 
@@ -148,6 +148,7 @@ http://localhost:8000
 - Open de app via een lokale HTTP-server of de gedeployde website; rechtstreeks openen als `file:///.../index.html` werkt niet.
 - Datasetbestanden worden via `/dataset/<bestandsnaam>` door een Cloudflare Pages Function opgehaald. Dit voorkomt browser-CORS-problemen met de R2-bucket.
 - Een eenvoudige server zoals `python -m http.server` serveert alleen de frontendbestanden; datasets vereisen nog steeds de Cloudflare Pages-route of lokaal Cloudflare Pages/Wrangler Functions.
+- Voor rechtstreeks openen of herladen van `/line`, `/stop` en `/menu` is een server nodig die deze paden naar `index.html` herschrijft; Cloudflare Pages gebruikt hiervoor `_redirects`. De eenvoudige Python-server ondersteunt deze herschrijvingen niet.
 - Zonder geldige `DELIJN_API_KEY` werken realtime-, halte- en GTFS-waarschuwingsverzoeken niet.
 - De service worker kan browsercache agressief vasthouden. Gebruik bij twijfel een harde refresh of verwijder de site data.
 
@@ -165,6 +166,7 @@ De frontendbestanden in de root kunnen als statische site gedeployed worden:
 - `translations.js`
 - `manifest.json`
 - `sw.js`
+- `_redirects` voor het rechtstreeks openen van de navigatiepagina's
 - `media/`
 
 ### API-laag
