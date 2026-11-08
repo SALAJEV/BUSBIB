@@ -84,6 +84,8 @@ nl: {
   missingVehicleTitle: "Dit voertuig ontbreekt in onze database.",
   missingVehicleText: "Meld het ons via het formulier onderaan.",
   missingVehicleReportCta: "Meld via formulier",
+  searchZone01: "Zoek op Zone 01",
+  missingVehicleHelp: "Controleer het voertuignummer. Ontbreekt het voertuig nog steeds? Meld het via het formulier of zoek verder op Zone 01.",
   noFavoritesYet: "Nog geen favorieten toegevoegd.",
   vehiclePlaceholder: "Zoek op voertuignummer, nummerplaat of intern nummer",
   notOutOfService: "Bus nog in dienst",
@@ -186,7 +188,7 @@ fr: {
 },
 
 en: {
-  subtitle: "Search for a vehicle and track it in real-time.",
+  subtitle: "Search for a vehicle and track it in realtime.",
   appContextLine: "About buses operated by the Flemish public transport company De Lijn.",
   install: "Install app",
   iosHint: "On iPhone/iPad: tap 'Share' and choose 'Add to Home Screen'.",
@@ -210,10 +212,10 @@ en: {
   settings: "Settings",
   settingsSummary: "Tailor the app to your preferences and viewing comfort.",
   settingsAppearance: "Appearance",
-  settingsRealtime: "Real time",
+  settingsRealtime: "Realtime",
   settingsAccessibility: "Accessibility",
   settingsReset: "Restore preferences",
-  settingsResetConfirm: "Restore the default preferences? Your language, appearance, and real-time preferences will be reset. Your favorites will be kept.",
+  settingsResetConfirm: "Restore the default preferences? Your language, appearance, and realtime preferences will be reset. Your favorites will be kept.",
   textScale: "Text size",
   textScaleNormal: "Normal",
   textScaleLarge: "Large",
@@ -223,7 +225,7 @@ en: {
   homeMapInterval: "Map refresh",
   oneMinute: "1 minute",
   twoMinutes: "2 minutes",
-  showHomeRealtimeMap: "Real-time map on home screen",
+  showHomeRealtimeMap: "Realtime map on home screen",
   timeFormat: "Time format",
   timeFormat24h: "24-hour",
   timeFormat12h: "12-hour",
@@ -248,7 +250,7 @@ en: {
   styleCalm: "Calm",
   language: "Language",
   staticCard: "Vehicle information",
-  realtimeCard: "Real-time data",
+  realtimeCard: "Realtime data",
   photoCard: "Vehicle photo",
   photoAlt: "Photo of vehicle {id}",
   photoCaption: "Vehicle {id}",
@@ -260,8 +262,8 @@ en: {
   followOn: "Follow: On",
   followOff: "Follow: Off",
   lastUpdate: "Last update",
-  idlePaused: "Real-time tracking paused after 5 minutes of inactivity. Interact with the screen to resume.",
-  noData: "No real-time data available.",
+  idlePaused: "Realtime tracking paused after 5 minutes of inactivity. Interact with the screen to resume.",
+  noData: "No realtime data available.",
   loading: "Loading data...",
   noneSelected: "No vehicle selected.",
   noFixed: "No vehicle data found.",
@@ -269,11 +271,13 @@ en: {
   missingVehicleTitle: "This vehicle is missing from our database.",
   missingVehicleText: "Report it via the form below.",
   missingVehicleReportCta: "Report via form",
+  searchZone01: "Search on Zone 01",
+  missingVehicleHelp: "Check the vehicle number. Still can't find the vehicle? Report it using the form or continue your search on Zone 01.",
   noFavoritesYet: "No favorites yet.",
   vehiclePlaceholder: "Search by vehicle number, license plate, or internal number",
   notOutOfService: "In service",
-  outOfServiceNoRealtime: "Real-time location unavailable: vehicle is out of service.",
-  realtimeError: "Error fetching real-time data.",
+  outOfServiceNoRealtime: "Realtime location unavailable: vehicle is out of service.",
+  realtimeError: "Error fetching realtime data.",
   story44xx: "The story of 44xx",
   feedCurrentUntil: "Data updated until {date}.",
   headerVisualKicker: "Realtime overview",
@@ -842,12 +846,41 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   infoGithubProject: "Dit project op GitHub",
   notInServiceYet: "Bus nog niet in dienst"
 });
+Object.entries({
+  nl: ["Favoriete lijnen", "Favoriete haltes", "Volledig scherm", "Volledig scherm sluiten"],
+  fr: ["Lignes favorites", "Arrêts favoris", "Plein écran", "Quitter le plein écran"],
+  en: ["Favorite lines", "Favorite stops", "Full screen", "Exit full screen"],
+  de: ["Favorisierte Linien", "Favorisierte Haltestellen", "Vollbild", "Vollbild schließen"],
+  pl: ["Ulubione linie", "Ulubione przystanki", "Pełny ekran", "Zamknij pełny ekran"],
+  es: ["Líneas favoritas", "Paradas favoritas", "Pantalla completa", "Salir de pantalla completa"],
+  ru: ["Избранные маршруты", "Избранные остановки", "Полный экран", "Выйти из полного экрана"]
+}).forEach(([language, [favoriteLinesPage, favoriteStopsPage, mapFullscreen, mapExitFullscreen]]) => {
+  Object.assign(window.BB_TRANSLATIONS.i18n[language], { favoriteLinesPage, favoriteStopsPage, mapFullscreen, mapExitFullscreen });
+});
+Object.entries({
+  nl: ["Widgets op de startpagina", "Favoriete voertuigen", "Voertuigen met foto", "Kies maximaal drie voertuigen met foto", "Voertuigen in beeld", "Kies maximaal drie voertuigen met foto in de instellingen.", "Je favoriete bussen en trams op één plek.", "Voertuig {number}", "Kies een voertuig", "Kies een foto", "Foto", "Kies voertuigen met foto in de instellingen."],
+  en: ["Home page widgets", "Favorite vehicles", "Vehicles with photos", "Choose up to three vehicles with photos", "Vehicles in pictures", "Choose up to three vehicles with photos in settings.", "Your favorite buses and trams in one place.", "Vehicle {number}", "Choose a vehicle", "Choose a photo", "Photo", "Choose vehicles with photos in settings."],
+  fr: ["Widgets de la page d'accueil", "Véhicules favoris", "Véhicules avec photo", "Choisissez jusqu'à trois véhicules avec photo", "Véhicules en images", "Choisissez jusqu'à trois véhicules avec photo dans les paramètres.", "Vos bus et trams favoris au même endroit.", "Véhicule {number}", "Choisir un véhicule", "Choisir une photo", "Photo", "Choisissez des véhicules avec photo dans les paramètres."],
+  de: ["Widgets auf der Startseite", "Favorisierte Fahrzeuge", "Fahrzeuge mit Foto", "Bis zu drei Fahrzeuge mit Foto wählen", "Fahrzeuge im Bild", "Wählen Sie in den Einstellungen bis zu drei Fahrzeuge mit Foto.", "Ihre Lieblingsbusse und -straßenbahnen an einem Ort.", "Fahrzeug {number}", "Fahrzeug wählen", "Foto wählen", "Foto", "Wählen Sie Fahrzeuge mit Foto in den Einstellungen."],
+  pl: ["Widżety na stronie głównej", "Ulubione pojazdy", "Pojazdy ze zdjęciem", "Wybierz do trzech pojazdów ze zdjęciem", "Pojazdy na zdjęciach", "Wybierz w ustawieniach do trzech pojazdów ze zdjęciem.", "Twoje ulubione autobusy i tramwaje w jednym miejscu.", "Pojazd {number}", "Wybierz pojazd", "Wybierz zdjęcie", "Zdjęcie", "Wybierz pojazdy ze zdjęciem w ustawieniach."],
+  es: ["Widgets de la página principal", "Vehículos favoritos", "Vehículos con foto", "Elige hasta tres vehículos con foto", "Vehículos en imágenes", "Elige hasta tres vehículos con foto en los ajustes.", "Tus autobuses y tranvías favoritos en un solo lugar.", "Vehículo {number}", "Elegir vehículo", "Elegir foto", "Foto", "Elige vehículos con foto en los ajustes."],
+  ru: ["Виджеты на главной странице", "Избранный транспорт", "Транспорт с фото", "Выберите до трёх транспортных средств с фото", "Транспорт в фотографиях", "Выберите до трёх транспортных средств с фото в настройках.", "Избранные автобусы и трамваи в одном месте.", "Транспорт {number}", "Выбрать транспорт", "Выбрать фото", "Фото", "Выберите транспорт с фото в настройках."]
+}).forEach(([language, values]) => {
+  const [widgetsTitle, widgetFavorites, widgetPhotos, widgetPhotoChoices, widgetPhotoTitle, widgetPhotoSummary,
+    widgetFavoriteSummary, widgetVehicleSlot, widgetChooseVehicle, widgetChoosePhoto, widgetPhoto, widgetPhotoEmpty] = values;
+  Object.assign(window.BB_TRANSLATIONS.i18n[language], {
+    widgetsTitle, widgetFavorites, widgetPhotos, widgetPhotoChoices, widgetPhotoTitle, widgetPhotoSummary,
+    widgetFavoriteSummary, widgetVehicleSlot, widgetChooseVehicle, widgetChoosePhoto, widgetPhoto, widgetPhotoEmpty
+  });
+});
 Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   confirmPythonDownload: "Telecharger script.py sur cet appareil maintenant ?",
   missingVehicleBadge: "Introuvable",
   missingVehicleTitle: "Ce vehicule manque dans notre base de donnees.",
   missingVehicleText: "Signalez-le via le formulaire ci-dessous.",
   missingVehicleReportCta: "Signaler via le formulaire",
+  searchZone01: "Rechercher sur Zone 01",
+  missingVehicleHelp: "Vérifiez le numéro du véhicule. Vous ne le trouvez toujours pas ? Signalez-le avec le formulaire ou poursuivez votre recherche sur Zone 01.",
   photoAlt: "Photo du vehicule {id}",
   photoCaption: "Vehicule {id}"
 });
@@ -860,6 +893,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   missingVehicleTitle: "Dieses Fahrzeug fehlt in unserer Datenbank.",
   missingVehicleText: "Melden Sie es uber das Formular unten.",
   missingVehicleReportCta: "Per Formular melden",
+  searchZone01: "Auf Zone 01 suchen",
+  missingVehicleHelp: "Prüfen Sie die Fahrzeugnummer. Wird das Fahrzeug weiterhin nicht gefunden? Melden Sie es über das Formular oder suchen Sie auf Zone 01 weiter.",
   photoAlt: "Foto von Fahrzeug {id}",
   photoCaption: "Fahrzeug {id}"
 });
@@ -869,6 +904,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   missingVehicleTitle: "Tego pojazdu brakuje w naszej bazie danych.",
   missingVehicleText: "Zglos go przez ponizszy formularz.",
   missingVehicleReportCta: "Zglos przez formularz",
+  searchZone01: "Szukaj w Zone 01",
+  missingVehicleHelp: "Sprawdź numer pojazdu. Nadal go nie ma? Zgłoś go przez formularz lub szukaj dalej w Zone 01.",
   photoAlt: "Zdjecie pojazdu {id}",
   photoCaption: "Pojazd {id}"
 });
@@ -878,6 +915,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   missingVehicleTitle: "Este vehiculo falta en nuestra base de datos.",
   missingVehicleText: "Avisanos mediante el formulario de abajo.",
   missingVehicleReportCta: "Avisar por formulario",
+  searchZone01: "Buscar en Zone 01",
+  missingVehicleHelp: "Comprueba el número del vehículo. ¿Sigue sin aparecer? Avísanos mediante el formulario o continúa la búsqueda en Zone 01.",
   photoAlt: "Foto del vehiculo {id}",
   photoCaption: "Vehiculo {id}"
 });
@@ -887,6 +926,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   missingVehicleTitle: "Etogo transporta net v nashey baze dannykh.",
   missingVehicleText: "Soobshchite ob etom cherez formu nizhe.",
   missingVehicleReportCta: "Soobshchit' cherez formu",
+  searchZone01: "Искать на Zone 01",
+  missingVehicleHelp: "Проверьте номер транспорта. Если он всё ещё не найден, сообщите о нём через форму или продолжите поиск на Zone 01.",
   photoAlt: "Foto transporta {id}",
   photoCaption: "Transport {id}"
 });
@@ -1021,7 +1062,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   offlinePill: "Offline",
   offlineTitle: "No internet connection",
   offlineTextPrimary: "BUSBIB could not confirm a working internet connection.",
-  offlineTextSecondary: "Real-time data and live lookups are temporarily unavailable.",
+  offlineTextSecondary: "Realtime data and live lookups are temporarily unavailable.",
   offlineRetry: "Try again",
   funnyTitle: "Bus wisdom",
   funnyBody: "The best buses come from Mercedes-Benz.",
@@ -1518,7 +1559,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   lineSearch: "Lijn zoeken",
   lineSearchSummary: "Zoek op lijnnummer, bestemming of lijncode.",
   lineSearchInputLabel: "Lijnnummer, bestemming of lijncode",
-  lineSearchPlaceholder: "Bijvoorbeeld 95 of Bussegem",
+  lineSearchPlaceholder: "Bijvoorbeeld 95, 54051 of Bussegem",
   lineSearchSubmit: "Zoek lijn",
   lineSearchPrompt: "Voer een lijnnummer, bestemming of lijncode in.",
   lineSearchLoading: "Lijnen en actuele voertuigen worden geladen...",
@@ -1939,11 +1980,11 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   photoUploadSummary: "Help BUSBIB by adding a photo of vehicle {id}.",
   photoUploadSummaryGeneric: "Help BUSBIB by adding a photo of this vehicle.",
   photoUploadTitle: "Upload photo",
-  realtimeTimeout: "Real-time loading took too long. Try De Lijn's official tracker.",
+  realtimeTimeout: "Realtime loading took too long. Try De Lijn's official tracker.",
   realtimeTrackerCta: "Search on vehicletracking.delijn.be",
-  realtimeTrackerHelp: "No real-time data found. Try searching for vehicle {id} on De Lijn's official tracker.",
-  realtimeTrackerHelpGeneric: "No real-time data found. Try De Lijn's official tracker.",
-  realtimeUnavailableOperator: "Real-time location is not available for this operator.",
+  realtimeTrackerHelp: "No realtime data found. Try searching for vehicle {id} on De Lijn's official tracker.",
+  realtimeTrackerHelpGeneric: "No realtime data found. Try De Lijn's official tracker.",
+  realtimeUnavailableOperator: "Realtime location is not available for this operator.",
   reportMobileOpen: "Open report form",
   reportModalSummary: "Report a missing vehicle using the form below.",
   reportModalTitle: "Report vehicle",
@@ -1956,7 +1997,7 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   termsSectionPrivacy: "Privacy and contact",
   termsSectionUse: "Use of the website",
   termsSummary: "Short standard terms for using BUSBIB.",
-  termsUseBody: "BUSBIB is an independent project and is not affiliated with or representative of De Lijn. The website is intended for personal informational use; abuse, overloading the site, or unlawful use is not allowed. Information on the site, including real-time data and vehicle information, is provided without guarantees and may contain delays, errors, or omissions. BUSBIB is not liable for inaccuracies; use is at your own risk, and no rights can be derived from this information. For official trip information, consult the relevant transport operator.",
+  termsUseBody: "BUSBIB is an independent project and is not affiliated with or representative of De Lijn. The website is intended for personal informational use; abuse, overloading the site, or unlawful use is not allowed. Information on the site, including realtime data and vehicle information, is provided without guarantees and may contain delays, errors, or omissions. BUSBIB is not liable for inaccuracies; use is at your own risk, and no rights can be derived from this information. For official trip information, consult the relevant transport operator.",
   unknownProvince: "Unknown province",
   weatherApiSource: "Source: Open-Meteo via BUSBIB",
   weatherClear: "Clear",
@@ -2489,15 +2530,27 @@ Object.entries({
   });
 
   Object.entries({
-    nl: ["B = bus · T = tram · ? = onbekend", "Actuele voertuigen zijn tijdelijk niet beschikbaar."],
-    fr: ["B = bus · T = tram · ? = inconnu", "Les véhicules en temps réel sont temporairement indisponibles."],
-    en: ["B = bus · T = tram · ? = unknown", "Live vehicles are temporarily unavailable."],
-    de: ["B = Bus · T = Straßenbahn · ? = unbekannt", "Aktuelle Fahrzeuge sind vorübergehend nicht verfügbar."],
-    pl: ["B = autobus · T = tramwaj · ? = nieznany", "Dane o pojazdach są tymczasowo niedostępne."],
-    es: ["B = autobús · T = tranvía · ? = desconocido", "Los vehículos en directo no están disponibles temporalmente."],
-    ru: ["B = автобус · T = трамвай · ? = неизвестно", "Данные о транспорте временно недоступны."]
-  }).forEach(([language, [mapKindLegend, lineRealtimeUnavailable]]) => {
-    Object.assign(window.BB_TRANSLATIONS.i18n[language], { mapKindLegend, lineRealtimeUnavailable });
+    nl: "De realtime kaart is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+    fr: "La carte en temps réel est temporairement indisponible. Réessayez plus tard.",
+    en: "The realtime map is temporarily unavailable. Please try again later.",
+    de: "Die Echtzeitkarte ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
+    pl: "Mapa w czasie rzeczywistym jest tymczasowo niedostępna. Spróbuj ponownie później.",
+    es: "El mapa en tiempo real no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+    ru: "Карта в реальном времени временно недоступна. Попробуйте позже."
+  }).forEach(([language, homeMapUnavailable]) => {
+    window.BB_TRANSLATIONS.i18n[language].homeMapUnavailable = homeMapUnavailable;
+  });
+
+  Object.entries({
+    nl: "Actuele voertuigen zijn tijdelijk niet beschikbaar.",
+    fr: "Les véhicules en temps réel sont temporairement indisponibles.",
+    en: "Live vehicles are temporarily unavailable.",
+    de: "Aktuelle Fahrzeuge sind vorübergehend nicht verfügbar.",
+    pl: "Dane o pojazdach są tymczasowo niedostępne.",
+    es: "Los vehículos en directo no están disponibles temporalmente.",
+    ru: "Данные о транспорте временно недоступны."
+  }).forEach(([language, lineRealtimeUnavailable]) => {
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], { lineRealtimeUnavailable });
   });
 
   Object.entries({

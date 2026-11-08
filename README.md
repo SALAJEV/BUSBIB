@@ -32,19 +32,23 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen en heeft
 ## Belangrijkste functies
 
 - Zoeken op voertuignummer, nummerplaat of intern nummer.
-- Lijnen zoeken op lijnnummer, routenaam, `route_id` of halte/station, met suggesties en actuele ritten en bussen.
+- Lijnen zoeken op lijnnummer, bestemming of lijncode, met suggesties en actuele ritten en voertuigen. Een vijfcijferige code zoals `54051` zoekt ook route-ID's met een achtervoegsel; een viercijferige code toont beide richtingen.
 - Live voertuigtracking via De Lijn realtime data.
 - Realtime kaartweergave met Leaflet en OpenStreetMap/CARTO tiles.
 - De realtime kaart kan op voertuigmodel gefilterd worden; bus- en trammodellen staan apart en onbekende voertuigen blijven als aparte categorie zichtbaar.
 - Weerkaart op basis van de huidige voertuiglocatie via Open-Meteo.
 - Halte zoeken op code of naam, plus optioneel nabije haltes op basis van browserlocatie met beschikbare realtime vertrekken.
 - Voertuig-, lijn- en haltefavorieten bewaren in `localStorage`.
+- De startpagina kan via de instellingen worden uitgebreid met widgets voor favoriete voertuigen en maximaal drie zelfgekozen voertuigen met foto. Per voertuig kan een beschikbare foto worden gekozen; de bestaande instelling voor de realtimekaart staat eveneens bij de widgets. Nieuwe widgets staan standaard uit.
+- Favoriete lijnen en haltes staan op hun respectieve zoekpagina, ook wanneer de voertuigwidget uit staat.
+- De kaart op de startpagina en de voertuigkaart kunnen schermvullend worden geopend.
 - De startpagina toont actieve GTFS-meldingen die expliciet aan een favoriete lijn gekoppeld zijn. Als de meldingenfeed niet bereikbaar is, wordt dat vermeld in plaats van te melden dat er geen verstoringen zijn.
 - Vergelijken van voertuigen.
 - Voertuigfoto's tonen uit lokale `media/` assets.
 - EXIF- en locatieverrijking voor foto's.
 - PWA-installatie en offline fallback.
 - Meertalige interface: Nederlands, Frans, Engels, Duits, Pools, Spaans en Russisch.
+- Bij het eerste bezoek kunnen taal, weergave, toegankelijkheid en realtime-instellingen worden gekozen of kunnen de standaardinstellingen worden gebruikt. Instellingen blijven later aanpasbaar via het menu.
 
 ## Technische architectuur
 
@@ -237,9 +241,10 @@ De app heeft caching op meerdere niveaus.
 
 De service worker gebruikt een mix van:
 
-- cache-first/stale-while-revalidate voor statische assets;
+- cache-first voor versiegebonden shellbestanden en stale-while-revalidate voor overige lokale statische assets;
 - network-first voor HTML navigatie;
-- no-store voor API-calls en niet-gecachete voertuigfoto's.
+- geen serviceworkercache voor API-calls en kaarttegels;
+- een afzonderlijke cache van maximaal 16 voertuigfoto's van maximaal 2 MiB per foto; versienummers in foto-URL's veroorzaken geen dubbele cachevermelding. De browser kan daarnaast zelf netwerkcache gebruiken.
 
 De installatiecache wordt alleen geactiveerd als alle core assets beschikbaar zijn. Bij een mislukte download blijft de vorige service worker actief. Bijwerken van de shell vereist een nieuwe `CACHE_NAME` in `sw.js`; houd ook de assetversies in `index.html` en `sw.js` gelijk.
 

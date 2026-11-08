@@ -1,18 +1,19 @@
-const CACHE_NAME = 'busbib-v233';
-const PHOTO_CACHE_NAME = 'busbib-photos-v1';
+const CACHE_NAME = 'busbib-v247';
+const PHOTO_CACHE_NAME = 'busbib-photos-v2';
 const NAVIGATION_TIMEOUT_MS = 4000;
-const PHOTO_CACHE_MAX_ENTRIES = 32;
-const PHOTO_CACHE_MAX_BYTES = 3 * 1024 * 1024;
+const PHOTO_CACHE_MAX_ENTRIES = 16;
+const PHOTO_CACHE_MAX_BYTES = 2 * 1024 * 1024;
+let photoCacheWrite = Promise.resolve();
 const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261108-17',
+  '/app.js?v=20261108-31',
   '/manifest.json',
   '/manifest-windows.json',
-  '/style.css?v=20261108-17',
-  '/redesign.css?v=20261108-17',
-  '/translations.js?v=20261108-17',
+  '/style.css?v=20261108-31',
+  '/redesign.css?v=20261108-31',
+  '/translations.js?v=20261108-31',
   '/site-config.js?v=20261018-14',
   '/media/logo/logo.png',
   '/media/logo/busbib-apple-touch-icon.png',
@@ -51,13 +52,18 @@ async function cacheVehiclePhoto(request, response) {
   if (!Number.isFinite(contentLength) || contentLength <= 0 || contentLength > PHOTO_CACHE_MAX_BYTES) return;
   if (!response.headers.get('content-type')?.startsWith('image/')) return;
 
-  const cache = await caches.open(PHOTO_CACHE_NAME);
-  await cache.put(request, response);
-  const requests = await cache.keys();
-  const excessCount = requests.length - PHOTO_CACHE_MAX_ENTRIES;
-  if (excessCount > 0) {
-    await Promise.all(requests.slice(0, excessCount).map((cachedRequest) => cache.delete(cachedRequest)));
-  }
+  photoCacheWrite = photoCacheWrite.catch(error => {
+    console.warn('Fotocache bijwerken mislukt', error);
+  }).then(async () => {
+    const cache = await caches.open(PHOTO_CACHE_NAME);
+    await cache.put(request, response);
+    const requests = await cache.keys();
+    const excessCount = requests.length - PHOTO_CACHE_MAX_ENTRIES;
+    if (excessCount > 0) {
+      await Promise.all(requests.slice(0, excessCount).map((cachedRequest) => cache.delete(cachedRequest)));
+    }
+  });
+  return photoCacheWrite;
 }
 
 self.addEventListener('install', event => {
@@ -122,12 +128,16 @@ self.addEventListener('fetch', event => {
     url.pathname.startsWith('/media/bus/');
 
   if (isVehiclePhotoRequest) {
+    if (request.headers.has('range')) return;
+    const photoUrl = new URL(request.url);
+    photoUrl.searchParams.delete('v');
+    const photoKey = photoUrl.href;
     event.respondWith(
-      caches.open(PHOTO_CACHE_NAME).then(cache => cache.match(request)).then(cached => {
+      caches.open(PHOTO_CACHE_NAME).then(cache => cache.match(photoKey)).then(cached => {
         if (cached) return cached;
         return fetch(request).then(response => {
-          if (response && response.status === 200 && !request.headers.has('range')) {
-            event.waitUntil(cacheVehiclePhoto(request, response.clone()).catch(() => {}));
+          if (response && response.status === 200) {
+            event.waitUntil(cacheVehiclePhoto(photoKey, response.clone()).catch(error => console.warn('Fotocache opslaan mislukt', error)));
           }
           return response;
         }).catch(() => offlineTextResponse);
@@ -178,6 +188,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  if (request.cache === 'no-store') {
+    event.respondWith(fetch(request).catch(() => offlineTextResponse));
+    return;
+  }
+
   const isSameOriginStaticAsset =
     url.origin === self.location.origin &&
     !url.pathname.includes('/api') &&
@@ -195,6 +210,11 @@ self.addEventListener('fetch', event => {
 
   // External calls: network first, fallback to cache
   if (url.hostname !== self.location.hostname) {
+    const cacheExternalAsset =
+      url.hostname === 'unpkg.com' && url.pathname.startsWith('/leaflet/') ||
+      url.hostname === 'fonts.googleapis.com' ||
+      url.hostname === 'fonts.gstatic.com';
+    if (!cacheExternalAsset) return;
     event.respondWith(
       fetch(request)
         .then(response => {
@@ -213,6 +233,7 @@ self.addEventListener('fetch', event => {
   } else { // Static assets: stale-while-revalidate
     event.respondWith(
       matchLocalAsset().then(cached => {
+        if (cached && url.searchParams.has('v') && CORE_ASSETS.includes(`${url.pathname}${url.search}`)) return cached;
         const networkFetch = fetch(request)
           .then(response => {
             if (response && response.status === 200) {

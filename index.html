@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261108-17">
-<link rel="stylesheet" href="redesign.css?v=20261108-17">
+<link rel="stylesheet" href="style.css?v=20261108-31">
+<link rel="stylesheet" href="redesign.css?v=20261108-31">
 <script src="site-config.js?v=20261018-14"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261108-17";
+  window.BB_ASSET_VERSION = "20261108-31";
 </script>
 </head>
 <body>
@@ -92,7 +92,17 @@
         </div>
       </div>
       <div class="header-visual" aria-hidden="true">
-        <span class="header-visual-pattern"></span>
+        <svg class="header-route-art" viewBox="0 0 240 180" fill="none" focusable="false">
+          <path class="header-route-art__line header-route-art__line--soft" d="M-10 144H47C71 144 71 116 95 116H135C161 116 161 82 187 82H250"></path>
+          <path class="header-route-art__line header-route-art__line--soft" d="M-10 54H31C59 54 59 92 87 92H135C163 92 163 145 191 145H250"></path>
+          <path class="header-route-art__line header-route-art__line--main" d="M-10 121H35C65 121 65 34 95 34H135C164 34 164 112 193 112H250"></path>
+          <path class="header-route-art__travel" d="M-10 121H35C65 121 65 34 95 34H135C164 34 164 112 193 112H250"></path>
+          <circle class="header-route-art__stop" cx="35" cy="121" r="4"></circle>
+          <circle class="header-route-art__stop" cx="95" cy="34" r="4"></circle>
+          <circle class="header-route-art__stop" cx="135" cy="92" r="4"></circle>
+          <circle class="header-route-art__stop" cx="187" cy="82" r="4"></circle>
+          <circle class="header-route-art__stop" cx="193" cy="112" r="4"></circle>
+        </svg>
         <div class="header-visual-copy">
           <span id="headerVisualKicker" class="header-visual-kicker">Realtime overzicht</span>
           <strong id="headerVisualTitle">Open meteen de juiste bus en volg de rit live.</strong>
@@ -127,11 +137,11 @@
     </a>
   </nav>
   <main id="routePageOutlet" class="route-page-outlet"></main>
-  <section id="homeFavoritesPanel" class="home-favorites-panel" aria-labelledby="homeFavoritesTitle">
+  <section id="homeFavoritesPanel" class="home-favorites-panel" aria-labelledby="homeFavoritesTitle" hidden>
     <div class="home-favorites-head">
       <div>
         <h2 id="homeFavoritesTitle">Mijn favorieten</h2>
-        <p id="homeFavoritesSummary">Je favoriete voertuigen, lijnen en haltes op één plek.</p>
+        <p id="homeFavoritesSummary">Je favoriete bussen en trams op één plek.</p>
       </div>
     </div>
     <div class="home-favorites-grid">
@@ -139,21 +149,22 @@
         <h3 id="homeFavoriteVehiclesTitle">Voertuigen</h3>
         <div id="homeFavoriteVehicles" class="home-favorites-list"></div>
       </section>
-      <section class="home-favorites-group" aria-labelledby="homeFavoriteLinesTitle">
-        <h3 id="homeFavoriteLinesTitle">Lijnen</h3>
-        <div id="homeFavoriteLines" class="home-favorites-list"></div>
-      </section>
-      <section class="home-favorites-group" aria-labelledby="homeFavoriteStopsTitle">
-        <h3 id="homeFavoriteStopsTitle">Haltes</h3>
-        <div id="homeFavoriteStops" class="home-favorites-list"></div>
-      </section>
     </div>
+  </section>
+  <section id="homePhotoWidget" class="home-photo-widget" aria-labelledby="homePhotoWidgetTitle" hidden>
+    <div class="home-favorites-head">
+      <h2 id="homePhotoWidgetTitle">Voertuigen in beeld</h2>
+      <p id="homePhotoWidgetSummary">Kies maximaal drie voertuigen met foto in de instellingen.</p>
+    </div>
+    <div id="homePhotoWidgetList" class="home-photo-widget-list"></div>
+  </section>
+  <section id="favoriteAlertsPanel" class="home-favorites-panel home-alerts-panel" hidden>
     <section id="favoriteAlerts" class="favorite-alerts" hidden aria-labelledby="favoriteAlertsTitle">
       <h3 id="favoriteAlertsTitle">Meldingen voor je favoriete lijnen</h3>
       <div id="favoriteAlertsContent" role="status"></div>
     </section>
   </section>
-  <section id="homeGtfsMapPanel" class="home-gtfs-map-panel" aria-labelledby="homeGtfsMapTitle">
+  <section id="homeGtfsMapPanel" class="home-gtfs-map-panel" aria-labelledby="homeGtfsMapTitle" tabindex="-1">
     <div class="home-gtfs-map-head">
       <div>
         <h2 id="homeGtfsMapTitle">Realtime kaart</h2>
@@ -171,10 +182,16 @@
       <select id="homeMapModelFilter">
         <option value="">Alle bussen en trams</option>
       </select>
-      <span id="homeMapKindLegend">B = bus · T = tram · ? = onbekend</span>
     </div>
     <div id="homeGtfsVehicleCard" class="home-gtfs-vehicle-card" role="dialog" aria-live="polite" hidden></div>
     <div id="homeGtfsMap" class="home-gtfs-map" role="region" aria-label="Kaart met alle live GTFS-bussen"></div>
+    <div id="homeGtfsMapError" class="home-map-error" hidden>
+      <span class="home-map-error-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+      </span>
+      <p id="homeGtfsMapErrorMessage" role="status">De realtime kaart is tijdelijk niet beschikbaar. Probeer het later opnieuw.</p>
+      <button id="homeGtfsMapRetryBtn" class="btn more-secondary-btn" type="button">Opnieuw proberen</button>
+    </div>
   </section>
   <div class="results-wrap">
     <div class="results-toolbar">
@@ -188,6 +205,7 @@
     <div class="grid" id="resultsGrid">
       <div id="staticVehicleCard" class="card" hidden>
         <h2 id="staticCardTitle">Voertuiginformatie</h2>
+        <button id="mobileVehicleCloseBtn" class="settings-close-btn mobile-vehicle-close" type="button" aria-label="Sluiten" title="Sluiten">&times;</button>
         <div id="vasteData">Geen voertuig geselecteerd.</div>
       </div>
 
@@ -283,7 +301,7 @@
     </div>
     <section class="more-panel-section">
       <div class="more-panel-section-head">
-        <h4 id="favoritesTitle">Favorieten</h4>
+        <h4 id="favoritesTitle">Favoriete voertuigen</h4>
       </div>
       <div id="favoritesList" class="chip-row"></div>
     </section>
@@ -359,10 +377,6 @@
                 <option value="12h" id="timeFormat12hOpt">12 uur</option>
               </select>
             </div>
-            <label class="settings-card settings-card--toggle" for="showHomeRealtimeMapToggle">
-              <span id="showHomeRealtimeMapLabel">Realtime kaart op startscherm</span>
-              <input id="showHomeRealtimeMapToggle" type="checkbox" checked>
-            </label>
             <div class="settings-card">
               <label for="homeMapIntervalSelect" id="homeMapIntervalLabel">Kaart verversen</label>
               <select id="homeMapIntervalSelect">
@@ -373,9 +387,33 @@
             </div>
           </div>
         </section>
-        <section class="settings-category" aria-labelledby="settingsAccessTitle">
+        <section class="settings-category" aria-labelledby="settingsWidgetsTitle">
           <div class="settings-category-heading">
             <span class="settings-category-index" aria-hidden="true">03</span>
+            <h5 id="settingsWidgetsTitle">Widgets op de startpagina</h5>
+          </div>
+          <div class="settings-grid">
+            <label class="settings-card settings-card--toggle" for="showHomeRealtimeMapToggle">
+              <span id="showHomeRealtimeMapLabel">Realtime kaart op startscherm</span>
+              <input id="showHomeRealtimeMapToggle" type="checkbox" checked>
+            </label>
+            <label class="settings-card settings-card--toggle" for="showFavoriteWidgetToggle">
+              <span id="showFavoriteWidgetLabel">Favoriete voertuigen</span>
+              <input id="showFavoriteWidgetToggle" type="checkbox">
+            </label>
+            <label class="settings-card settings-card--toggle" for="showPhotoWidgetToggle">
+              <span id="showPhotoWidgetLabel">Voertuigen met foto</span>
+              <input id="showPhotoWidgetToggle" type="checkbox">
+            </label>
+            <div class="settings-card widget-photo-settings">
+              <span id="photoWidgetChoiceLabel">Kies maximaal drie voertuigen met foto</span>
+              <div id="photoWidgetChoices" class="widget-photo-choices"></div>
+            </div>
+          </div>
+        </section>
+        <section class="settings-category" aria-labelledby="settingsAccessTitle">
+          <div class="settings-category-heading">
+            <span class="settings-category-index" aria-hidden="true">04</span>
             <h5 id="settingsAccessTitle">Toegankelijkheid</h5>
           </div>
           <div class="settings-grid settings-grid--toggles">
@@ -391,7 +429,7 @@
         </section>
         <section class="settings-category" aria-labelledby="settingsLanguageTitle">
           <div class="settings-category-heading">
-            <span class="settings-category-index" aria-hidden="true">04</span>
+            <span class="settings-category-index" aria-hidden="true">05</span>
             <h5 id="settingsLanguageTitle">Taal</h5>
           </div>
           <div class="settings-grid settings-grid--single">
@@ -527,6 +565,7 @@
         <span class="first-run-progress-step"></span>
         <span class="first-run-progress-step"></span>
         <span class="first-run-progress-step"></span>
+        <span class="first-run-progress-step"></span>
       </div>
       <p id="firstRunStepLabel" class="first-run-step-label" aria-live="polite"></p>
       <div id="firstRunWelcomeStep" class="first-run-step-panel">
@@ -575,15 +614,55 @@
               <option value="purple" id="firstRunColorPurpleOpt">Paars</option>
             </select>
           </div>
+          <div class="settings-card">
+            <label for="firstRunTextScaleSelect" id="firstRunTextScaleLabel">Tekengrootte</label>
+            <select id="firstRunTextScaleSelect">
+              <option value="normal">Normaal</option>
+              <option value="large">Groot</option>
+              <option value="largest">Extra groot</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="firstRunAccessStep" class="first-run-step-panel" hidden>
+        <div class="first-run-settings-grid">
+          <label class="settings-card settings-card--toggle" for="firstRunHighContrastToggle">
+            <span id="firstRunHighContrastLabel">Hoog contrast</span>
+            <input id="firstRunHighContrastToggle" type="checkbox">
+          </label>
+          <label class="settings-card settings-card--toggle" for="firstRunReduceMotionToggle">
+            <span id="firstRunReduceMotionLabel">Minder beweging</span>
+            <input id="firstRunReduceMotionToggle" type="checkbox">
+          </label>
         </div>
       </div>
       <div id="firstRunTimeFormatStep" class="first-run-step-panel" hidden>
         <div class="first-run-settings-grid">
           <div class="settings-card">
+            <label for="firstRunIntervalSelect" id="firstRunIntervalLabel">Update-interval voertuig</label>
+            <select id="firstRunIntervalSelect">
+              <option value="10000">10 seconden</option>
+              <option value="15000">15 seconden</option>
+              <option value="30000">30 seconden</option>
+            </select>
+          </div>
+          <div class="settings-card">
             <label for="firstRunTimeFormatSelect" id="firstRunTimeFormatLabel">Tijdnotatie</label>
             <select id="firstRunTimeFormatSelect">
               <option value="24h" id="firstRunTimeFormat24hOpt">24 uur</option>
               <option value="12h" id="firstRunTimeFormat12hOpt">12 uur</option>
+            </select>
+          </div>
+          <label class="settings-card settings-card--toggle" for="firstRunHomeMapToggle">
+            <span id="firstRunHomeMapLabel">Realtime kaart op startscherm</span>
+            <input id="firstRunHomeMapToggle" type="checkbox" checked>
+          </label>
+          <div class="settings-card">
+            <label for="firstRunHomeMapIntervalSelect" id="firstRunHomeMapIntervalLabel">Kaart verversen</label>
+            <select id="firstRunHomeMapIntervalSelect">
+              <option value="30">30 seconden</option>
+              <option value="60">1 minuut</option>
+              <option value="120">2 minuten</option>
             </select>
           </div>
         </div>
@@ -636,6 +715,10 @@
       </div>
       <p id="haltSearchHelp" class="halte-module-help">Als je op zoeken drukt, kom je op de site van De Lijn terecht.</p>
       <p id="haltecodeError" class="halte-module-error" hidden>Voer een haltecode of haltenaam in.</p>
+      <section class="transit-favorites-section" aria-labelledby="homeFavoriteStopsTitle">
+        <h4 id="homeFavoriteStopsTitle">Favoriete haltes</h4>
+        <div id="homeFavoriteStops" class="home-favorites-list"></div>
+      </section>
       <section class="halte-nearby" aria-labelledby="halteNearbyTitle">
         <div class="halte-nearby-heading">
           <div>
@@ -671,6 +754,10 @@
       <div id="lineSearchSuggestions" class="line-search-suggestions" role="listbox" aria-label="Lijnsuggesties" hidden></div>
       <p id="lineSearchStatus" class="line-search-status" role="status" aria-live="polite"></p>
       <div id="lineSearchResults" class="line-search-results"></div>
+      <section class="transit-favorites-section" aria-labelledby="homeFavoriteLinesTitle">
+        <h4 id="homeFavoriteLinesTitle">Favoriete lijnen</h4>
+        <div id="homeFavoriteLines" class="home-favorites-list"></div>
+      </section>
     </div>
   </div>
 </section>
@@ -782,7 +869,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261108-17";
+    var assetVersion = window.BB_ASSET_VERSION || "20261108-31";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

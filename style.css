@@ -4580,29 +4580,46 @@ body.route-page-open .container > .results-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
-  border: 2px solid var(--danger);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--nested-card-radius);
+  background: var(--surface-soft);
 }
 
 .vehicle-not-found p {
   margin: 0;
+}
+
+.vehicle-not-found .vehicle-not-found-title {
   color: var(--ink);
   font-weight: 700;
+}
+
+.vehicle-not-found .vehicle-not-found-description {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .vehicle-not-found-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--danger);
-  color: #fff;
-  font-weight: 800;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.vehicle-not-found-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 
 #halteSearchCloseBtn,
@@ -4621,20 +4638,44 @@ body.route-page-open .container > .results-wrap {
   }
 }
 
+.vehicle-not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .vehicle-not-found-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  max-width: 100%;
   padding: 8px 14px;
-  border: 1px solid var(--danger);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--danger);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
   font-weight: 700;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .vehicle-not-found-btn:hover:not(:disabled) {
-  background: var(--danger);
-  color: #fff;
+  background: var(--surface-tint);
+}
+
+.vehicle-not-found-btn--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.vehicle-not-found-btn--primary:hover:not(:disabled) {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--accent-ink);
 }
 
 .vehicle-not-found-btn:disabled {
@@ -5865,8 +5906,7 @@ body.route-page-open .container > .results-wrap {
 
 .halte-nearby-results {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .halte-nearby-stop {
@@ -5874,10 +5914,8 @@ body.route-page-open .container > .results-wrap {
   align-content: start;
   gap: 10px;
   min-width: 0;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--nested-card-radius);
-  background: var(--nested-card-background);
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
 }
 
 .halte-nearby-stop-copy {

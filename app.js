@@ -145,6 +145,7 @@ const vasteDataEl = document.getElementById("vasteData");
 const resultsWrapEl = document.querySelector(".results-wrap");
 const resultsGridEl = document.getElementById("resultsGrid");
 const closeBtnEl = document.getElementById("closeBtn");
+const mobileVehicleCloseBtnEl = document.getElementById("mobileVehicleCloseBtn");
 const mapEl = document.getElementById("map");
 const searchBtn = document.getElementById("searchBtn");
 const favoritesListEl = document.getElementById("favoritesList");
@@ -152,6 +153,12 @@ const homeFavoritesPanelEl = document.getElementById("homeFavoritesPanel");
 const homeFavoriteVehiclesEl = document.getElementById("homeFavoriteVehicles");
 const homeFavoriteLinesEl = document.getElementById("homeFavoriteLines");
 const homeFavoriteStopsEl = document.getElementById("homeFavoriteStops");
+const homePhotoWidgetEl = document.getElementById("homePhotoWidget");
+const homePhotoWidgetListEl = document.getElementById("homePhotoWidgetList");
+const photoWidgetChoicesEl = document.getElementById("photoWidgetChoices");
+const showFavoriteWidgetToggle = document.getElementById("showFavoriteWidgetToggle");
+const showPhotoWidgetToggle = document.getElementById("showPhotoWidgetToggle");
+const favoriteAlertsPanelEl = document.getElementById("favoriteAlertsPanel");
 const metaDescriptionEl = document.querySelector('meta[name="description"]');
 const intervalSelect = document.getElementById("intervalSelect");
 const themeSelect = document.getElementById("themeSelect");
@@ -463,6 +470,12 @@ const firstRunTimeFormatLabelEl = document.getElementById("firstRunTimeFormatLab
 const firstRunTimeFormatSelectEl = document.getElementById("firstRunTimeFormatSelect");
 const firstRunTimeFormat24hOptEl = document.getElementById("firstRunTimeFormat24hOpt");
 const firstRunTimeFormat12hOptEl = document.getElementById("firstRunTimeFormat12hOpt");
+const firstRunTextScaleSelectEl = document.getElementById("firstRunTextScaleSelect");
+const firstRunHighContrastToggleEl = document.getElementById("firstRunHighContrastToggle");
+const firstRunReduceMotionToggleEl = document.getElementById("firstRunReduceMotionToggle");
+const firstRunIntervalSelectEl = document.getElementById("firstRunIntervalSelect");
+const firstRunHomeMapToggleEl = document.getElementById("firstRunHomeMapToggle");
+const firstRunHomeMapIntervalSelectEl = document.getElementById("firstRunHomeMapIntervalSelect");
 const firstRunSkipBtnEl = document.getElementById("firstRunSkipBtn");
 const firstRunBackBtnEl = document.getElementById("firstRunBackBtn");
 const firstRunConfirmBtnEl = document.getElementById("firstRunConfirmBtn");
@@ -653,7 +666,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.08-9";
+const APP_VERSION = "2026.11.08-20";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -1449,6 +1462,9 @@ const PHOTO_LIBRARY_INDEX = {
     "221111": [
         "@dln.spotter/221111.jpeg"
     ],
+    "221119": [
+        "@dln.spotter/221119.jpeg"
+    ],
     "222080": [
         "@dln.spotter/222080.jpeg"
     ],
@@ -1517,6 +1533,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "664054": [
         "@dln.spotter/664054.jpeg"
+    ],
+    "664057": [
+        "@dln.spotter/664057.jpeg"
     ],
     "664059": [
         "@dln.spotter/664059 (2).jpeg",
@@ -2353,6 +2372,7 @@ function setCurrentPageView(view) {
     else buttonEl?.removeAttribute("aria-current");
   });
   setFavoritesPanel(view === "menu");
+  if (view === "menu") renderPhotoWidgetChoices();
   syncRoutePageBodyState(view);
   updateDocumentTitle("");
 }
@@ -2397,6 +2417,9 @@ let settings = {
   highContrast: false,
   reduceMotion: false,
   showHomeRealtimeMap: true,
+  showFavoriteWidget: false,
+  showPhotoWidget: false,
+  photoWidgetChoices: [],
   hasCompletedOnboarding: false
 };
 const HALTE_CODE_REGEX = /^[1-5]\d{5}$/;
@@ -2405,6 +2428,7 @@ let halteSearchRequestToken = 0;
 let lineSearchRequestToken = 0;
 let lineSearchSuggestionToken = 0;
 let lineSearchRouteIndex = null;
+let photoWidgetVehicleCache = null;
 let halteSearchIndex = null;
 const halteSearchCache = new Map();
 
@@ -2887,13 +2911,8 @@ function completeFirstRunSetup(options = {}) {
       ...createDefaultSettings(detectPreferredLanguage()),
       hasCompletedOnboarding: true
     };
-  } else if (firstRunLanguageSelectEl && firstRunThemeSelectEl && firstRunColorThemeSelectEl && firstRunTimeFormatSelectEl) {
-    settings.language = normalizeLanguage(firstRunLanguageSelectEl.value);
-    settings.theme = normalizeTheme(firstRunThemeSelectEl.value);
-    settings.colorTheme = normalizeColorTheme(firstRunColorThemeSelectEl.value);
-    settings.timeFormat = firstRunTimeFormatSelectEl.value === "12h" ? "12h" : "24h";
-    settings.hasCompletedOnboarding = true;
   } else {
+    if (!applyFirstRunPreviewSettings()) return;
     settings.hasCompletedOnboarding = true;
   }
 
@@ -2901,7 +2920,16 @@ function completeFirstRunSetup(options = {}) {
   syncPrimarySettingsControls();
   applyTheme(settings.theme);
   applyColorTheme(settings.colorTheme);
+  applyAccessibilitySettings();
   applyTranslations();
+  updateIntervalMs = settings.intervalMs;
+  restartRealtimeRefresh();
+  setHomeGtfsMapVisible(getCurrentRouteState().view === "home");
+  restartHomeGtfsMapRefresh();
+  if (settings.showHomeRealtimeMap && !homeGtfsMapStarted) {
+    homeGtfsMapStarted = true;
+    void refreshHomeGtfsMap({ force: true });
+  }
   saveSettings();
   hideFirstRunSetupModal();
 }
@@ -2921,14 +2949,16 @@ function setFirstRunWizardStep(step, moveFocus = true) {
   const stepTitles = [
     getLabel("firstRunTitle", "Welkom bij BUSBIB"),
     t("language"),
-    t("theme"),
-    t("timeFormat")
+    getLabel("settingsAppearance", "Weergave"),
+    getLabel("settingsAccessibility", "Toegankelijkheid"),
+    getLabel("settingsRealtime", "Realtime")
   ];
   const stepSummaries = [
     getLabel("firstRunSummary", "Je persoonlijke startpunt voor alles wat rijdt."),
     t("firstRunLanguageSummary"),
     t("firstRunAppearanceSummary"),
-    t("firstRunTimeFormatSummary")
+    getLabel("settingsSummary", "Stem de app af op jouw voorkeuren en manier van kijken."),
+    getLabel("settingsSummary", "Stem de app af op jouw voorkeuren en manier van kijken.")
   ];
   if (firstRunTitleEl) firstRunTitleEl.textContent = stepTitles[firstRunCurrentStep] || stepTitles[0];
   if (firstRunSummaryEl) firstRunSummaryEl.textContent = stepSummaries[firstRunCurrentStep] || stepSummaries[0];
@@ -2938,6 +2968,7 @@ function setFirstRunWizardStep(step, moveFocus = true) {
       total: firstRunStepPanels.length
     });
   }
+  if (firstRunSkipBtnEl) firstRunSkipBtnEl.hidden = firstRunCurrentStep !== 0;
   if (firstRunBackBtnEl) firstRunBackBtnEl.hidden = firstRunCurrentStep === 0;
   if (firstRunConfirmBtnEl) {
     firstRunConfirmBtnEl.textContent = isLastStep
@@ -2950,7 +2981,8 @@ function setFirstRunWizardStep(step, moveFocus = true) {
       firstRunConfirmBtnEl,
       firstRunLanguageSelectEl,
       firstRunThemeSelectEl,
-      firstRunTimeFormatSelectEl
+      firstRunHighContrastToggleEl,
+      firstRunIntervalSelectEl
     ];
     focusTargets[firstRunCurrentStep]?.focus();
   }
@@ -3148,12 +3180,15 @@ function findLineSearchRoutes(query, { limit = 30 } = {}) {
   return getLineSearchRouteIndex()
     .map(({ route, fields, searchText }) => {
       if (/^\d{5}$/.test(normalizedQuery) && words.length === 1) {
-        return normalizeLookup(route.route_id) === normalizedQuery ? { route, score: 0 } : null;
+        const routeId = normalizeLookup(route.route_id);
+        return routeId === normalizedQuery || normalizeLookup(getRouteKey(routeId)) === normalizedQuery
+          ? { route, score: 0 }
+          : null;
       }
       // 4 cijfers = lijncode (beide richtingen), 5de cijfer = richting
       if (/^\d{4}$/.test(normalizedQuery) && words.length === 1) {
         const routeId = normalizeLookup(route.route_id);
-        if (/^\d{5}$/.test(routeId) && routeId.slice(0, 4) === normalizedQuery) return { route, score: 0 };
+        if (/^\d{5}$/.test(getRouteKey(routeId)) && getRouteKey(routeId).slice(0, 4) === normalizedQuery) return { route, score: 0 };
       }
       if (hasLineNumber) {
         const shortName = normalizeSearchText(route.route_short_name);
@@ -4021,6 +4056,19 @@ function buildLoadingSkeletonMarkup(label, lineCount = 3) {
 
 function setHomeGtfsMapStatus(message, tone = "") {
   if (!homeGtfsMapStatusEl) return;
+  const errorEl = document.getElementById("homeGtfsMapError");
+  if (tone === "error") {
+    closeMapFullscreen(homeGtfsMapEl);
+    closeHomeGtfsVehicleCard();
+    homeGtfsMapPanelEl?.classList.add("is-unavailable");
+    if (errorEl) errorEl.hidden = false;
+    if (document.activeElement === homeGtfsMapPanelEl) {
+      document.getElementById("homeGtfsMapRetryBtn")?.focus({ preventScroll: true });
+    }
+  } else if (tone === "loading" || !homeGtfsMapPanelEl?.classList.contains("is-unavailable")) {
+    homeGtfsMapPanelEl?.classList.remove("is-unavailable");
+    if (errorEl) errorEl.hidden = true;
+  }
   homeGtfsMapStatusEl.textContent = "";
   if (tone === "loading") {
     const spinnerEl = document.createElement("span");
@@ -4043,6 +4091,7 @@ function closeHomeGtfsVehicleCard() {
 function setHomeGtfsMapVisible(visible) {
   if (!homeGtfsMapPanelEl) return;
   const shouldShow = visible && settings.showHomeRealtimeMap;
+  if (!shouldShow) closeMapFullscreen(homeGtfsMapEl);
   homeGtfsMapPanelEl.hidden = !shouldShow;
   homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!shouldShow));
   if (!shouldShow) closeHomeGtfsVehicleCard();
@@ -4108,7 +4157,77 @@ async function initHomeGtfsMap() {
   }).setView(HOME_GTFS_MAP_CENTER, HOME_GTFS_MAP_ZOOM);
   addPublicTransportTileLayer(homeGtfsMap);
   addCurrentLocationControl(homeGtfsMap);
+  addMapFullscreenControl(homeGtfsMap);
   homeGtfsMapMarkers = L.layerGroup().addTo(homeGtfsMap);
+}
+
+function updateMapFullscreenButton(button, active) {
+  const label = active
+    ? getLabel("mapExitFullscreen", "Volledig scherm sluiten")
+    : getLabel("mapFullscreen", "Volledig scherm");
+  button.title = label;
+  button.setAttribute("aria-label", label);
+  button.setAttribute("aria-pressed", String(active));
+}
+
+function closeMapFullscreen(container) {
+  if (!container) return;
+  if (document.fullscreenElement === container) {
+    void document.exitFullscreen().catch((error) => console.warn("Volledig scherm sluiten mislukt", error));
+  }
+  if (container.classList.contains("map-fullscreen-fallback")) {
+    container.classList.remove("map-fullscreen-fallback");
+    document.body.classList.remove("map-fullscreen-open");
+    container.querySelector(".leaflet-control-fullscreen-button")?.focus({ preventScroll: true });
+    const mapInstance = container === homeGtfsMapEl ? homeGtfsMap : map;
+    window.requestAnimationFrame(() => mapInstance?.invalidateSize(false));
+    const button = container.querySelector(".leaflet-control-fullscreen-button");
+    if (button) updateMapFullscreenButton(button, false);
+  }
+}
+
+function addMapFullscreenControl(mapInstance) {
+  const L = window.L;
+  const container = mapInstance.getContainer();
+  const control = L.control({ position: "topleft" });
+  let button;
+  const sync = () => {
+    const active = document.fullscreenElement === container || container.classList.contains("map-fullscreen-fallback");
+    updateMapFullscreenButton(button, active);
+    window.requestAnimationFrame(() => mapInstance.invalidateSize(false));
+  };
+  control.onAdd = () => {
+    const wrapper = L.DomUtil.create("div", "leaflet-bar leaflet-control-fullscreen");
+    button = L.DomUtil.create("button", "leaflet-control-fullscreen-button", wrapper);
+    button.type = "button";
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path></svg>';
+    updateMapFullscreenButton(button, false);
+    L.DomEvent.disableClickPropagation(wrapper);
+    L.DomEvent.on(button, "click", async (event) => {
+      L.DomEvent.stop(event);
+      if (document.fullscreenElement === container || container.classList.contains("map-fullscreen-fallback")) {
+        closeMapFullscreen(container);
+        return;
+      }
+      if (container.requestFullscreen) {
+        try {
+          await container.requestFullscreen();
+          return;
+        } catch (error) {
+          console.warn("Native volledig scherm niet beschikbaar; kaart wordt schermvullend weergegeven", error);
+        }
+      }
+      container.classList.add("map-fullscreen-fallback");
+      document.body.classList.add("map-fullscreen-open");
+      sync();
+    });
+    return wrapper;
+  };
+  control.addTo(mapInstance);
+  document.addEventListener("fullscreenchange", sync);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && container.classList.contains("map-fullscreen-fallback")) closeMapFullscreen(container);
+  });
 }
 
 function addCurrentLocationControl(mapInstance) {
@@ -4309,8 +4428,6 @@ function updateHomeMapFilterOptions() {
   allOption.textContent = getLabel("mapAllVehicles", "Alle bussen en trams");
   homeMapModelFilterEl.replaceChildren(allOption);
   if (homeMapFilterLabelEl) homeMapFilterLabelEl.textContent = getLabel("mapFilterModel", "Filter op voertuigmodel");
-  const legend = document.getElementById("homeMapKindLegend");
-  if (legend) legend.textContent = getLabel("mapKindLegend", "B = bus · T = tram · ? = onbekend");
   const kinds = [
     ["bus", getLabel("mapBuses", "Bussen")],
     ["tram", getLabel("mapTrams", "Trams")],
@@ -6061,6 +6178,7 @@ function resetWeatherBlock() {
 }
 
 function setRealtimeMapVisibility(visible) {
+  if (!visible) closeMapFullscreen(mapEl);
   if (mapEl) {
     mapEl.classList.toggle("hidden", !visible);
   }
@@ -6357,6 +6475,15 @@ function loadSettings() {
     settings.highContrast = settings.highContrast === true;
     settings.reduceMotion = settings.reduceMotion === true;
     settings.showHomeRealtimeMap = typeof parsed.showHomeRealtimeMap === "boolean" ? parsed.showHomeRealtimeMap : true;
+    settings.showFavoriteWidget = parsed.showFavoriteWidget === true;
+    settings.showPhotoWidget = parsed.showPhotoWidget === true;
+    settings.photoWidgetChoices = Array.from({ length: 3 }, (_, index) => {
+      const choice = Array.isArray(parsed.photoWidgetChoices) ? parsed.photoWidgetChoices[index] : null;
+      return {
+        id: typeof choice?.id === "string" ? choice.id : "",
+        src: typeof choice?.src === "string" ? choice.src : ""
+      };
+    });
     settings.hasCompletedOnboarding = typeof parsed.hasCompletedOnboarding === "boolean" ? parsed.hasCompletedOnboarding : true;
     window.settings = settings;
   } catch (e) {
@@ -6598,6 +6725,9 @@ function createDefaultSettings(language = DEFAULT_LANG) {
     highContrast: false,
     reduceMotion: false,
     showHomeRealtimeMap: true,
+    showFavoriteWidget: false,
+    showPhotoWidget: false,
+    photoWidgetChoices: [],
     hasCompletedOnboarding: false
   };
 }
@@ -6609,6 +6739,8 @@ function syncPrimarySettingsControls() {
   if (languageSelect) languageSelect.value = settings.language;
   if (timeFormatSelect) timeFormatSelect.value = settings.timeFormat;
   if (showHomeRealtimeMapToggle) showHomeRealtimeMapToggle.checked = settings.showHomeRealtimeMap;
+  if (showFavoriteWidgetToggle) showFavoriteWidgetToggle.checked = settings.showFavoriteWidget;
+  if (showPhotoWidgetToggle) showPhotoWidgetToggle.checked = settings.showPhotoWidget;
   if (homeMapIntervalSelect) {
     homeMapIntervalSelect.value = String(settings.homeMapRefreshIntervalSec);
     homeMapIntervalSelect.disabled = !settings.showHomeRealtimeMap;
@@ -6624,6 +6756,17 @@ function syncFirstRunSetupControls() {
   if (firstRunThemeSelectEl) firstRunThemeSelectEl.value = getEffectiveThemeSetting(settings.theme, settings.colorTheme);
   if (firstRunColorThemeSelectEl) firstRunColorThemeSelectEl.value = normalizeColorTheme(settings.colorTheme);
   if (firstRunTimeFormatSelectEl) firstRunTimeFormatSelectEl.value = settings.timeFormat === "12h" ? "12h" : "24h";
+  if (firstRunTextScaleSelectEl) firstRunTextScaleSelectEl.value = settings.textScale;
+  if (firstRunHighContrastToggleEl) firstRunHighContrastToggleEl.checked = settings.highContrast;
+  if (firstRunReduceMotionToggleEl) firstRunReduceMotionToggleEl.checked = settings.reduceMotion;
+  if (firstRunIntervalSelectEl) firstRunIntervalSelectEl.value = String(settings.intervalMs);
+  if (firstRunHomeMapToggleEl) firstRunHomeMapToggleEl.checked = settings.showHomeRealtimeMap;
+  if (firstRunHomeMapIntervalSelectEl) {
+    firstRunHomeMapIntervalSelectEl.value = String(settings.homeMapRefreshIntervalSec);
+    firstRunHomeMapIntervalSelectEl.disabled = !settings.showHomeRealtimeMap;
+    const option30 = firstRunHomeMapIntervalSelectEl.querySelector('option[value="30"]');
+    if (option30) option30.disabled = isIosPlatform;
+  }
 }
 
 function shouldShowFirstRunSetup() {
@@ -6631,17 +6774,30 @@ function shouldShowFirstRunSetup() {
 }
 
 function applyFirstRunPreviewSettings() {
-  if (!firstRunLanguageSelectEl || !firstRunThemeSelectEl || !firstRunColorThemeSelectEl || !firstRunTimeFormatSelectEl) return;
+  if (!firstRunLanguageSelectEl || !firstRunThemeSelectEl || !firstRunColorThemeSelectEl || !firstRunTimeFormatSelectEl ||
+      !firstRunTextScaleSelectEl || !firstRunHighContrastToggleEl || !firstRunReduceMotionToggleEl ||
+      !firstRunIntervalSelectEl || !firstRunHomeMapToggleEl || !firstRunHomeMapIntervalSelectEl) {
+    console.error("Instellingen voor het startscherm ontbreken.");
+    return false;
+  }
   settings.language = normalizeLanguage(firstRunLanguageSelectEl.value);
   settings.theme = normalizeTheme(firstRunThemeSelectEl.value);
   settings.colorTheme = normalizeColorTheme(firstRunColorThemeSelectEl.value);
   settings.timeFormat = firstRunTimeFormatSelectEl.value === "12h" ? "12h" : "24h";
+  settings.textScale = normalizeTextScale(firstRunTextScaleSelectEl.value);
+  settings.highContrast = firstRunHighContrastToggleEl.checked;
+  settings.reduceMotion = firstRunReduceMotionToggleEl.checked;
+  settings.intervalMs = normalizeUpdateIntervalMs(firstRunIntervalSelectEl.value);
+  settings.showHomeRealtimeMap = firstRunHomeMapToggleEl.checked;
+  settings.homeMapRefreshIntervalSec = normalizeHomeMapRefreshIntervalSec(firstRunHomeMapIntervalSelectEl.value);
   window.settings = settings;
   syncPrimarySettingsControls();
   applyTheme(settings.theme);
   applyColorTheme(settings.colorTheme);
+  applyAccessibilitySettings();
   applyTranslations();
   syncFirstRunSetupControls();
+  return true;
 }
 
 function getEffectiveThemeSetting(theme = settings.theme, colorTheme = settings.colorTheme) {
@@ -6757,6 +6913,9 @@ window.addEventListener("resize", debounce(syncHeaderActionPlacement, 120), { pa
 
 function applyTranslations() {
   document.documentElement.lang = settings.language || DEFAULT_LANG;
+  document.querySelectorAll(".leaflet-control-fullscreen-button").forEach((button) => {
+    updateMapFullscreenButton(button, button.getAttribute("aria-pressed") === "true");
+  });
   updateHomeMapFilterOptions();
   renderFavoriteAlerts();
   updateCopyrightText();
@@ -6795,7 +6954,7 @@ function applyTranslations() {
   searchBtn.title = t("search");
   searchBtn.setAttribute("aria-label", t("search"));
   voertuigInput.placeholder = t("vehiclePlaceholder");
-  favoritesTitleEl.textContent = t("favorites");
+  favoritesTitleEl.textContent = getLabel("widgetFavorites", "Favoriete voertuigen");
   settingsTitleEl.textContent = t("settings");
   if (settingsSummaryEl) settingsSummaryEl.textContent = getLabel("settingsSummary", "Stem de app af op jouw voorkeuren en manier van kijken.");
   if (settingsAppearanceTitleEl) settingsAppearanceTitleEl.textContent = getLabel("settingsAppearance", "Weergave");
@@ -6854,10 +7013,21 @@ function applyTranslations() {
   const homeFavoriteLinesTitleEl = document.getElementById("homeFavoriteLinesTitle");
   const homeFavoriteStopsTitleEl = document.getElementById("homeFavoriteStopsTitle");
   if (homeFavoritesTitleEl) homeFavoritesTitleEl.textContent = getLabel("homeFavoritesTitle", "Mijn favorieten");
-  if (homeFavoritesSummaryEl) homeFavoritesSummaryEl.textContent = getLabel("homeFavoritesSummary", "Je favoriete voertuigen, lijnen en haltes op één plek.");
+  if (homeFavoritesSummaryEl) homeFavoritesSummaryEl.textContent = getLabel("widgetFavoriteSummary", "Je favoriete bussen en trams op één plek.");
+  [
+    ["settingsWidgetsTitle", "widgetsTitle", "Widgets op de startpagina"],
+    ["showFavoriteWidgetLabel", "widgetFavorites", "Favoriete voertuigen"],
+    ["showPhotoWidgetLabel", "widgetPhotos", "Voertuigen met foto"],
+    ["photoWidgetChoiceLabel", "widgetPhotoChoices", "Kies maximaal drie voertuigen met foto"],
+    ["homePhotoWidgetTitle", "widgetPhotoTitle", "Voertuigen in beeld"],
+    ["homePhotoWidgetSummary", "widgetPhotoSummary", "Kies maximaal drie voertuigen met foto in de instellingen."]
+  ].forEach(([id, key, fallback]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = getLabel(key, fallback);
+  });
   if (homeFavoriteVehiclesTitleEl) homeFavoriteVehiclesTitleEl.textContent = getLabel("favoriteVehicles", "Voertuigen");
-  if (homeFavoriteLinesTitleEl) homeFavoriteLinesTitleEl.textContent = getLabel("favoriteLines", "Lijnen");
-  if (homeFavoriteStopsTitleEl) homeFavoriteStopsTitleEl.textContent = getLabel("favoriteStops", "Haltes");
+  if (homeFavoriteLinesTitleEl) homeFavoriteLinesTitleEl.textContent = getLabel("favoriteLinesPage", "Favoriete lijnen");
+  if (homeFavoriteStopsTitleEl) homeFavoriteStopsTitleEl.textContent = getLabel("favoriteStopsPage", "Favoriete haltes");
   if (haltSearchHelpEl) haltSearchHelpEl.textContent = getLabel("haltSearchHelp", "Zoek een halte op naam of haltecode.");
   const halteNearbyTitleEl = document.getElementById("halteNearbyTitle");
   const halteNearbyDescriptionEl = document.getElementById("halteNearbyDescription");
@@ -6865,6 +7035,10 @@ function applyTranslations() {
   if (halteNearbyDescriptionEl) halteNearbyDescriptionEl.textContent = getLabel("haltNearbyDescription", "Deel je locatie alleen wanneer je nabije haltes wilt zoeken.");
   if (halteNearbyBtnEl) halteNearbyBtnEl.textContent = getLabel("haltNearbyButton", "Gebruik mijn locatie");
   if (homeGtfsMapTitleEl) homeGtfsMapTitleEl.textContent = getLabel("homeGtfsMapTitle", "Realtime kaart");
+  const homeMapErrorMessageEl = document.getElementById("homeGtfsMapErrorMessage");
+  const homeMapRetryBtn = document.getElementById("homeGtfsMapRetryBtn");
+  if (homeMapErrorMessageEl) homeMapErrorMessageEl.textContent = getLabel("homeMapUnavailable", "De realtime kaart is tijdelijk niet beschikbaar. Probeer het later opnieuw.");
+  if (homeMapRetryBtn) homeMapRetryBtn.textContent = getLabel("offlineRetry", "Opnieuw proberen");
   if (homeGtfsMapSummaryEl) homeGtfsMapSummaryEl.remove();
   if (homeGtfsMapRefreshBtn) {
     const refreshLabel = getLabel("refresh", "Vernieuwen");
@@ -6922,6 +7096,11 @@ function applyTranslations() {
   closeBtnEl.title = getLabel("back", "Terug");
   closeBtnEl.setAttribute("aria-label", getLabel("back", "Terug"));
   if (closeBtnTextEl) closeBtnTextEl.textContent = getLabel("back", "Terug");
+  if (mobileVehicleCloseBtnEl) {
+    const closeLabel = getLabel("close", "Sluiten");
+    mobileVehicleCloseBtnEl.title = closeLabel;
+    mobileVehicleCloseBtnEl.setAttribute("aria-label", closeLabel);
+  }
   if (offlinePillEl) offlinePillEl.textContent = getLabel("offlinePill", "Offline");
   if (offlineTitleEl) offlineTitleEl.textContent = getLabel("offlineTitle", "Geen internetverbinding");
   if (offlineTextPrimaryEl) offlineTextPrimaryEl.textContent = getLabel("offlineTextPrimary", "BUSBIB kon geen werkende internetverbinding bevestigen.");
@@ -6974,6 +7153,28 @@ function applyTranslations() {
   if (firstRunTimeFormatLabelEl) firstRunTimeFormatLabelEl.textContent = t("timeFormat");
   if (firstRunTimeFormat24hOptEl) firstRunTimeFormat24hOptEl.textContent = t("timeFormat24h");
   if (firstRunTimeFormat12hOptEl) firstRunTimeFormat12hOptEl.textContent = t("timeFormat12h");
+  [
+    ["firstRunTextScaleLabel", textScaleLabelEl],
+    ["firstRunHighContrastLabel", highContrastLabelEl],
+    ["firstRunReduceMotionLabel", reduceMotionLabelEl],
+    ["firstRunIntervalLabel", intervalLabelEl],
+    ["firstRunHomeMapLabel", showHomeRealtimeMapLabelEl],
+    ["firstRunHomeMapIntervalLabel", homeMapIntervalLabelEl]
+  ].forEach(([id, source]) => {
+    const target = document.getElementById(id);
+    if (target && source) target.textContent = source.textContent;
+  });
+  [
+    [firstRunTextScaleSelectEl, textScaleSelect],
+    [firstRunIntervalSelectEl, intervalSelect],
+    [firstRunHomeMapIntervalSelectEl, homeMapIntervalSelect]
+  ].forEach(([target, source]) => {
+    if (!target || !source) return;
+    Array.from(target.options).forEach((option) => {
+      const sourceOption = Array.from(source.options).find((item) => item.value === option.value);
+      if (sourceOption) option.textContent = sourceOption.textContent;
+    });
+  });
   if (firstRunHeroKickerEl) firstRunHeroKickerEl.textContent = t("firstRunHeroKicker");
   if (firstRunSkipBtnEl) firstRunSkipBtnEl.textContent = getLabel("firstRunSkip", "Standaard gebruiken");
   if (firstRunBackBtnEl) firstRunBackBtnEl.textContent = t("back");
@@ -7457,7 +7658,7 @@ function getNearbyStopGroups(latitude, longitude) {
   return [...groups.values()]
     .filter((stop) => stop.distanceMeters <= 2500)
     .sort((left, right) => left.distanceMeters - right.distanceMeters)
-    .slice(0, 5);
+    .slice(0, 15);
 }
 
 function getNearbyStopDepartures(stop, derivedData) {
@@ -7995,7 +8196,8 @@ function renderFavorites() {
 
 function renderHomeFavorites() {
   if (!homeFavoritesPanelEl) return;
-  homeFavoritesPanelEl.hidden = !favorites.length && !favoriteLines.length && !favoriteStops.length;
+  homeFavoritesPanelEl.hidden = !settings.showFavoriteWidget || !!currentVehicleId;
+  if (favoriteAlertsPanelEl) favoriteAlertsPanelEl.hidden = !favoriteLines.length;
   const renderEmpty = (container) => {
     if (!container) return;
     container.innerHTML = `<p class="home-favorite-empty">${escapeHtml(t("noFavoritesYet"))}</p>`;
@@ -8029,6 +8231,72 @@ function renderHomeFavorites() {
   });
   renderFavoriteAlerts();
   if (favoriteLines.length && Date.now() - favoriteAlertsFetchedAt > 5 * 60 * 1000) void loadFavoriteAlerts();
+  renderPhotoWidget();
+  if (currentPageView === "menu") renderPhotoWidgetChoices();
+}
+
+function getPhotoWidgetVehicles() {
+  if (photoWidgetVehicleCache) return photoWidgetVehicleCache;
+  const vehicles = new Map();
+  Object.keys(PHOTO_LIBRARY_INDEX).forEach((id) => {
+    const vehicle = findBusById(id);
+    const canonicalId = normalize(vehicle?.Voertuignummer || id);
+    if (!vehicles.has(canonicalId)) {
+      const photos = getIndexedPhotoEntries(canonicalId);
+      if (photos.length) vehicles.set(canonicalId, { id: canonicalId, vehicle, photos });
+    }
+  });
+  photoWidgetVehicleCache = [...vehicles.values()].sort((a, b) => getVehicleDisplayId(a.id).localeCompare(getVehicleDisplayId(b.id), undefined, { numeric: true }));
+  return photoWidgetVehicleCache;
+}
+
+function renderPhotoWidgetChoices() {
+  if (!photoWidgetChoicesEl) return;
+  const vehicles = getPhotoWidgetVehicles();
+  const choices = settings.photoWidgetChoices || [];
+  photoWidgetChoicesEl.innerHTML = Array.from({ length: 3 }, (_, index) => {
+    const choice = choices[index] || {};
+    const selected = vehicles.find((entry) => entry.id === choice.id);
+    const photos = selected?.photos || [];
+    const selectedPhoto = photos.find((photo) => photo.src === choice.src) || photos[0];
+    const options = vehicles.map((entry) => {
+      const usedElsewhere = choices.some((other, otherIndex) => otherIndex !== index && other?.id === entry.id);
+      const label = [getVehicleDisplayId(entry.vehicle || entry.id), cleanText(entry.vehicle?.Type)].filter(Boolean).join(" · ");
+      return `<option value="${escapeHtml(entry.id)}"${entry.id === choice.id ? " selected" : ""}${usedElsewhere ? " disabled" : ""}>${escapeHtml(label)}</option>`;
+    }).join("");
+    const photoOptions = photos.map((photo, photoIndex) => {
+      const maker = cleanText(photo.metaFields?.maker);
+      const label = `${getLabel("widgetPhoto", "Foto")} ${photoIndex + 1}${maker ? ` · ${maker}` : ""}`;
+      return `<option value="${escapeHtml(photo.src)}"${photo.src === selectedPhoto?.src ? " selected" : ""}>${escapeHtml(label)}</option>`;
+    }).join("");
+    const label = getLabel("widgetVehicleSlot", "Voertuig {number}").replace("{number}", String(index + 1));
+    return `<div class="widget-photo-choice">
+      <label for="widgetVehicle${index}">${escapeHtml(label)}</label>
+      <select id="widgetVehicle${index}" data-widget-vehicle="${index}"><option value="">${escapeHtml(getLabel("widgetChooseVehicle", "Kies een voertuig"))}</option>${options}</select>
+      ${selectedPhoto ? `<label for="widgetPhoto${index}">${escapeHtml(getLabel("widgetChoosePhoto", "Kies een foto"))}</label><select id="widgetPhoto${index}" data-widget-photo="${index}">${photoOptions}</select><img class="widget-photo-preview" src="${escapeHtml(selectedPhoto.src)}" alt="${escapeHtml(getLabel("photoAlt", "Foto van voertuig {id}").replace("{id}", getVehicleDisplayId(selected.id)))}" loading="lazy">` : ""}
+    </div>`;
+  }).join("");
+}
+
+function renderPhotoWidget() {
+  if (!homePhotoWidgetEl || !homePhotoWidgetListEl) return;
+  homePhotoWidgetEl.hidden = !settings.showPhotoWidget || !!currentVehicleId;
+  const cards = (settings.photoWidgetChoices || []).map((choice) => {
+    if (!choice?.id) return "";
+    const vehicle = findBusById(choice.id);
+    const photos = getIndexedPhotoEntries(choice.id);
+    const photo = photos.find((entry) => entry.src === choice.src) || photos[0];
+    if (!photo) return "";
+    const number = getVehicleDisplayId(vehicle || choice.id);
+    const model = cleanText(vehicle?.Type) || getLabel("unknownVehicleModel", "Onbekend voertuigmodel");
+    const maker = cleanText(photo.metaFields?.maker);
+    return `<button class="home-photo-widget-item" type="button" data-widget-open="${escapeHtml(choice.id)}">
+      <img src="${escapeHtml(photo.src)}" alt="" loading="lazy">
+      <span class="home-photo-widget-copy"><strong>${buildVehicleIdMarkup(vehicle || choice.id, number)}</strong><span>${escapeHtml(model)}</span>${maker ? `<small>${escapeHtml(getLabel("photoPhotographer", "Fotograaf"))}: ${escapeHtml(maker)}</small>` : ""}</span>
+    </button>`;
+  }).filter(Boolean);
+  homePhotoWidgetListEl.classList.toggle("is-empty", !cards.length);
+  homePhotoWidgetListEl.innerHTML = cards.length ? cards.join("") : `<p class="home-favorite-empty">${escapeHtml(getLabel("widgetPhotoEmpty", "Kies voertuigen met foto in de instellingen."))}</p>`;
 }
 
 function getAlertText(value) {
@@ -8352,13 +8620,17 @@ function initAppPreferences() {
 }
 
 searchBtn.addEventListener("click", () => zoekAlles({ closeKeyboard: true }));
-closeBtnEl?.addEventListener("click", () => {
+function closeVehicleResults() {
+  latestSearchToken += 1;
+  setPageLoading(false);
   if (getCurrentRouteState().view !== "home") {
     window.history.back();
     return;
   }
   terug({ historyMode: "replace" });
-});
+}
+closeBtnEl?.addEventListener("click", closeVehicleResults);
+mobileVehicleCloseBtnEl?.addEventListener("click", closeVehicleResults);
 appTitleBtnEl?.addEventListener("click", () => navigateToPage("home"));
 [
   [navHomeBtn, "home"],
@@ -8410,11 +8682,16 @@ voertuigInput.addEventListener("keydown", (event) => {
     zoekAlles({ closeKeyboard: true });
   }
 });
-homeGtfsMapRefreshBtn?.addEventListener("click", () => {
+function retryHomeGtfsMap() {
   homeGtfsMapStarted = true;
   homeGtfsMapPausedByInactivity = false;
   startHomeGtfsMapRefresh();
   void refreshHomeGtfsMap({ force: true });
+}
+homeGtfsMapRefreshBtn?.addEventListener("click", retryHomeGtfsMap);
+document.getElementById("homeGtfsMapRetryBtn")?.addEventListener("click", () => {
+  retryHomeGtfsMap();
+  homeGtfsMapPanelEl?.focus({ preventScroll: true });
 });
 homeMapModelFilterEl?.addEventListener("change", () => {
   void applyHomeMapFilter().catch((error) => {
@@ -8422,7 +8699,7 @@ homeMapModelFilterEl?.addEventListener("change", () => {
     setHomeGtfsMapStatus(getLabel("homeGtfsMapError", "Live GTFS-kaart kon niet geladen worden."), "error");
   });
 });
-homeFavoritesPanelEl?.addEventListener("click", (event) => {
+function handleFavoriteWidgetClick(event) {
   const target = event.target;
   if (!(target instanceof Element)) return;
   const removeButton = target.closest("[data-favorite-remove]");
@@ -8448,6 +8725,19 @@ homeFavoritesPanelEl?.addEventListener("click", (event) => {
     const favorite = favoriteStops.find((entry) => entry.id === id);
     if (favorite) openHalteRealtime(favorite.codes);
   }
+}
+homeFavoritesPanelEl?.addEventListener("click", handleFavoriteWidgetClick);
+homeFavoriteLinesEl?.addEventListener("click", handleFavoriteWidgetClick);
+homeFavoriteStopsEl?.addEventListener("click", handleFavoriteWidgetClick);
+homePhotoWidgetEl?.addEventListener("click", (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-widget-open]") : null;
+  if (!button) return;
+  const id = button.getAttribute("data-widget-open");
+  if (!id) return;
+  const vehicle = findBusById(id);
+  setVehicleInputResolvedId(voertuigInput, id);
+  voertuigInput.value = getVehicleDisplayId(vehicle || id) || id;
+  void zoekAlles({ historyMode: "push" });
 });
 document.getElementById("homeGtfsVehicleCard")?.addEventListener("click", (event) => {
   const target = event.target;
@@ -8588,6 +8878,50 @@ showHomeRealtimeMapToggle?.addEventListener("change", () => {
     homeGtfsMapStarted = true;
     void refreshHomeGtfsMap({ force: true });
   }
+});
+showFavoriteWidgetToggle?.addEventListener("change", () => {
+  settings.showFavoriteWidget = showFavoriteWidgetToggle.checked;
+  saveSettings();
+  renderHomeFavorites();
+});
+showPhotoWidgetToggle?.addEventListener("change", () => {
+  settings.showPhotoWidget = showPhotoWidgetToggle.checked;
+  saveSettings();
+  renderPhotoWidget();
+});
+photoWidgetChoicesEl?.addEventListener("change", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLSelectElement)) return;
+  const index = Number(target.dataset.widgetVehicle ?? target.dataset.widgetPhoto);
+  if (!Number.isInteger(index) || index < 0 || index >= 3) return;
+  const choices = Array.from({ length: 3 }, (_, slot) => settings.photoWidgetChoices[slot] || { id: "", src: "" });
+  if (target.hasAttribute("data-widget-vehicle")) {
+    const vehicle = getPhotoWidgetVehicles().find((entry) => entry.id === target.value);
+    choices[index] = vehicle ? { id: vehicle.id, src: vehicle.photos[0].src } : { id: "", src: "" };
+  } else {
+    const photos = getIndexedPhotoEntries(choices[index].id);
+    if (!photos.some((photo) => photo.src === target.value)) return;
+    choices[index] = { ...choices[index], src: target.value };
+  }
+  settings.photoWidgetChoices = choices;
+  saveSettings();
+  renderPhotoWidgetChoices();
+  renderPhotoWidget();
+  const focusId = target.hasAttribute("data-widget-vehicle") && choices[index].id
+    ? `widgetPhoto${index}`
+    : target.id;
+  document.getElementById(focusId)?.focus();
+});
+[homePhotoWidgetListEl, photoWidgetChoicesEl].forEach((container) => {
+  container?.addEventListener("error", (event) => {
+    const image = event.target;
+    if (!(image instanceof HTMLImageElement)) return;
+    console.warn("Widgetfoto laden mislukt", image.src);
+    const message = document.createElement("span");
+    message.className = "widget-photo-error";
+    message.textContent = getLabel("photoUploadEmptyTitle", "Foto niet beschikbaar");
+    image.replaceWith(message);
+  }, true);
 });
 homeMapIntervalSelect?.addEventListener("change", () => {
   settings.homeMapRefreshIntervalSec = normalizeHomeMapRefreshIntervalSec(homeMapIntervalSelect.value);
@@ -8781,6 +9115,12 @@ firstRunLanguageSelectEl?.addEventListener("change", applyFirstRunPreviewSetting
 firstRunThemeSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunColorThemeSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunTimeFormatSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunTextScaleSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunHighContrastToggleEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunReduceMotionToggleEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunIntervalSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunHomeMapToggleEl?.addEventListener("change", applyFirstRunPreviewSettings);
+firstRunHomeMapIntervalSelectEl?.addEventListener("change", applyFirstRunPreviewSettings);
 firstRunSkipBtnEl?.addEventListener("click", () => completeFirstRunSetup({ useSuggestedDefaults: true }));
 firstRunBackBtnEl?.addEventListener("click", () => setFirstRunWizardStep(firstRunCurrentStep - 1));
 firstRunConfirmBtnEl?.addEventListener("click", advanceFirstRunWizard);
@@ -9309,6 +9649,7 @@ function buildVehicleSearchEntry(vehicle) {
 }
 
 function rebuildVehicleIndexes() {
+  photoWidgetVehicleCache = null;
   vehicleLookupById.clear();
   vehicleLookupByPlate.clear();
   vehicleLookupByHansea.clear();
@@ -9468,12 +9809,19 @@ function debounce(func, wait) {
   };
 }
 
-function renderMissingVehicleStaticState() {
+function renderMissingVehicleStaticState(vehicleId) {
   if (!vasteDataEl) return;
+  const zone01Url = `https://www.zone01.be/hercules/resultaten?q=${encodeURIComponent(vehicleId)}`;
   vasteDataEl.innerHTML = `<div class="vehicle-not-found" role="alert">
-    <span class="vehicle-not-found-icon" aria-hidden="true">!</span>
-    <p>${escapeHtml(t("noFixed"))}</p>
-    <button id="reportMissingVehicleBtn" class="vehicle-not-found-btn" type="button">${escapeHtml(getLabel("reportMobileOpen", "Open meldformulier"))}</button>
+    <span class="vehicle-not-found-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4 4"></path></svg></span>
+    <div class="vehicle-not-found-content">
+      <p class="vehicle-not-found-title">${escapeHtml(t("noFixed"))}</p>
+      <p class="vehicle-not-found-description">${escapeHtml(getLabel("missingVehicleHelp", "Controleer het voertuignummer. Ontbreekt het voertuig nog steeds? Meld het via het formulier of zoek verder op Zone 01."))}</p>
+    </div>
+    <div class="vehicle-not-found-actions">
+      <button id="reportMissingVehicleBtn" class="vehicle-not-found-btn vehicle-not-found-btn--primary" type="button">${escapeHtml(getLabel("reportMobileOpen", "Open meldformulier"))}</button>
+      <a class="vehicle-not-found-btn" href="${escapeHtml(zone01Url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(getLabel("searchZone01", "Zoek op Zone 01"))}</a>
+    </div>
   </div>`;
 }
 
@@ -9690,19 +10038,6 @@ function getHomeGtfsCanvasLayerClass() {
           ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
           ctx.drawImage(icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
           ctx.restore();
-          const kind = snapshot.vehicle ? getVehicleKind(snapshot.vehicle) : "unknown";
-          ctx.beginPath();
-          ctx.arc(x + 9, y - 7, 7, 0, Math.PI * 2);
-          ctx.fillStyle = "#ffffff";
-          ctx.fill();
-          ctx.strokeStyle = "#263844";
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.fillStyle = "#263844";
-          ctx.font = "700 9px system-ui, sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(kind === "tram" ? "T" : kind === "bus" ? "B" : "?", x + 9, y - 7);
           return;
         }
 
@@ -10309,6 +10644,7 @@ async function zoekAlles(options = {}) {
   const bus = resolved.bus;
   setCurrentPageView("home");
   currentVehicleId = activeVehicleId;
+  renderHomeFavorites();
   staticVehicleCardEl.hidden = false;
   realtimeVehicleCardEl.hidden = false;
   updateHeaderVisualRoutePresentation();
@@ -10406,6 +10742,7 @@ function terug(options = {}) {
   voertuigInput.value = "";
   setVehicleInputResolvedId(voertuigInput, "");
   currentVehicleId = "";
+  renderHomeFavorites();
   updateHeaderVisualRoutePresentation();
   realtimePausedByInactivity = false;
   compareVehicleId = "";
@@ -10476,7 +10813,7 @@ function toonVasteData(id){
   const bus = findBusById(id);
 
   if(!bus){
-    renderMissingVehicleStaticState();
+    renderMissingVehicleStaticState(id);
     hideVehiclePhotoCard();
     return;
   }
@@ -10539,6 +10876,7 @@ async function initMap(lat,lon){
     // Use the same keyless transit map as the overview; CARTO now requires a key.
     addPublicTransportTileLayer(map);
     addCurrentLocationControl(map);
+    addMapFullscreenControl(map);
     refreshRealtimeMapSize();
   }
 }
