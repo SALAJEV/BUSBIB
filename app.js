@@ -653,7 +653,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.08-8";
+const APP_VERSION = "2026.11.08-9";
 const dataLoadTimestamps = {
   realtime: 0
 };

@@ -54,6 +54,7 @@ De frontend wordt rechtstreeks geladen vanuit de rootbestanden:
 
 - `index.html`: markup, shell, modals en basis bootstrap.
 - `style.css`: volledige styling, responsive layouts en themas.
+- `redesign.css`: visuele vormgeving en consistente kleuren, typografie en componenten bovenop de bestaande functionele layoutregels.
 - `app.js`: alle clientlogica.
 - `translations.js`: vertalingen en locale-configuratie.
 - `sw.js`: service worker voor caching en offline gedrag.
@@ -164,6 +165,7 @@ De frontendbestanden in de root kunnen als statische site gedeployed worden:
 
 - `index.html`
 - `style.css`
+- `redesign.css`
 - `app.js`
 - `translations.js`
 - `manifest.json`

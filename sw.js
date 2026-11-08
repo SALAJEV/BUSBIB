@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busbib-v232';
+const CACHE_NAME = 'busbib-v233';
 const PHOTO_CACHE_NAME = 'busbib-photos-v1';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PHOTO_CACHE_MAX_ENTRIES = 32;
@@ -7,11 +7,12 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261108-16',
+  '/app.js?v=20261108-17',
   '/manifest.json',
   '/manifest-windows.json',
-  '/style.css?v=20261108-16',
-  '/translations.js?v=20261108-16',
+  '/style.css?v=20261108-17',
+  '/redesign.css?v=20261108-17',
+  '/translations.js?v=20261108-17',
   '/site-config.js?v=20261018-14',
   '/media/logo/logo.png',
   '/media/logo/busbib-apple-touch-icon.png',
