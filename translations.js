@@ -2445,3 +2445,75 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   weatherUnknown: "Погода",
   weatherWind: "Ветер"
 });
+
+Object.entries({
+  nl: ["Filter op voertuigmodel", "Alle bussen en trams", "Bussen", "Trams", "Onbekend voertuig"],
+  fr: ["Filtrer par modèle de véhicule", "Tous les bus et trams", "Bus", "Trams", "Véhicule inconnu"],
+  en: ["Filter by vehicle model", "All buses and trams", "Buses", "Trams", "Unknown vehicle"],
+  de: ["Nach Fahrzeugmodell filtern", "Alle Busse und Straßenbahnen", "Busse", "Straßenbahnen", "Unbekanntes Fahrzeug"],
+  pl: ["Filtruj według modelu pojazdu", "Wszystkie autobusy i tramwaje", "Autobusy", "Tramwaje", "Nieznany pojazd"],
+  es: ["Filtrar por modelo de vehículo", "Todos los autobuses y tranvías", "Autobuses", "Tranvías", "Vehículo desconocido"],
+  ru: ["Фильтр по модели транспорта", "Все автобусы и трамваи", "Автобусы", "Трамваи", "Неизвестный транспорт"]
+}).forEach(([language, labels]) => {
+  const [mapFilterModel, mapAllVehicles, mapBuses, mapTrams, mapUnknownKind] = labels;
+  Object.assign(window.BB_TRANSLATIONS.i18n[language], {
+    mapFilterModel, mapAllVehicles, mapBuses, mapTrams, mapUnknownKind
+  });
+
+  Object.entries({
+    nl: ["Delen", "De link is gekopieerd.", "Kopieer deze link:", "Meldingen voor je favoriete lijnen", "Meldingen worden geladen...", "Meldingen zijn tijdelijk niet beschikbaar.", "Geen actuele meldingen voor je favoriete lijnen.", "Melding"],
+    fr: ["Partager", "Le lien a été copié.", "Copiez ce lien :", "Perturbations de vos lignes favorites", "Chargement des perturbations...", "Les perturbations sont temporairement indisponibles.", "Aucune perturbation actuelle pour vos lignes favorites.", "Information"],
+    en: ["Share", "The link has been copied.", "Copy this link:", "Alerts for your favourite lines", "Loading alerts...", "Alerts are temporarily unavailable.", "No current alerts for your favourite lines.", "Alert"],
+    de: ["Teilen", "Der Link wurde kopiert.", "Diesen Link kopieren:", "Meldungen für deine favorisierten Linien", "Meldungen werden geladen...", "Meldungen sind vorübergehend nicht verfügbar.", "Keine aktuellen Meldungen für deine favorisierten Linien.", "Meldung"],
+    pl: ["Udostępnij", "Link został skopiowany.", "Skopiuj ten link:", "Komunikaty dla ulubionych linii", "Ładowanie komunikatów...", "Komunikaty są tymczasowo niedostępne.", "Brak aktualnych komunikatów dla ulubionych linii.", "Komunikat"],
+    es: ["Compartir", "Se ha copiado el enlace.", "Copia este enlace:", "Avisos de tus líneas favoritas", "Cargando avisos...", "Los avisos no están disponibles temporalmente.", "No hay avisos actuales para tus líneas favoritas.", "Aviso"],
+    ru: ["Поделиться", "Ссылка скопирована.", "Скопируйте эту ссылку:", "Уведомления для избранных маршрутов", "Загрузка уведомлений...", "Уведомления временно недоступны.", "Нет актуальных уведомлений для избранных маршрутов.", "Уведомление"]
+  }).forEach(([language, labels]) => {
+    const [shareLink, shareCopied, shareCopyManually, favoriteAlertsTitle, favoriteAlertsLoading, favoriteAlertsUnavailable, favoriteAlertsNone, favoriteAlertsNotice] = labels;
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], {
+      shareLink, shareCopied, shareCopyManually, favoriteAlertsTitle, favoriteAlertsLoading,
+      favoriteAlertsUnavailable, favoriteAlertsNone, favoriteAlertsNotice
+    });
+  });
+
+  Object.entries({
+    nl: "{count} voertuigen actief op de kaart",
+    fr: "{count} véhicules actifs sur la carte",
+    en: "{count} vehicles active on the map",
+    de: "{count} Fahrzeuge auf der Karte aktiv",
+    pl: "{count} aktywnych pojazdów na mapie",
+    es: "{count} vehículos activos en el mapa",
+    ru: "Активных транспортных средств на карте: {count}"
+  }).forEach(([language, homeGtfsMapLoaded]) => {
+    window.BB_TRANSLATIONS.i18n[language].homeGtfsMapLoaded = homeGtfsMapLoaded;
+  });
+
+  Object.entries({
+    nl: ["B = bus · T = tram · ? = onbekend", "Actuele voertuigen zijn tijdelijk niet beschikbaar."],
+    fr: ["B = bus · T = tram · ? = inconnu", "Les véhicules en temps réel sont temporairement indisponibles."],
+    en: ["B = bus · T = tram · ? = unknown", "Live vehicles are temporarily unavailable."],
+    de: ["B = Bus · T = Straßenbahn · ? = unbekannt", "Aktuelle Fahrzeuge sind vorübergehend nicht verfügbar."],
+    pl: ["B = autobus · T = tramwaj · ? = nieznany", "Dane o pojazdach są tymczasowo niedostępne."],
+    es: ["B = autobús · T = tranvía · ? = desconocido", "Los vehículos en directo no están disponibles temporalmente."],
+    ru: ["B = автобус · T = трамвай · ? = неизвестно", "Данные о транспорте временно недоступны."]
+  }).forEach(([language, [mapKindLegend, lineRealtimeUnavailable]]) => {
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], { mapKindLegend, lineRealtimeUnavailable });
+  });
+
+  Object.entries({
+    nl: ["Voertuignummer", "Naam van de fotograaf", "Foto (JPEG, PNG of WebP, maximaal 8 MB)", "Ik heb het recht om deze foto te delen en geef BUSBIB toestemming om ze met mijn naam te publiceren.", "De foto wordt eerst gecontroleerd. De foto kan locatie en andere metadata bevatten; verwijder die vooraf als je ze niet wilt delen.", "Foto insturen", "Foto insturen is tijdelijk niet beschikbaar.", "Kies een JPEG-, PNG- of WebP-foto van maximaal 8 MB.", "Foto wordt verstuurd...", "Bedankt! Je foto is ontvangen en wordt gecontroleerd.", "Versturen mislukt. Probeer het later opnieuw."],
+    fr: ["Numéro du véhicule", "Nom du photographe", "Photo (JPEG, PNG ou WebP, 8 Mo maximum)", "J'ai le droit de partager cette photo et j'autorise BUSBIB à la publier avec mon nom.", "La photo sera vérifiée avant publication. Elle peut contenir des données de localisation et autres métadonnées ; supprimez-les si vous ne souhaitez pas les partager.", "Envoyer une photo", "L'envoi de photos est temporairement indisponible.", "Choisissez une photo JPEG, PNG ou WebP de 8 Mo maximum.", "Envoi de la photo...", "Merci ! Votre photo a été reçue et sera vérifiée.", "Échec de l'envoi. Réessayez plus tard."],
+    en: ["Vehicle number", "Photographer's name", "Photo (JPEG, PNG or WebP, maximum 8 MB)", "I have the right to share this photo and permit BUSBIB to publish it with my name.", "The photo is reviewed before publication. It may contain location and other metadata; remove these first if you do not want to share them.", "Submit photo", "Photo submissions are temporarily unavailable.", "Choose a JPEG, PNG or WebP photo of at most 8 MB.", "Sending photo...", "Thank you! Your photo was received and will be reviewed.", "Upload failed. Please try again later."],
+    de: ["Fahrzeugnummer", "Name des Fotografen", "Foto (JPEG, PNG oder WebP, höchstens 8 MB)", "Ich darf dieses Foto teilen und erlaube BUSBIB, es mit meinem Namen zu veröffentlichen.", "Das Foto wird vor der Veröffentlichung geprüft. Es kann Standort- und andere Metadaten enthalten; entferne diese vorher, falls du sie nicht teilen möchtest.", "Foto einsenden", "Das Einsenden von Fotos ist vorübergehend nicht verfügbar.", "Wähle ein JPEG-, PNG- oder WebP-Foto mit höchstens 8 MB.", "Foto wird gesendet...", "Danke! Dein Foto wurde empfangen und wird geprüft.", "Senden fehlgeschlagen. Bitte versuche es später erneut."],
+    pl: ["Numer pojazdu", "Imię i nazwisko fotografa", "Zdjęcie (JPEG, PNG lub WebP, maksymalnie 8 MB)", "Mam prawo udostępnić to zdjęcie i zezwalam BUSBIB na publikację z moim nazwiskiem.", "Zdjęcie zostanie sprawdzone przed publikacją. Może zawierać lokalizację i inne metadane; usuń je wcześniej, jeśli nie chcesz ich udostępniać.", "Wyślij zdjęcie", "Wysyłanie zdjęć jest tymczasowo niedostępne.", "Wybierz zdjęcie JPEG, PNG lub WebP o rozmiarze do 8 MB.", "Wysyłanie zdjęcia...", "Dziękujemy! Zdjęcie zostało odebrane i zostanie sprawdzone.", "Wysyłanie nie powiodło się. Spróbuj ponownie później."],
+    es: ["Número del vehículo", "Nombre del fotógrafo", "Foto (JPEG, PNG o WebP, máximo 8 MB)", "Tengo derecho a compartir esta foto y autorizo a BUSBIB a publicarla con mi nombre.", "La foto se revisará antes de publicarse. Puede contener ubicación y otros metadatos; elimínalos antes si no quieres compartirlos.", "Enviar foto", "El envío de fotos no está disponible temporalmente.", "Elige una foto JPEG, PNG o WebP de 8 MB como máximo.", "Enviando foto...", "¡Gracias! Hemos recibido tu foto y la revisaremos.", "No se pudo enviar. Inténtalo más tarde."],
+    ru: ["Номер транспорта", "Имя фотографа", "Фото (JPEG, PNG или WebP, не более 8 МБ)", "Я имею право поделиться фотографией и разрешаю BUSBIB опубликовать её с моим именем.", "Фотография будет проверена перед публикацией. Она может содержать геолокацию и другие метаданные; удалите их, если не хотите делиться ими.", "Отправить фото", "Отправка фотографий временно недоступна.", "Выберите фото JPEG, PNG или WebP размером не более 8 МБ.", "Отправка фотографии...", "Спасибо! Фотография получена и будет проверена.", "Не удалось отправить. Попробуйте позже."]
+  }).forEach(([language, labels]) => {
+    const [uploadVehicleLabel, uploadPhotographerLabel, uploadFileLabel, uploadConsentLabel, uploadPrivacy,
+      uploadSubmit, photoUploadUnavailable, uploadInvalidImage, uploadSending, uploadSuccess, uploadFailed] = labels;
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], {
+      uploadVehicleLabel, uploadPhotographerLabel, uploadFileLabel, uploadConsentLabel, uploadPrivacy,
+      uploadSubmit, photoUploadUnavailable, uploadInvalidImage, uploadSending, uploadSuccess, uploadFailed
+    });
+  });
+});

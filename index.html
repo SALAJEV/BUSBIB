@@ -27,12 +27,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261108-15">
-<script src="site-config.js?v=20261018-13"></script>
+<link rel="stylesheet" href="style.css?v=20261108-16">
+<script src="site-config.js?v=20261018-14"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261108-15";
+  window.BB_ASSET_VERSION = "20261108-16";
 </script>
 </head>
 <body>
@@ -147,6 +147,10 @@
         <div id="homeFavoriteStops" class="home-favorites-list"></div>
       </section>
     </div>
+    <section id="favoriteAlerts" class="favorite-alerts" hidden aria-labelledby="favoriteAlertsTitle">
+      <h3 id="favoriteAlertsTitle">Meldingen voor je favoriete lijnen</h3>
+      <div id="favoriteAlertsContent" role="status"></div>
+    </section>
   </section>
   <section id="homeGtfsMapPanel" class="home-gtfs-map-panel" aria-labelledby="homeGtfsMapTitle">
     <div class="home-gtfs-map-head">
@@ -160,6 +164,13 @@
           <path d="M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"></path>
         </svg>
       </button>
+    </div>
+    <div class="home-map-filter">
+      <label id="homeMapFilterLabel" for="homeMapModelFilter">Filter op voertuigmodel</label>
+      <select id="homeMapModelFilter">
+        <option value="">Alle bussen en trams</option>
+      </select>
+      <span id="homeMapKindLegend">B = bus · T = tram · ? = onbekend</span>
     </div>
     <div id="homeGtfsVehicleCard" class="home-gtfs-vehicle-card" role="dialog" aria-live="polite" hidden></div>
     <div id="homeGtfsMap" class="home-gtfs-map" role="region" aria-label="Kaart met alle live GTFS-bussen"></div>
@@ -216,6 +227,7 @@
               <p id="vehiclePhotoCaption" class="vehicle-photo-caption"></p>
               <div class="vehicle-photo-info">
                 <div id="vehiclePhotoMeta" class="vehicle-photo-meta" hidden></div>
+                <button id="vehiclePhotoAddBtn" class="btn" type="button">Foto insturen</button>
               </div>
             </aside>
           </div>
@@ -716,16 +728,16 @@
     </div>
     <div class="pdf-modal-body legal-modal-body">
       <div class="photo-upload-modal-copy">
-        <div class="photo-upload-callout">
-          <span id="photoUploadModalBadge" class="photo-upload-badge">Voertuigfoto ontbreekt</span>
-          <p id="photoUploadModalNote" class="photo-upload-lead">Nog geen foto beschikbaar van dit voertuig. Heb jij er eentje?</p>
-        </div>
-        <ul class="install-guide-steps photo-upload-steps">
-          <li id="photoUploadStep1">Open het formulier in je browser.</li>
-          <li id="photoUploadStep2">Voeg je foto toe en vermeld het voertuignummer.</li>
-          <li id="photoUploadStep3">Na controle kan de foto op BUSBIB verschijnen.</li>
-        </ul>
-        <a id="photoUploadOpenLink" class="btn" href="https://forms.gle/MLzezhEKqxg6xagm9" target="_blank" rel="noopener noreferrer">Open uploadformulier</a>
+        <form id="photoUploadForm" class="photo-upload-form">
+          <label><span id="photoUploadVehicleLabel">Voertuignummer</span><input id="photoUploadVehicle" name="vehicle" required maxlength="30"></label>
+          <label><span id="photoUploadPhotographerLabel">Naam van de fotograaf</span><input name="photographer" required minlength="2" maxlength="100"></label>
+          <label><span id="photoUploadFileLabel">Foto (JPEG, PNG of WebP, maximaal 8 MB)</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label>
+          <label class="photo-upload-consent"><input name="consent" type="checkbox" value="yes" required><span id="photoUploadConsentLabel">Ik heb het recht om deze foto te delen en geef BUSBIB toestemming om ze met mijn naam te publiceren.</span></label>
+          <p id="photoUploadPrivacy">De foto wordt eerst gecontroleerd. De foto kan locatie en andere metadata bevatten; verwijder die vooraf als je ze niet wilt delen.</p>
+          <div id="photoUploadChallenge"></div>
+          <p id="photoUploadStatus" role="status"></p>
+          <button id="photoUploadSubmit" class="btn" type="submit">Foto insturen</button>
+        </form>
       </div>
     </div>
     <div class="pdf-modal-actions">
@@ -769,7 +781,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261108-15";
+    var assetVersion = window.BB_ASSET_VERSION || "20261108-16";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

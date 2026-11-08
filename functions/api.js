@@ -65,7 +65,7 @@ export async function onRequest(context) {
         const upstreamResponse = await fetchUpstream(upstreamUrl, resource, apiKey);
 
         if (!upstreamResponse.ok) {
-          if (isTemporaryUpstreamStatus(upstreamResponse.status)) {
+          if (resource === "realtime" && isTemporaryUpstreamStatus(upstreamResponse.status)) {
             const staleCache = await getRealtimeFromCache(true); // Try stale cache
             if (staleCache) return staleCache;
           }

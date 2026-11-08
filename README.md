@@ -35,9 +35,11 @@ De webapp draait als PWA, ondersteunt installatie op mobiele toestellen en heeft
 - Lijnen zoeken op lijnnummer, routenaam, `route_id` of halte/station, met suggesties en actuele ritten en bussen.
 - Live voertuigtracking via De Lijn realtime data.
 - Realtime kaartweergave met Leaflet en OpenStreetMap/CARTO tiles.
+- De realtime kaart kan op voertuigmodel gefilterd worden; bus- en trammodellen staan apart en onbekende voertuigen blijven als aparte categorie zichtbaar.
 - Weerkaart op basis van de huidige voertuiglocatie via Open-Meteo.
 - Halte zoeken op code of naam, plus optioneel nabije haltes op basis van browserlocatie met beschikbare realtime vertrekken.
 - Voertuig-, lijn- en haltefavorieten bewaren in `localStorage`.
+- De startpagina toont actieve GTFS-meldingen die expliciet aan een favoriete lijn gekoppeld zijn. Als de meldingenfeed niet bereikbaar is, wordt dat vermeld in plaats van te melden dat er geen verstoringen zijn.
 - Vergelijken van voertuigen.
 - Voertuigfoto's tonen uit lokale `media/` assets.
 - EXIF- en locatieverrijking voor foto's.
@@ -59,7 +61,7 @@ De frontend wordt rechtstreeks geladen vanuit de rootbestanden:
 
 Er wordt bewust geen framework zoals React, Vue of Angular gebruikt. De app is volledig geschreven in vanilla JavaScript en werkt met DOM-manipulatie, lokale state, `localStorage`, `fetch`, `history` en een service worker.
 
-De hoofdnavigatie gebruikt de deelbare URL's `/`, `/line`, `/stop` en `/menu`. De pagina's delen dezelfde frontend-shell en navigeren via de browsergeschiedenis. Oude links met `?view=lijn`, `?view=halte` of `?view=menu` blijven werken en worden omgezet naar de nieuwe paden. Voertuiglinks blijven beschikbaar via `/?bus=<nummer>` en optioneel `&compare=<nummer>`.
+De hoofdnavigatie gebruikt de deelbare URL's `/`, `/line`, `/stop` en `/menu`. De pagina's delen dezelfde frontend-shell en navigeren via de browsergeschiedenis. Oude links met `?view=lijn`, `?view=halte` of `?view=menu` blijven werken en worden omgezet naar de nieuwe paden. Voertuiglinks blijven beschikbaar via `/?bus=<nummer>` en optioneel `&compare=<nummer>`. Deelknoppen bij lijnresultaten en haltes maken links in de vorm `/line?route=<route_id>` en `/stop?stop=<haltecode>`.
 
 ### API-laag
 
@@ -107,7 +109,7 @@ De app gebruikt verschillende bronnen:
 - OpenStreetMap/CARTO als kaarttiles.
 - Voertuigdatasets (`buses.txt`, `trams.txt`, `trips.txt`, `routes.txt`, `stops.txt` en `feed_info.txt`) uit publieke R2-opslag, via de same-origin Pages-route `/dataset/<bestandsnaam>`. Bussen en trams worden samen doorzocht en onderscheiden met hun eigen pictogram.
 - Foto-assets in het project of via externe statische hosting.
-- Externe formulieren voor uploads, meldingen en feedback.
+- Externe formulieren voor meldingen en feedback; foto-inzendingen lopen na configuratie via een eigen Pages Function.
 
 Belangrijke URL-patronen die in de code gebruikt worden:
 
@@ -178,6 +180,12 @@ DELIJN_API_KEY
 ```
 
 Zonder deze key falen realtime-, halte- en GTFS-waarschuwingsverzoeken. De sleutel staat uitsluitend in de serveromgeving; voeg hem nooit toe aan frontendcode.
+
+### Foto's insturen configureren
+
+De upload is standaard uitgeschakeld. Maak in Cloudflare een **privé** R2-bucket aan zonder publieke toegang en koppel die aan het Pages-project als R2-binding `PHOTO_UPLOADS`. Maak een Turnstile-widget voor de domeinen waarop de site draait, zet de publieke site key in `photoUploadTurnstileSiteKey` in `site-config.js` en stel de bijbehorende geheime sleutel als Pages-secret `TURNSTILE_SECRET` in. Configureer dezelfde bindings en secrets afzonderlijk voor de juiste productie- en previewomgeving en deploy opnieuw. Stel ook een Cloudflare WAF-rate-limitingregel in voor `POST /photo-upload` om kosten en misbruik te beperken. Zonder binding of sleutel werkt insturen niet.
+
+De Pages Function accepteert alleen JPEG, PNG en WebP tot 8 MB, controleert de bestandssignatuur, toestemming en Turnstile, en schrijft uitsluitend naar `pending/` in de privébucket. Deze controle is geen volledige bestands- of malwarecontrole. Bekijk inzendingen zelf via het R2-dashboard; publicatie gebeurt niet automatisch. Voertuignummer en fotografennaam staan in de custom metadata als URL-gecodeerde tekst. Controleer de inhoud en rechten, verwijder ongewenste inzendingen en voeg goedgekeurde foto's handmatig toe aan de bestaande fotobibliotheek met de juiste naamsvermelding. De beheerder blijft verantwoordelijk voor toegangsbeheer, bewaartermijn en privacy van ingestuurde foto's en eventuele EXIF-gegevens.
 
 ### Versiebeheer van assets
 

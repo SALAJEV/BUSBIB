@@ -105,7 +105,6 @@ function syncPhotoDelayBanner() {
 const BASE_URL = `${window.location.origin}/dataset`;
 const API_URL = "https://busbib.be/api";
 const PYTHON_MAIN_DOWNLOAD_URL = "https://busbibliotheek95.pages.dev/python/script.py";
-const PHOTO_UPLOAD_FORM_URL = "https://forms.gle/MLzezhEKqxg6xagm9";
 const REPORT_FORM_URL = "https://forms.gle/DKKPFHfSAgA2jo6B7";
 const REVIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeuWQPblp0uBjQ2W2EKwd3LH_qVITWjQcS2EQhHQcbubS7KRw/viewform";
 const CONTACT_PAGE_URL = "https://sites.google.com/view/delijn-busspotter/contact";
@@ -409,6 +408,7 @@ const vehiclePhotoEmptyStateEl = document.getElementById("vehiclePhotoEmptyState
 const vehiclePhotoEmptyTitleEl = document.getElementById("vehiclePhotoEmptyTitle");
 const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText");
 const vehiclePhotoUploadBtn = document.getElementById("vehiclePhotoUploadBtn");
+const vehiclePhotoAddBtn = document.getElementById("vehiclePhotoAddBtn");
 const footerSocialsEl = document.getElementById("footerSocials");
 const footerReviewBtn = document.getElementById("footerReviewBtn");
 const footerTermsBtn = document.getElementById("footerTermsBtn");
@@ -489,14 +489,14 @@ const reportMobileLinkEl = document.getElementById("reportMobileLink");
 const photoUploadModalEl = document.getElementById("photoUploadModal");
 const photoUploadModalTitleEl = document.getElementById("photoUploadModalTitle");
 const photoUploadModalSummaryEl = document.getElementById("photoUploadModalSummary");
-const photoUploadModalBadgeEl = document.getElementById("photoUploadModalBadge");
-const photoUploadModalNoteEl = document.getElementById("photoUploadModalNote");
-const photoUploadStep1El = document.getElementById("photoUploadStep1");
-const photoUploadStep2El = document.getElementById("photoUploadStep2");
-const photoUploadStep3El = document.getElementById("photoUploadStep3");
 const photoUploadModalCloseBtn = document.getElementById("photoUploadModalCloseBtn");
 const photoUploadModalDoneBtn = document.getElementById("photoUploadModalDoneBtn");
-const photoUploadOpenLinkEl = document.getElementById("photoUploadOpenLink");
+const photoUploadFormEl = document.getElementById("photoUploadForm");
+const photoUploadVehicleEl = document.getElementById("photoUploadVehicle");
+const photoUploadChallengeEl = document.getElementById("photoUploadChallenge");
+const photoUploadStatusEl = document.getElementById("photoUploadStatus");
+const photoUploadSubmitEl = document.getElementById("photoUploadSubmit");
+let photoUploadChallengeId = null;
 const termsModalEl = document.getElementById("termsModal");
 const termsModalTitleEl = document.getElementById("termsModalTitle");
 const termsModalSummaryEl = document.getElementById("termsModalSummary");
@@ -542,6 +542,11 @@ const homeGtfsMapSummaryEl = document.getElementById("homeGtfsMapSummary");
 const homeGtfsMapStatusEl = document.getElementById("homeGtfsMapStatus");
 const homeGtfsMapEl = document.getElementById("homeGtfsMap");
 const homeGtfsMapRefreshBtn = document.getElementById("homeGtfsMapRefreshBtn");
+const homeMapModelFilterEl = document.getElementById("homeMapModelFilter");
+const homeMapFilterLabelEl = document.getElementById("homeMapFilterLabel");
+const favoriteAlertsEl = document.getElementById("favoriteAlerts");
+const favoriteAlertsTitleEl = document.getElementById("favoriteAlertsTitle");
+const favoriteAlertsContentEl = document.getElementById("favoriteAlertsContent");
 const morePanelTitleEl = document.getElementById("morePanelTitle");
 const haltModuleTitleEl = document.getElementById("haltModuleTitle");
 const haltModuleDescriptionEl = document.getElementById("haltModuleDescription");
@@ -608,6 +613,11 @@ let homeGtfsMapStarted = false;
 let homeGtfsMapTripsDeferred = false;
 let homeGtfsMapIsRefreshing = false;
 let homeGtfsMapPausedByInactivity = false;
+let homeGtfsMapSnapshots = [];
+let favoriteAlertsData = null;
+let favoriteAlertsState = "loading";
+let favoriteAlertsLoading = null;
+let favoriteAlertsFetchedAt = 0;
 let currentPhotoVehicleId = "";
 let currentVehiclePhotoEntries = [];
 let currentVehiclePhotoIndex = 0;
@@ -643,7 +653,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.08-7";
+const APP_VERSION = "2026.11.08-8";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -2243,6 +2253,8 @@ function buildUrlForRouteState(routeState = {}) {
 
   url.pathname = PAGE_PATHS[normalizedState.view] || PAGE_PATHS.home;
   url.searchParams.delete("view");
+  if (normalizedState.view !== "lijn") url.searchParams.delete("route");
+  if (normalizedState.view !== "halte") url.searchParams.delete("stop");
 
   return `${url.pathname}${url.search}${url.hash}`;
 }
@@ -2283,6 +2295,13 @@ function navigateToPage(view) {
     compare: ""
   }, "", buildUrlForRouteState(nextState));
   void applyRouteStateFromLocation();
+}
+
+function clearTransitLinkParameter(name) {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(name)) return;
+  url.searchParams.delete(name);
+  window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
 function isMobileMenuOverlay() {
@@ -3211,6 +3230,11 @@ async function updateLineSearchSuggestions() {
 
 async function showLineSearchRoute(route) {
   if (!route) return;
+  if (!routeNavigationLocked && currentPageView === "lijn") {
+    const url = new URL(window.location.href);
+    url.searchParams.set("route", cleanText(route.route_id));
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }
   const requestToken = ++lineSearchRequestToken;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
@@ -3224,6 +3248,7 @@ async function showLineSearchRoute(route) {
   } catch (error) {
     console.warn("Actuele voertuigen voor lijn laden mislukt", error);
     if (requestToken === lineSearchRequestToken) {
+      renderLineSearchResults([route], { gpsEntityByVehicleId: new Map() }, { realtimeUnavailable: true });
       setLineSearchStatus(
         getLabel("lineSearchError", "Lijngegevens konden niet worden opgehaald. Probeer het later opnieuw."),
         true
@@ -3324,7 +3349,7 @@ function getLineSearchActiveTrips(route, derivedData) {
     );
 }
 
-function renderLineSearchResults(matchedRoutes, derivedData) {
+function renderLineSearchResults(matchedRoutes, derivedData, { realtimeUnavailable = false } = {}) {
   const routeResults = matchedRoutes.map((route) => ({
     route,
     activeTrips: getLineSearchActiveTrips(route, derivedData)
@@ -3336,7 +3361,7 @@ function renderLineSearchResults(matchedRoutes, derivedData) {
     const routeId = cleanText(route.route_id);
     const isFavorite = favoriteLines.some((favorite) => normalize(favorite.id) === normalize(routeId));
     const favoriteLabel = isFavorite ? t("favoriteRemove") : t("favoriteAdd");
-    const routeCount = getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
+    const routeCount = realtimeUnavailable ? "" : getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
       .replace("{trips}", String(activeTrips.length))
       .replace("{vehicles}", String(activeVehicleCount));
     const tripMarkup = activeTrips.length
@@ -3351,9 +3376,11 @@ function renderLineSearchResults(matchedRoutes, derivedData) {
           }).join("");
           return `<article class="line-search-trip"><div class="line-search-trip-heading"><strong>${escapeHtml(tripLabel)}</strong>${trip.tripId ? `<span>${escapeHtml(trip.tripId)}</span>` : ""}</div><div class="line-search-vehicles">${vehicleMarkup}</div></article>`;
         }).join("")}</div>`
-      : `<p class="line-search-empty">${escapeHtml(getLabel("lineSearchNoActiveVehicles", "Er zijn momenteel geen actieve ritten of voertuigen voor deze lijn gevonden."))}</p>`;
+      : `<p class="line-search-empty">${escapeHtml(realtimeUnavailable
+          ? getLabel("lineRealtimeUnavailable", "Actuele voertuigen zijn tijdelijk niet beschikbaar.")
+          : getLabel("lineSearchNoActiveVehicles", "Er zijn momenteel geen actieve ritten of voertuigen voor deze lijn gevonden."))}</p>`;
 
-    return `<section class="line-search-route"><header class="line-search-route-header">${getLineSearchBadgeMarkup(route)}<div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span><button class="favorite-line-toggle${isFavorite ? " is-favorite" : ""}" type="button" data-line-favorite-toggle="${escapeHtml(routeId)}" aria-pressed="${String(isFavorite)}" aria-label="${escapeHtml(favoriteLabel)}">${isFavorite ? "★" : "☆"}</button></header>${tripMarkup}</section>`;
+    return `<section class="line-search-route"><header class="line-search-route-header">${getLineSearchBadgeMarkup(route)}<div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span><button class="btn transit-share-btn" type="button" data-share-line="${escapeHtml(routeId)}">${escapeHtml(getLabel("shareLink", "Delen"))}</button><button class="favorite-line-toggle${isFavorite ? " is-favorite" : ""}" type="button" data-line-favorite-toggle="${escapeHtml(routeId)}" aria-pressed="${String(isFavorite)}" aria-label="${escapeHtml(favoriteLabel)}">${isFavorite ? "★" : "☆"}</button></header>${tripMarkup}</section>`;
   }).join("");
 
   lineSearchResultsEl.innerHTML = routeSections;
@@ -3458,15 +3485,41 @@ function hideReportModal() {
 function showPhotoUploadModal() {
   if (!photoUploadModalEl) return;
   updatePhotoUploadCopy(currentPhotoVehicleId);
-  if (shouldOpenExternalFormExperience()) {
-    openExternalUrl(PHOTO_UPLOAD_FORM_URL, { preferSameTab: true });
-    return;
-  }
-  openOverlayModal(photoUploadModalEl, { focusTarget: photoUploadOpenLinkEl || photoUploadModalCloseBtn });
+  if (photoUploadVehicleEl) photoUploadVehicleEl.value = getVehicleDisplayId(currentPhotoVehicleId);
+  openOverlayModal(photoUploadModalEl, { focusTarget: photoUploadVehicleEl || photoUploadModalCloseBtn });
+  void initializePhotoUploadChallenge();
 }
 
 function hidePhotoUploadModal() {
   closeOverlayModal(photoUploadModalEl);
+}
+
+async function initializePhotoUploadChallenge() {
+  const siteKey = cleanText(window.BB_SITE_CONFIG?.photoUploadTurnstileSiteKey);
+  if (!photoUploadChallengeEl || !photoUploadSubmitEl || !photoUploadStatusEl) return;
+  if (!siteKey) {
+    photoUploadSubmitEl.disabled = true;
+    photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
+    return;
+  }
+  if (photoUploadChallengeId !== null) return;
+  photoUploadSubmitEl.disabled = true;
+  try {
+    await loadScriptOnce("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit");
+    if (!window.turnstile) throw new Error("Turnstile ontbreekt");
+    photoUploadChallengeId = window.turnstile.render(photoUploadChallengeEl, {
+      sitekey: siteKey,
+      callback: () => { photoUploadSubmitEl.disabled = false; photoUploadStatusEl.textContent = ""; },
+      "expired-callback": () => { photoUploadSubmitEl.disabled = true; },
+      "error-callback": () => {
+        photoUploadSubmitEl.disabled = true;
+        photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
+      }
+    });
+  } catch (error) {
+    console.warn("Uploadbeveiliging laden mislukt", error);
+    photoUploadStatusEl.textContent = getLabel("photoUploadUnavailable", "Foto insturen is tijdelijk niet beschikbaar.");
+  }
 }
 
 function ensureEmbeddedFrameLoaded(frameEl) {
@@ -3792,6 +3845,9 @@ async function applyDeepLinkIfNeeded() {
 
 async function applyRouteStateFromLocation() {
   const routeState = getRouteStateFromLocation();
+  const params = new URLSearchParams(window.location.search);
+  const linkedRoute = routeState.view === "lijn" ? cleanText(params.get("route")) : "";
+  const linkedStop = routeState.view === "halte" ? cleanText(params.get("stop")) : "";
   routeNavigationLocked = true;
   closeTransientOverlays();
 
@@ -3839,6 +3895,35 @@ async function applyRouteStateFromLocation() {
     setHomeGtfsMapVisible(routeState.view === "home" || isMobileMenuOverlay());
     if (routeState.view === "halte") prepareHalteSearchPage();
     if (routeState.view === "lijn") prepareLineSearchPage();
+    if (linkedRoute) {
+      await laadRoutes();
+      if (getRouteStateFromLocation().view !== "lijn" || new URLSearchParams(window.location.search).get("route") !== linkedRoute) return;
+      const route = routesById.get(normalize(linkedRoute));
+      if (route) await showLineSearchRoute(route);
+      else setLineSearchStatus(routes.length
+        ? getLabel("favoriteLineUnavailable", "Deze lijn staat niet meer in de huidige dienstregeling.")
+        : getLabel("lineSearchError", "Lijngegevens konden niet worden opgehaald. Probeer het later opnieuw."), true);
+    }
+    if (linkedStop) {
+      if (!/^\d{1,12}$/.test(linkedStop) || !isValidHalteCode(linkedStop)) {
+        setHalteStatus(getLabel("haltSearchInvalid", "Voer een haltecode of haltenaam in."));
+      } else {
+        if (haltecodeInputEl) haltecodeInputEl.value = linkedStop;
+        try {
+          const matches = await searchHaltesLocal(linkedStop);
+          if (getRouteStateFromLocation().view !== "halte" || new URLSearchParams(window.location.search).get("stop") !== linkedStop) return;
+          if (!stops.length) throw new Error("Haltegegevens niet beschikbaar");
+          const exactMatches = matches.filter((stop) =>
+            (stop.haltenummers || []).some((code) => normalizeHalteCode(code) === linkedStop)
+          );
+          renderHalteSearchResults(exactMatches);
+          setHalteStatus(exactMatches.length ? "" : getLabel("haltSearchNoResults", "Geen haltes gevonden."));
+        } catch (error) {
+          console.warn("Gedeelde halte laden mislukt", error);
+          setHalteStatus(getLabel("haltSearchFailed", "Haltes konden niet worden opgehaald."));
+        }
+      }
+    }
   } finally {
     routeNavigationLocked = false;
     updateUrlState("replace");
@@ -3888,9 +3973,9 @@ function buildVehicleMapPopup(snapshot) {
   const routeTextColor = snapshot.routeTextColor || "#ffffff";
   const modelText = cleanText(snapshot.type);
   const ownerText = cleanText(snapshot.owner);
-  const vehicleModel = modelText && modelText !== "/"
-    ? modelText
-    : getLabel("unknownVehicleModel", "Onbekend voertuigmodel");
+  const vehicleKind = snapshot.vehicle ? getVehicleKind(snapshot.vehicle) : "";
+  const kindLabel = vehicleKind === "tram" ? getLabel("mapTrams", "Trams") : vehicleKind === "bus" ? getLabel("mapBuses", "Bussen") : getLabel("mapUnknownKind", "Onbekend voertuig");
+  const vehicleModel = `${kindLabel} · ${modelText || getLabel("unknownVehicleModel", "Onbekend voertuigmodel")}`;
   const owner = ownerText && ownerText !== "/" ? ownerText : "-";
   const destinationText = cleanText(snapshot.destinationText);
   const destination = destinationText && destinationText !== "/" ? destinationText : "-";
@@ -4188,7 +4273,7 @@ function updateOpenHomeGtfsMapVehicleCard(snapshots) {
   positionHomeGtfsVehicleCard();
 }
 
-async function renderHomeGtfsMap(snapshots) {
+async function renderHomeGtfsMap(snapshots, { recenter = true } = {}) {
   if (!homeGtfsMapPanelEl || !homeGtfsMapEl) return;
   await initHomeGtfsMap();
   if (!homeGtfsMapMarkers || !homeGtfsMap) return;
@@ -4205,9 +4290,70 @@ async function renderHomeGtfsMap(snapshots) {
 
   window.setTimeout(() => {
     homeGtfsMap.invalidateSize();
-    if (!bounds.length) return;
+    if (!bounds.length || !recenter) return;
     homeGtfsMap.setView(HOME_GTFS_MAP_CENTER, homeGtfsMap.getZoom() || HOME_GTFS_MAP_ZOOM, { animate: false });
   }, 0);
+}
+
+function getHomeMapModelKey(snapshot) {
+  const kind = snapshot.vehicle ? getVehicleKind(snapshot.vehicle) : "unknown";
+  return JSON.stringify([kind, cleanText(snapshot.type)]);
+}
+
+function updateHomeMapFilterOptions() {
+  if (!homeMapModelFilterEl) return;
+  const selected = homeMapModelFilterEl.value;
+  const selectedLabel = homeMapModelFilterEl.selectedOptions[0]?.textContent || "";
+  const allOption = document.createElement("option");
+  allOption.value = "";
+  allOption.textContent = getLabel("mapAllVehicles", "Alle bussen en trams");
+  homeMapModelFilterEl.replaceChildren(allOption);
+  if (homeMapFilterLabelEl) homeMapFilterLabelEl.textContent = getLabel("mapFilterModel", "Filter op voertuigmodel");
+  const legend = document.getElementById("homeMapKindLegend");
+  if (legend) legend.textContent = getLabel("mapKindLegend", "B = bus · T = tram · ? = onbekend");
+  const kinds = [
+    ["bus", getLabel("mapBuses", "Bussen")],
+    ["tram", getLabel("mapTrams", "Trams")],
+    ["unknown", getLabel("mapUnknownKind", "Onbekend voertuig")]
+  ];
+  for (const [kind, label] of kinds) {
+    const models = new Map();
+    for (const snapshot of homeGtfsMapSnapshots) {
+      const snapshotKind = snapshot.vehicle ? getVehicleKind(snapshot.vehicle) : "unknown";
+      if (snapshotKind !== kind) continue;
+      const model = cleanText(snapshot.type);
+      models.set(getHomeMapModelKey(snapshot), model || getLabel("unknownVehicleModel", "Onbekend voertuigmodel"));
+    }
+    if (!models.size) continue;
+    const group = document.createElement("optgroup");
+    group.label = label;
+    for (const [key, name] of [...models].sort((a, b) => a[1].localeCompare(b[1]))) {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = name;
+      group.append(option);
+    }
+    homeMapModelFilterEl.append(group);
+  }
+  if (selected && !Array.from(homeMapModelFilterEl.options).some((option) => option.value === selected)) {
+    const option = document.createElement("option");
+    option.value = selected;
+    option.textContent = selectedLabel;
+    homeMapModelFilterEl.append(option);
+  }
+  if (Array.from(homeMapModelFilterEl.options).some((option) => option.value === selected)) {
+    homeMapModelFilterEl.value = selected;
+  }
+}
+
+async function applyHomeMapFilter({ recenter = false } = {}) {
+  const selected = homeMapModelFilterEl?.value || "";
+  const visible = selected
+    ? homeGtfsMapSnapshots.filter((snapshot) => getHomeMapModelKey(snapshot) === selected)
+    : homeGtfsMapSnapshots;
+  await renderHomeGtfsMap(visible, { recenter });
+  updateOpenHomeGtfsMapVehicleCard(visible);
+  setHomeGtfsMapStatus(getLabel("homeGtfsMapLoaded", "{count} voertuigen actief op de kaart").replace("{count}", String(visible.length)), visible.length ? "" : "muted");
 }
 
 function redrawHomeGtfsMapMarkers() {
@@ -4283,18 +4429,10 @@ async function refreshHomeGtfsMap(options = {}) {
       return (left.displayVehicleId || left.vehicleId).localeCompare(right.displayVehicleId || right.vehicleId, undefined, { numeric: true });
     });
 
-    await renderHomeGtfsMap(snapshots);
+    homeGtfsMapSnapshots = snapshots;
+    updateHomeMapFilterOptions();
+    await applyHomeMapFilter({ recenter: true });
     if (requestToken !== homeGtfsMapRequestToken) return;
-    updateOpenHomeGtfsMapVehicleCard(snapshots);
-    setHomeGtfsMapStatus(
-      snapshots.length
-        ? getLabel(
-            "homeGtfsMapLoaded",
-            "{count} voertuigen actief op de kaart"
-          ).replace("{count}", String(snapshots.length))
-        : getLabel("homeGtfsMapEmpty", "Geen live GTFS-bussen gevonden."),
-      snapshots.length ? "" : "muted"
-    );
     if (trips.length === 0 && !tripsLoadPromise && !homeGtfsMapTripsDeferred) {
       // Grote ritten-dataset pas na de eerste kaartweergave laden en dan de kaart verrijken.
       homeGtfsMapTripsDeferred = true;
@@ -4379,29 +4517,25 @@ function updatePhotoUploadCopy(vehicleId = currentPhotoVehicleId) {
   if (vehiclePhotoUploadBtn) {
     vehiclePhotoUploadBtn.textContent = getLabel("photoUploadOpen", "Foto insturen");
   }
+  if (vehiclePhotoAddBtn) vehiclePhotoAddBtn.textContent = getLabel("uploadSubmit", "Foto insturen");
   if (photoUploadModalTitleEl) photoUploadModalTitleEl.textContent = getLabel("photoUploadTitle", "Foto uploaden");
   if (photoUploadModalSummaryEl) {
     photoUploadModalSummaryEl.textContent = hasSpecificVehicleId
       ? fillTemplate(getLabel("photoUploadSummary", "Help BUSBIB aanvullen met een foto van voertuig {id}."), visibleVehicleId)
       : getLabel("photoUploadSummaryGeneric", "Help BUSBIB aanvullen met een foto van dit voertuig.");
   }
-  if (photoUploadModalBadgeEl) photoUploadModalBadgeEl.textContent = getLabel("photoUploadModalBadge", "Voertuigfoto ontbreekt");
-  if (photoUploadModalNoteEl) {
-    photoUploadModalNoteEl.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadNote", "We zoeken nog een duidelijke foto van voertuig {id}. Heb jij er eentje? Dan kan je die hieronder doorsturen."), visibleVehicleId)
-      : getLabel("photoUploadNoteGeneric", "We zoeken nog een duidelijke foto van dit voertuig. Heb jij er eentje? Dan kan je die hieronder doorsturen.");
-  }
-  if (photoUploadStep1El) photoUploadStep1El.textContent = getLabel("photoUploadStep1", "Open het formulier in je browser.");
-  if (photoUploadStep2El) {
-    photoUploadStep2El.textContent = hasSpecificVehicleId
-      ? fillTemplate(getLabel("photoUploadStep2", "Voeg je foto toe en vermeld voertuig {id}."), visibleVehicleId)
-      : getLabel("photoUploadStep2Generic", "Voeg je foto toe en vermeld het voertuignummer.");
-  }
-  if (photoUploadStep3El) photoUploadStep3El.textContent = getLabel("photoUploadStep3", "Na controle kan de foto op BUSBIB verschijnen.");
-  if (photoUploadOpenLinkEl) {
-    photoUploadOpenLinkEl.textContent = getLabel("photoUploadOpen", "Open uploadformulier");
-    photoUploadOpenLinkEl.href = PHOTO_UPLOAD_FORM_URL;
-  }
+  const uploadLabels = {
+    photoUploadVehicleLabel: ["uploadVehicleLabel", "Voertuignummer"],
+    photoUploadPhotographerLabel: ["uploadPhotographerLabel", "Naam van de fotograaf"],
+    photoUploadFileLabel: ["uploadFileLabel", "Foto (JPEG, PNG of WebP, maximaal 8 MB)"],
+    photoUploadConsentLabel: ["uploadConsentLabel", "Ik heb het recht om deze foto te delen en geef BUSBIB toestemming om ze met mijn naam te publiceren."],
+    photoUploadPrivacy: ["uploadPrivacy", "De foto wordt eerst gecontroleerd. De foto kan locatie en andere metadata bevatten; verwijder die vooraf als je ze niet wilt delen."],
+    photoUploadSubmit: ["uploadSubmit", "Foto insturen"]
+  };
+  Object.entries(uploadLabels).forEach(([id, [key, fallback]]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = getLabel(key, fallback);
+  });
 }
 
 function ensureVehiclePhotoImageElement() {
@@ -6623,6 +6757,8 @@ window.addEventListener("resize", debounce(syncHeaderActionPlacement, 120), { pa
 
 function applyTranslations() {
   document.documentElement.lang = settings.language || DEFAULT_LANG;
+  updateHomeMapFilterOptions();
+  renderFavoriteAlerts();
   updateCopyrightText();
   if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", getLabel("metaDescription", "Ontdek BUSBIB: zoek bussen en trams van De Lijn, volg voertuigen live op de kaart en bekijk lijnen, haltes, foto's en voertuiggegevens."));
   splash?.setAttribute("aria-label", getLabel("splashAria", "BUSBIB laden"));
@@ -6903,6 +7039,7 @@ function applyTranslations() {
 }
 
 function refreshVisibleLocalizedState() {
+  updateHomeMapFilterOptions();
   updateVehiclePhotoTexts();
   if (compareVehicleId && !compareCardEl?.hidden) {
     renderComparison();
@@ -7002,6 +7139,7 @@ function renderHalteSearchResults(haltes = []) {
         <span class="vehicle-suggestion-primary">${escapeHtml(omschrijving)}</span>
         <span class="vehicle-suggestion-secondary">${escapeHtml(provincie || getLabel("unknownProvince", "Onbekende provincie"))}</span>
       </span>
+      <button class="btn transit-share-btn" type="button" data-share-stop>${escapeHtml(getLabel("shareLink", "Delen"))}</button>
       <button class="favorite-stop-toggle${isFavorite ? " is-favorite" : ""}" type="button" data-halte-favorite-toggle aria-pressed="${String(isFavorite)}" aria-label="${escapeHtml(isFavorite ? t("favoriteRemove") : t("favoriteAdd"))}">${isFavorite ? "★" : "☆"}</button>
     `;
     item.addEventListener("mousedown", (event) => {
@@ -7016,11 +7154,35 @@ function renderHalteSearchResults(haltes = []) {
       toggleStopFavorite({ codes: validCodes, name: omschrijving });
       renderHalteSearchResults(haltes);
     });
+    item.querySelector("[data-share-stop]")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      void shareTransitLink("stop", primaryCode);
+    });
     haltSearchResultsListEl.appendChild(item);
   });
 
   haltSearchResultsListEl.hidden = haltSearchResultsListEl.childElementCount === 0;
   if (!haltSearchResultsListEl.hidden) positionSuggestionList(haltSearchResultsListEl, haltecodeInputEl);
+}
+
+async function shareTransitLink(type, id) {
+  const url = new URL(type === "line" ? "/line" : "/stop", window.location.origin);
+  url.searchParams.set(type === "line" ? "route" : "stop", id);
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: document.title, url: url.href });
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url.href);
+      await showAppAlert(getLabel("shareCopied", "De link is gekopieerd."));
+      return;
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    console.warn("Link delen mislukt", error);
+  }
+  await showAppAlert(`${getLabel("shareCopyManually", "Kopieer deze link:")} ${url.href}`);
 }
 
 async function updateHalteSuggestions() {
@@ -7865,6 +8027,74 @@ function renderHomeFavorites() {
     const stopName = cleanText(stop?.stop_name || favorite.name || favorite.id);
     return `<article class="home-favorite-entry"><button class="home-favorite-open" type="button" data-favorite-type="stop" data-favorite-id="${escapeHtml(favorite.id)}"><span class="home-favorite-stop-icon" aria-hidden="true">●</span><span class="home-favorite-copy"><strong>${escapeHtml(stopName)}</strong><small>${escapeHtml(favorite.id)}</small></span></button><button class="home-favorite-remove" type="button" data-favorite-type="stop" data-favorite-remove="${escapeHtml(favorite.id)}" aria-label="${escapeHtml(t("favoriteRemove"))}">&times;</button></article>`;
   });
+  renderFavoriteAlerts();
+  if (favoriteLines.length && Date.now() - favoriteAlertsFetchedAt > 5 * 60 * 1000) void loadFavoriteAlerts();
+}
+
+function getAlertText(value) {
+  const translations = value?.translation || value?.translations || [];
+  if (typeof value === "string") return cleanText(value);
+  if (!Array.isArray(translations)) return "";
+  const preferred = translations.find((entry) => cleanText(entry.language).toLowerCase().split("-")[0] === settings.language);
+  return cleanText(preferred?.text || translations[0]?.text);
+}
+
+function renderFavoriteAlerts() {
+  if (!favoriteAlertsEl || !favoriteAlertsContentEl) return;
+  favoriteAlertsEl.hidden = !favoriteLines.length;
+  if (!favoriteLines.length) return;
+  if (favoriteAlertsTitleEl) favoriteAlertsTitleEl.textContent = getLabel("favoriteAlertsTitle", "Meldingen voor je favoriete lijnen");
+  if (favoriteAlertsState !== "ready") {
+    favoriteAlertsContentEl.textContent = favoriteAlertsState === "error"
+      ? getLabel("favoriteAlertsUnavailable", "Meldingen zijn tijdelijk niet beschikbaar.")
+      : getLabel("favoriteAlertsLoading", "Meldingen worden geladen...");
+    return;
+  }
+  const favoriteIds = new Set(favoriteLines.map((line) => normalizeLookup(line.id)));
+  const now = Date.now() / 1000;
+  const alerts = favoriteAlertsData.filter((entity) => {
+    const alert = entity.alert;
+    if (!alert) return false;
+    const periods = alert.activePeriod || alert.active_period || [];
+    if (periods.length && !periods.some((period) => (!period.start || Number(period.start) <= now) && (!period.end || Number(period.end) >= now))) return false;
+    const selectors = alert.informedEntity || alert.informed_entity || [];
+    return selectors.some((selector) => favoriteIds.has(normalizeLookup(selector.routeId || selector.route_id || selector.trip?.routeId || selector.trip?.route_id)));
+  });
+  if (!alerts.length) {
+    favoriteAlertsContentEl.textContent = getLabel("favoriteAlertsNone", "Geen actuele meldingen voor je favoriete lijnen.");
+    return;
+  }
+  favoriteAlertsContentEl.innerHTML = `<ul class="favorite-alerts-list">${alerts.map((entity) => {
+    const alert = entity.alert;
+    const title = getAlertText(alert.headerText || alert.header_text) || getLabel("favoriteAlertsNotice", "Melding");
+    const description = getAlertText(alert.descriptionText || alert.description_text);
+    return `<li><strong>${escapeHtml(title)}</strong>${description ? `<p>${escapeHtml(description)}</p>` : ""}</li>`;
+  }).join("")}</ul>`;
+}
+
+async function loadFavoriteAlerts() {
+  if (!favoriteLines.length || favoriteAlertsLoading) return favoriteAlertsLoading;
+  favoriteAlertsState = "loading";
+  renderFavoriteAlerts();
+  favoriteAlertsLoading = (async () => {
+    try {
+      const response = await fetchWithTimeout(`${API_URL}?resource=gtfsalerts&format=json`, { cache: "no-store" });
+      const payload = await response.json();
+      const entities = payload.entity || payload.entities;
+      if (!Array.isArray(entities) || payload.meta?.source === "fallback") throw new Error("Ongeldige of niet beschikbare GTFS-alertfeed");
+      favoriteAlertsData = entities;
+      favoriteAlertsState = "ready";
+    } catch (error) {
+      console.warn("Lijnmeldingen ophalen mislukt", error);
+      favoriteAlertsData = null;
+      favoriteAlertsState = "error";
+    } finally {
+      favoriteAlertsFetchedAt = Date.now();
+      favoriteAlertsLoading = null;
+      renderFavoriteAlerts();
+    }
+  })();
+  return favoriteAlertsLoading;
 }
 
 async function openFavoriteLine(routeId) {
@@ -8087,6 +8317,9 @@ function initAppPreferences() {
   initAndroidViewportSupport();
   loadFavorites();
   loadTransitFavorites();
+  window.setInterval(() => {
+    if (favoriteLines.length) void loadFavoriteAlerts();
+  }, 5 * 60 * 1000);
   settings.intervalMs = normalizeUpdateIntervalMs(settings.intervalMs);
   updateIntervalMs = settings.intervalMs;
   settings.language = normalizeLanguage(settings.language);
@@ -8182,6 +8415,12 @@ homeGtfsMapRefreshBtn?.addEventListener("click", () => {
   homeGtfsMapPausedByInactivity = false;
   startHomeGtfsMapRefresh();
   void refreshHomeGtfsMap({ force: true });
+});
+homeMapModelFilterEl?.addEventListener("change", () => {
+  void applyHomeMapFilter().catch((error) => {
+    console.warn("Kaartfilter toepassen mislukt", error);
+    setHomeGtfsMapStatus(getLabel("homeGtfsMapError", "Live GTFS-kaart kon niet geladen worden."), "error");
+  });
 });
 homeFavoritesPanelEl?.addEventListener("click", (event) => {
   const target = event.target;
@@ -8305,6 +8544,9 @@ haltecodeInputEl?.addEventListener("keydown", (event) => {
     searchHaltes();
   }
 });
+haltecodeInputEl?.addEventListener("input", () => {
+  clearTransitLinkParameter("stop");
+});
 haltecodeInputEl?.addEventListener("input", debounce(() => {
   void updateHalteSuggestions();
 }, 200));
@@ -8411,8 +8653,31 @@ reportModalEl?.addEventListener("click", (event) => {
   if (event.target === reportModalEl) hideReportModal();
 });
 vehiclePhotoUploadBtn?.addEventListener("click", showPhotoUploadModal);
+vehiclePhotoAddBtn?.addEventListener("click", showPhotoUploadModal);
 photoUploadModalCloseBtn?.addEventListener("click", hidePhotoUploadModal);
 photoUploadModalDoneBtn?.addEventListener("click", hidePhotoUploadModal);
+photoUploadFormEl?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!photoUploadSubmitEl || !photoUploadStatusEl) return;
+  const formData = new FormData(photoUploadFormEl);
+  const photo = formData.get("photo");
+  if (!(photo instanceof File) || photo.size > 8 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(photo.type)) {
+    photoUploadStatusEl.textContent = getLabel("uploadInvalidImage", "Kies een JPEG-, PNG- of WebP-foto van maximaal 8 MB.");
+    return;
+  }
+  photoUploadSubmitEl.disabled = true;
+  photoUploadStatusEl.textContent = getLabel("uploadSending", "Foto wordt verstuurd...");
+  try {
+    await fetchWithTimeout("/photo-upload", { method: "POST", body: formData }, 90000);
+    photoUploadFormEl.reset();
+    photoUploadStatusEl.textContent = getLabel("uploadSuccess", "Bedankt! Je foto is ontvangen en wordt gecontroleerd.");
+  } catch (error) {
+    console.warn("Foto insturen mislukt", error);
+    photoUploadStatusEl.textContent = getLabel("uploadFailed", "Versturen mislukt. Probeer het later opnieuw.");
+  } finally {
+    if (photoUploadChallengeId !== null && window.turnstile) window.turnstile.reset(photoUploadChallengeId);
+  }
+});
 photoUploadModalEl?.addEventListener("click", (event) => {
   if (event.target === photoUploadModalEl) hidePhotoUploadModal();
 });
@@ -8541,6 +8806,7 @@ const scheduleLineSearchSuggestions = debounce(() => {
   });
 }, 180);
 lineSearchInputEl?.addEventListener("input", () => {
+  clearTransitLinkParameter("route");
   lineSearchRequestToken += 1;
   clearLineSearchSuggestions();
   if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
@@ -8567,6 +8833,11 @@ lineSearchSuggestionsEl?.addEventListener("click", (event) => {
 lineSearchResultsEl?.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
+  const shareButton = target.closest("[data-share-line]");
+  if (shareButton) {
+    void shareTransitLink("line", shareButton.getAttribute("data-share-line") || "");
+    return;
+  }
   const favoriteButton = target.closest("[data-line-favorite-toggle]");
   if (favoriteButton) {
     const routeId = favoriteButton.getAttribute("data-line-favorite-toggle") || "";
@@ -8741,6 +9012,7 @@ function buildVehicleIdMarkup(vehicleOrId, fallbackId = "") {
     : findVehicleFromGtfsVehicleId(vehicleOrId);
   const displayId = getVehicleDisplayId(vehicle || vehicleOrId) || normalize(fallbackId);
   if (!displayId) return "";
+  if (!vehicle) return `<span class="vehicle-id-display vehicle-id-display--unknown"><span>${escapeHtml(displayId)}</span></span>`;
   const vehicleKind = getVehicleKind(vehicle);
   return `<span class="vehicle-id-display vehicle-id-display--${vehicleKind}">${buildVehicleKindIconMarkup(vehicle)}<span>${escapeHtml(displayId)}</span></span>`;
 }
@@ -9418,6 +9690,19 @@ function getHomeGtfsCanvasLayerClass() {
           ctx.rotate(((Number(snapshot.bearing) || 0) * Math.PI) / 180);
           ctx.drawImage(icon, -iconWidth / 2, -iconSize, iconWidth, iconSize);
           ctx.restore();
+          const kind = snapshot.vehicle ? getVehicleKind(snapshot.vehicle) : "unknown";
+          ctx.beginPath();
+          ctx.arc(x + 9, y - 7, 7, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.strokeStyle = "#263844";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.fillStyle = "#263844";
+          ctx.font = "700 9px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(kind === "tram" ? "T" : kind === "bus" ? "B" : "?", x + 9, y - 7);
           return;
         }
 

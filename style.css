@@ -522,6 +522,81 @@ p {
   transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 
+.home-map-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 12px 0;
+  font-weight: 600;
+}
+
+.home-map-filter select {
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+}
+
+.favorite-alerts {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.favorite-alerts h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.favorite-alerts-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.favorite-alerts-list li {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.favorite-alerts-list p {
+  margin: 6px 0 0;
+  white-space: pre-line;
+}
+
+.photo-upload-form,
+.photo-upload-form > label:not(.photo-upload-consent) {
+  display: grid;
+  gap: 8px;
+}
+
+.photo-upload-form {
+  gap: 14px;
+}
+
+.photo-upload-form input:not([type="checkbox"]) {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+}
+
+.photo-upload-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 /* Met de navigatiebalk zichtbaar zijn deze knoppen dubbel */
 .container:has(> .primary-nav:not([hidden])) ~ .menu-overlay .more-extra-functions,
 body:has(.container > .primary-nav) .more-extra-functions {
