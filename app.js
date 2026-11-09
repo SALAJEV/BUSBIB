@@ -205,6 +205,7 @@ touchPointerMediaQuery?.addEventListener?.("change", syncPlatformBodyClasses);
 function isStandaloneDisplayMode() {
   if (window.matchMedia?.("(display-mode: standalone)")?.matches) return true;
   if (window.matchMedia?.("(display-mode: fullscreen)")?.matches) return true;
+  if (window.matchMedia?.("(display-mode: minimal-ui)")?.matches) return true;
   return Boolean(window.navigator.standalone);
 }
 
@@ -226,6 +227,36 @@ function isTabletLikeViewport() {
   const shortSide = Math.min(getViewportWidth(), getViewportHeight());
   const longSide = Math.max(getViewportWidth(), getViewportHeight());
   return shortSide >= 720 || (shortSide >= 600 && longSide >= 960);
+}
+
+function shouldLockPhoneAppZoom() {
+  return isStandaloneDisplayMode() && (isIosPlatform || isAndroidPlatform) &&
+    !isAndroidTvPlatform && !isTabletLikeViewport();
+}
+
+function syncPhoneAppViewport() {
+  const viewport = document.querySelector('meta[name="viewport"]');
+  if (!viewport) return;
+  const base = "width=device-width, initial-scale=1.0, viewport-fit=cover";
+  viewport.setAttribute("content", shouldLockPhoneAppZoom()
+    ? `${base}, maximum-scale=1.0, user-scalable=no`
+    : base);
+}
+
+function preventPhoneAppPageZoom(event) {
+  if (!shouldLockPhoneAppZoom() || !(event.target instanceof Element)) return;
+  if (event.target.closest(".leaflet-container")) return;
+  if (event.type === "touchmove" && event.touches.length < 2) return;
+  if (event.cancelable) event.preventDefault();
+}
+
+function initPhoneAppZoomSupport() {
+  syncPhoneAppViewport();
+  document.addEventListener("gesturestart", preventPhoneAppPageZoom, { passive: false });
+  document.addEventListener("gesturechange", preventPhoneAppPageZoom, { passive: false });
+  document.addEventListener("touchmove", preventPhoneAppPageZoom, { passive: false });
+  window.addEventListener("resize", syncPhoneAppViewport, { passive: true });
+  window.addEventListener("orientationchange", syncPhoneAppViewport, { passive: true });
 }
 
 function supportsEnhancedDialogs() {
@@ -340,10 +371,17 @@ function initAndroidViewportSupport() {
 window.matchMedia?.("(display-mode: standalone)")?.addEventListener?.("change", () => {
   syncPlatformBodyClasses();
   syncInstallButtonVisibility();
+  syncPhoneAppViewport();
 });
 window.matchMedia?.("(display-mode: fullscreen)")?.addEventListener?.("change", () => {
   syncPlatformBodyClasses();
   syncInstallButtonVisibility();
+  syncPhoneAppViewport();
+});
+window.matchMedia?.("(display-mode: minimal-ui)")?.addEventListener?.("change", () => {
+  syncPlatformBodyClasses();
+  syncInstallButtonVisibility();
+  syncPhoneAppViewport();
 });
 window.addEventListener("resize", syncPlatformBodyClasses, { passive: true });
 window.addEventListener("orientationchange", syncPlatformBodyClasses, { passive: true });
@@ -668,7 +706,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.09-22";
+const APP_VERSION = "2026.11.09-23";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -8602,6 +8640,7 @@ function initAppPreferences() {
   syncPlatformBodyClasses();
   syncHeaderActionPlacement();
   initAndroidViewportSupport();
+  initPhoneAppZoomSupport();
   loadFavorites();
   loadTransitFavorites();
   window.setInterval(() => {

@@ -930,6 +930,11 @@ body.route-page-open .container > .home-alerts-panel {
   color: #ffffff;
 }
 
+:root[data-color-theme] .ig-btn-wrap .btn,
+:root[data-color-theme] .ig-btn-wrap .btn:hover {
+  color: var(--ink);
+}
+
 .settings-card select,
 .suggestion-input-shell input,
 .halte-module-form input,

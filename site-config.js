@@ -10,7 +10,7 @@ window.BB_SITE_CONFIG = {
   bannerEnabled: 0,
   bannerText: "Realtime-informatie kan tijdelijk vertraagd zijn.",
   photoDelayEnabled: 0,
-  photoUploadTurnstileSiteKey: "",
+  photoUploadTurnstileSiteKey: "0x4AAAAAAF5PN7FcDNeV-cDg",
   photoDelayText: "Door omstandigheden worden foto's later ge\u00fcpload dan normaal. Bedankt voor je begrip.",
   disabledTitle: "BUSBIB is tijdelijk niet beschikbaar",
   disabledBody: "De website is momenteel tijdelijk niet beschikbaar. Probeer het later opnieuw."
