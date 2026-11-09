@@ -185,3 +185,41 @@ test("oversized request bodies are rejected even without Content-Length", async 
     env.PHOTO_UPLOAD_QUOTA.db.close();
   }
 });
+
+test("503 responses log actionable diagnostics without exposing configuration values", async () => {
+  const quota = createQuota();
+  const env = {
+    TURNSTILE_SECRET: "test-secret",
+    PHOTO_UPLOAD_QUOTA_SECRET: "quota-test-secret",
+    PHOTO_UPLOAD_QUOTA: quota,
+    PHOTO_UPLOADS: { put: async () => {} }
+  };
+  const originalFetch = globalThis.fetch;
+  const originalError = console.error;
+  const logs = [];
+  console.error = (...args) => logs.push(args.join(" "));
+  try {
+    let response = await onRequest({ request: makeRequest(), env: { ...env, PHOTO_UPLOAD_QUOTA: null } });
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: "unavailable" });
+    const configLog = logs.pop();
+    assert.match(configLog, /ontbrekende configuratie.*PHOTO_UPLOAD_QUOTA/);
+    assert.doesNotMatch(configLog, /test-secret|quota-test-secret/);
+
+    const request = new Request(`${origin}/photo-upload`, { method: "POST", headers: { Origin: origin } });
+    response = await onRequest({ request, env });
+    assert.equal(response.status, 503);
+    assert.match(logs.pop(), /CF-Connecting-IP ontbreekt/);
+
+    globalThis.fetch = async () => new Response(null, { status: 503 });
+    response = await onRequest({ request: makeRequest(), env });
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: "verification" });
+    assert.match(logs.pop(), /Turnstile-verificatie niet beschikbaar: HTTP 503/);
+    assert.equal(logs.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalError;
+    quota.db.close();
+  }
+});

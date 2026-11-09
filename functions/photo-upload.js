@@ -43,11 +43,19 @@ function detectImageType(bytes) {
 
 export async function onRequest({ request, env }) {
   if (request.method !== "POST") return respond("method", 405);
-  if (!env.PHOTO_UPLOADS || !env.TURNSTILE_SECRET || !env.PHOTO_UPLOAD_QUOTA || !env.PHOTO_UPLOAD_QUOTA_SECRET) return respond("unavailable", 503);
+  const missingBindings = ["PHOTO_UPLOADS", "TURNSTILE_SECRET", "PHOTO_UPLOAD_QUOTA", "PHOTO_UPLOAD_QUOTA_SECRET"]
+    .filter(name => !env[name]);
+  if (missingBindings.length) {
+    console.error("Foto insturen niet beschikbaar: ontbrekende configuratie", missingBindings.join(", "));
+    return respond("unavailable", 503);
+  }
   const url = new URL(request.url);
   if (request.headers.get("Origin") !== url.origin) return respond("origin", 403);
   const ip = request.headers.get("CF-Connecting-IP");
-  if (!ip) return respond("unavailable", 503);
+  if (!ip) {
+    console.error("Foto insturen niet beschikbaar: CF-Connecting-IP ontbreekt");
+    return respond("unavailable", 503);
+  }
   if (!(request.headers.get("Content-Type") || "").toLowerCase().startsWith("multipart/form-data;")) return respond("format", 400);
   const length = Number(request.headers.get("Content-Length"));
   if (Number.isFinite(length) && length > MAX_BODY_BYTES) return respond("size", 413);
@@ -82,7 +90,10 @@ export async function onRequest({ request, env }) {
       body: JSON.stringify({ secret: env.TURNSTILE_SECRET, response: token }),
       signal: AbortSignal.timeout(10000)
     });
-    if (!verify.ok) return respond("verification", 503);
+    if (!verify.ok) {
+      console.error("Turnstile-verificatie niet beschikbaar: HTTP", verify.status);
+      return respond("verification", 503);
+    }
     const result = await verify.json();
     if (!result.success || result.hostname !== url.hostname) return respond("verification", 403);
     const month = new Date().toISOString().slice(0, 7);
