@@ -15,8 +15,8 @@ from io import StringIO
 
 # Constanten
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-VEHICLES_FILE = "vehicles.txt"
-DOWNLOAD_URL = "https://pub-611b5bc156eb455ba86d9bcece9aea1c.r2.dev/vehicles.txt"
+VEHICLES_FILE = "buses.txt"
+DOWNLOAD_URL = "https://pub-611b5bc156eb455ba86d9bcece9aea1c.r2.dev/buses.txt"
 PDF_LOGO_URL = "https://busbibliotheek95.pages.dev/media/logo/logo.png"
 SITE_URL = "https://sites.google.com/view/delijn-busspotter"
 HEADERS = {
@@ -54,7 +54,7 @@ def _print_welkom():
 
 
 def _find_file():
-    """Zoek naar vehicles.txt bestand."""
+    """Zoek naar het bestand met busgegevens."""
     txt_file = os.path.join(BASE_DIR, VEHICLES_FILE)
 
     if os.path.exists(txt_file):
@@ -68,7 +68,7 @@ def _find_file():
     if sys.stdin.isatty():
         antwoord = input("Hebt u het bestand al ergens op uw computer staan? (ja/nee): ").strip().lower()
         if antwoord in ["ja", "j"]:
-            pad = input("Voer het volledige pad naar vehicles.txt in: ").strip()
+            pad = input(f"Voer het volledige pad naar {VEHICLES_FILE} in: ").strip()
             if pad and os.path.exists(pad):
                 return pad
             else:
@@ -81,7 +81,7 @@ def _find_file():
     return None
 
 def _download_file(txt_file):
-    """Download vehicles.txt van URL."""
+    """Download het bestand met busgegevens."""
     print(f"{BLUE}[DOWNLOAD]{RESET} Bezig met downloaden van voertuigendata...")
     download_ok = False
 
@@ -128,9 +128,9 @@ def _load_from_file(txt_file):
 
 
 def update_data():
-    """Update vehicles.txt van de URL."""
+    """Update de busgegevens van de URL."""
     txt_file = os.path.join(BASE_DIR, VEHICLES_FILE)
-    print(f"{YELLOW}[INFO]{RESET} Start update van vehicles.txt...")
+    print(f"{YELLOW}[INFO]{RESET} Start update van {VEHICLES_FILE}...")
     if _download_file(txt_file):
         print(f"{GREEN}[OK]{RESET} Update voltooid. Herlaad data...")
         return _load_from_file(txt_file)

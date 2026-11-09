@@ -3847,32 +3847,6 @@ footer {
   color: var(--muted);
 }
 
-.photo-upload-callout {
-  padding: 16px;
-  border-radius: var(--radius-md);
-  background: var(--accent-soft);
-}
-
-.photo-upload-badge {
-  display: inline-flex;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.photo-upload-lead {
-  margin: 9px 0 0;
-  color: var(--ink);
-  font-weight: 700;
-}
-
-.photo-upload-modal-copy > .btn {
-  width: 100%;
-}
-
 .app-dialog-message {
   margin: 0;
   overflow-wrap: anywhere;
