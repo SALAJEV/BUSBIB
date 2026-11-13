@@ -1191,6 +1191,10 @@ footer {
     gap: 12px;
   }
 
+  .footer-links {
+    gap: 0 16px;
+  }
+
   .footer-socials {
     grid-template-columns: repeat(6, 44px);
     margin-left: 0;
@@ -1200,6 +1204,10 @@ footer {
 @media (max-width: 680px) {
   footer {
     padding: 16px;
+  }
+
+  .footer-links {
+    gap: 0 12px;
   }
 
   .footer-socials {

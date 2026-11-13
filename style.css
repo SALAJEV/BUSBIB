@@ -2827,6 +2827,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   min-height: 40px;
   padding-top: 13px;
 }
@@ -2838,6 +2840,51 @@ footer {
   letter-spacing: 0.01em;
 }
 
+.footer-donation-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  opacity: 0.82;
+  transition: opacity 160ms ease;
+}
+
+.footer-donation-link:hover {
+  opacity: 1;
+}
+
+.footer-donation-link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.footer-donation-link img,
+.info-donation-badge {
+  display: block;
+  width: clamp(96px, 30vw, 108px);
+  height: auto;
+  aspect-ratio: 3.6;
+  object-fit: contain;
+}
+
+.info-value--donation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  text-decoration: none;
+}
+
+.info-value--donation:hover {
+  text-decoration: none;
+}
+
+.info-value--donation:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 @media (max-width: 900px) {
   .footer-main {
     align-items: stretch;
@@ -2847,9 +2894,8 @@ footer {
   }
 
   .footer-links {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 0 16px;
   }
 
   .footer-socials {
@@ -2868,8 +2914,8 @@ footer {
   }
 
   .footer-links {
-    flex-direction: column;
-    gap: 2px;
+    justify-content: flex-start;
+    gap: 0 12px;
   }
 
   .footer-socials {

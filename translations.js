@@ -844,6 +844,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   infoFeed: "Feed-info",
   infoRealtimeApi: "Realtime API",
   infoGithubProject: "Dit project op GitHub",
+  donationLabel: "Steun BUSBIB",
+  donationPrompt: "Vind je BUSBIB handig? Een kleine vrijwillige donatie is welkom.",
   notInServiceYet: "Bus nog niet in dienst"
 });
 Object.entries({
@@ -1038,6 +1040,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   infoFeed: "Infos du feed",
   infoRealtimeApi: "API temps réel",
   infoGithubProject: "Ce projet sur GitHub",
+  donationLabel: "Soutenir BUSBIB",
+  donationPrompt: "BUSBIB vous est utile ? Un petit don facultatif est apprécié.",
   notInServiceYet: "Bus pas encore en service"
 });
 
@@ -1091,6 +1095,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   infoFeed: "Feed info",
   infoRealtimeApi: "Realtime API",
   infoGithubProject: "This project on GitHub",
+  donationLabel: "Support BUSBIB",
+  donationPrompt: "Find BUSBIB useful? A small voluntary donation is appreciated.",
   notInServiceYet: "Bus not yet in service"
 });
 
@@ -1144,6 +1150,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   infoFeed: "Feed-Info",
   infoRealtimeApi: "Echtzeit-API",
   infoGithubProject: "Dieses Projekt auf GitHub",
+  donationLabel: "BUSBIB unterstützen",
+  donationPrompt: "Ist BUSBIB hilfreich? Über eine kleine freiwillige Spende freuen wir uns.",
   notInServiceYet: "Bus noch nicht im Dienst"
 });
 
@@ -1197,6 +1205,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   infoFeed: "Informacje feedu",
   infoRealtimeApi: "API realtime",
   infoGithubProject: "Ten projekt na GitHubie",
+  donationLabel: "Wesprzyj BUSBIB",
+  donationPrompt: "Przydaje Ci się BUSBIB? Będziemy wdzięczni za drobną, dobrowolną wpłatę.",
   notInServiceYet: "Autobus jeszcze nie jest w służbie"
 });
 
@@ -1250,6 +1260,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   infoFeed: "Información del feed",
   infoRealtimeApi: "API en tiempo real",
   infoGithubProject: "Este proyecto en GitHub",
+  donationLabel: "Apoya a BUSBIB",
+  donationPrompt: "¿Te resulta útil BUSBIB? Agradecemos una pequeña donación voluntaria.",
   notInServiceYet: "El autobús aún no está en servicio"
 });
 
@@ -1303,6 +1315,8 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   infoFeed: "Информация feed",
   infoRealtimeApi: "API реального времени",
   infoGithubProject: "Этот проект на GitHub",
+  donationLabel: "Поддержать BUSBIB",
+  donationPrompt: "Вам полезен BUSBIB? Будем благодарны за небольшое добровольное пожертвование.",
   notInServiceYet: "Автобус еще не введен в эксплуатацию"
 });
 

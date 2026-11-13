@@ -455,6 +455,7 @@ const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText")
 const vehiclePhotoUploadBtn = document.getElementById("vehiclePhotoUploadBtn");
 const vehiclePhotoAddBtn = document.getElementById("vehiclePhotoAddBtn");
 const footerSocialsEl = document.getElementById("footerSocials");
+const footerDonationLinkEl = document.getElementById("footerDonationLink");
 const footerReviewBtn = document.getElementById("footerReviewBtn");
 const footerTermsBtn = document.getElementById("footerTermsBtn");
 const footerContactBtn = document.getElementById("footerContactBtn");
@@ -741,7 +742,7 @@ let appDialogResolve = null;
 const usesOverlayCompatibilityMode = () =>
   isAndroidWebView ||
   isAndroidTvPlatform;
-// Updated from the current contents of media/bus on 2026-11-08.
+// Updated from the current contents of media/bus on 2026-11-13.
 const PHOTO_LIBRARY_INDEX = {
     "089024": [
         "@busspotter_04/089024.jpeg"
@@ -784,12 +785,24 @@ const PHOTO_LIBRARY_INDEX = {
     "301880": [
         "@delijn_busspotter/301880.jpeg"
     ],
+    "4445": [
+        "@delijn_busspotter/4445.jpeg"
+    ],
+    "4450": [
+        "@delijn_busspotter/4450.jpeg"
+    ],
     "4451": [
         "@delijn_busspotter/4451 (2).jpeg",
         "@delijn_busspotter/4451.jpeg"
     ],
+    "4453": [
+        "@delijn_busspotter/4453.jpeg"
+    ],
     "4454": [
         "@delijn_busspotter/4454.jpeg"
+    ],
+    "4455": [
+        "@delijn_busspotter/4455.jpeg"
     ],
     "4456": [
         "@delijn_busspotter/4456.jpeg"
@@ -1088,6 +1101,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_spotter/4299.jpeg"
     ],
     "4477": [
+        "@delijn_busspotter/4477.jpeg",
         "@delijn_spotter/4477 (2).jpeg",
         "@delijn_spotter/4477.jpeg"
     ],
@@ -2842,6 +2856,12 @@ function renderInfoModalContent() {
       value: "SALAJEV/BUSBIB",
       href: "https://github.com/SALAJEV/BUSBIB",
       icon: "github"
+    },
+    {
+      label: getLabel("donationLabel", "Steun BUSBIB"),
+      value: getLabel("donationPrompt", "Vind je BUSBIB handig? Een kleine vrijwillige donatie is welkom."),
+      href: "https://www.buymeacoffee.com/anzor",
+      icon: "donation"
     }
   ];
   infoModalBodyEl.textContent = "";
@@ -2880,6 +2900,21 @@ function renderInfoModalContent() {
         const textEl = document.createElement("span");
         textEl.textContent = row.value;
         valueEl.append(iconEl, textEl);
+      } else if (row.icon === "donation") {
+        valueEl.classList.add("info-value--donation");
+
+        const badgeEl = document.createElement("img");
+        badgeEl.className = "info-donation-badge";
+        badgeEl.src = "https://cdn.buymeacoffee.com/buttons/v2/arial-blue.png";
+        badgeEl.alt = "";
+        badgeEl.width = 108;
+        badgeEl.height = 30;
+        badgeEl.loading = "lazy";
+        badgeEl.decoding = "async";
+
+        const textEl = document.createElement("span");
+        textEl.textContent = row.value;
+        valueEl.append(badgeEl, textEl);
       } else {
         valueEl.textContent = row.value;
       }
@@ -7148,6 +7183,7 @@ function applyTranslations() {
   if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.setAttribute("aria-label", getLabel("photoNext", "Volgende foto"));
   updateVehiclePhotoTexts();
   if (footerSocialsEl) footerSocialsEl.setAttribute("aria-label", t("footerSocials"));
+  if (footerDonationLinkEl) footerDonationLinkEl.setAttribute("aria-label", getLabel("donationLabel", "Steun BUSBIB"));
   if (footerReviewBtn) footerReviewBtn.textContent = getLabel("footerReview", "Feedback achterlaten");
   if (footerTermsBtn) footerTermsBtn.textContent = getLabel("footerTerms", "Gebruiksvoorwaarden");
   if (footerContactBtn) footerContactBtn.textContent = getLabel("footerContact", "Contact opnemen");
