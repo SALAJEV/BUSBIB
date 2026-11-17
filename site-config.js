@@ -4,7 +4,7 @@ window.BB_SITE_CONFIG = {
   maintenanceBadge: "Onderhoudsmodus",
   maintenanceTitle: "BUSBIB is in onderhoud",
   maintenanceBody: "De site is momenteel in onderhoudsmodus en is tijdelijk niet bereikbaar. Probeer het later opnieuw.",
-  trackingStatusBannerEnabled: 0,
+  trackingStatusBannerEnabled: 1,
   trackingStatusBannerText: "Realtime-informatie kan tijdelijk vertraagd zijn.",
   trackingUnavailableEnabled: 0,
   bannerEnabled: 0,
