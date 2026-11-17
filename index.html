@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261109-39">
-<link rel="stylesheet" href="redesign.css?v=20261109-39">
-<script src="site-config.js?v=20261109-15"></script>
+<link rel="stylesheet" href="style.css?v=20261117-41">
+<link rel="stylesheet" href="redesign.css?v=20261117-41">
+<script src="site-config.js?v=20261117-40"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261109-39";
+  window.BB_ASSET_VERSION = "20261117-41";
 </script>
 </head>
 <body>
@@ -226,6 +226,9 @@
           <div class="vehicle-photo-layout">
             <div class="vehicle-photo-media-panel">
               <div class="vehicle-photo-frame">
+                <button id="vehiclePhotoFullscreenBtn" class="photo-fullscreen-btn" type="button" hidden aria-label="Foto volledig scherm bekijken">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>
+                </button>
                 <button id="vehiclePhotoPrevBtn" class="photo-nav-btn photo-nav-btn--prev" type="button" hidden aria-label="Vorige foto">
                   <svg class="photo-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 5-7 7 7 7"></path></svg>
                 </button>
@@ -473,6 +476,23 @@
     <p id="offlineTextSecondary">Realtimegegevens en live-opzoekingen zijn tijdelijk niet beschikbaar.</p>
     <button id="offlineRetryBtn" type="button">Opnieuw proberen</button>
   </div>
+</div>
+
+<div id="vehiclePhotoViewer" class="vehicle-photo-viewer" hidden role="dialog" aria-modal="true" aria-label="Foto volledig scherm">
+  <div class="vehicle-photo-viewer-toolbar">
+    <p id="vehiclePhotoViewerCounter" class="vehicle-photo-viewer-counter" hidden></p>
+    <button id="vehiclePhotoViewerCloseBtn" class="vehicle-photo-viewer-close" type="button" aria-label="Foto sluiten">&times;</button>
+  </div>
+  <button id="vehiclePhotoViewerPrevBtn" class="vehicle-photo-viewer-nav vehicle-photo-viewer-nav--prev" type="button" hidden aria-label="Vorige foto">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 5-7 7 7 7"></path></svg>
+  </button>
+  <figure class="vehicle-photo-viewer-figure">
+    <img id="vehiclePhotoViewerImg" class="vehicle-photo-viewer-image" alt="">
+    <figcaption id="vehiclePhotoViewerCaption" class="vehicle-photo-viewer-caption"></figcaption>
+  </figure>
+  <button id="vehiclePhotoViewerNextBtn" class="vehicle-photo-viewer-nav vehicle-photo-viewer-nav--next" type="button" hidden aria-label="Volgende foto">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 5 7 7-7 7"></path></svg>
+  </button>
 </div>
 
 <div id="funnyModal" class="funny-modal" hidden role="dialog" aria-modal="true" aria-labelledby="funnyModalTitle">
@@ -876,7 +896,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261109-39";
+    var assetVersion = window.BB_ASSET_VERSION || "20261117-41";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

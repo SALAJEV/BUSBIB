@@ -1,5 +1,5 @@
-const CACHE_NAME = 'busbib-v255';
-const PHOTO_CACHE_NAME = 'busbib-photos-v2';
+const CACHE_NAME = 'busbib-v257';
+const PHOTO_CACHE_NAME = 'busbib-photos-v4';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PHOTO_CACHE_MAX_ENTRIES = 16;
 const PHOTO_CACHE_MAX_BYTES = 2 * 1024 * 1024;
@@ -8,13 +8,13 @@ const APP_SHELL_CACHE_KEY = '/index.html';
 const CORE_ASSETS = [
   '/',
   APP_SHELL_CACHE_KEY,
-  '/app.js?v=20261109-39',
+  '/app.js?v=20261117-41',
   '/manifest.json',
   '/manifest-windows.json',
-  '/style.css?v=20261109-39',
-  '/redesign.css?v=20261109-39',
-  '/translations.js?v=20261109-39',
-  '/site-config.js?v=20261109-15',
+  '/style.css?v=20261117-41',
+  '/redesign.css?v=20261117-41',
+  '/translations.js?v=20261117-41',
+  '/site-config.js?v=20261117-40',
   '/media/logo/logo.png',
   '/media/logo/busbib-apple-touch-icon.png',
   '/media/logo/busbib-website-logo.svg',
@@ -129,9 +129,7 @@ self.addEventListener('fetch', event => {
 
   if (isVehiclePhotoRequest) {
     if (request.headers.has('range')) return;
-    const photoUrl = new URL(request.url);
-    photoUrl.searchParams.delete('v');
-    const photoKey = photoUrl.href;
+    const photoKey = request.url;
     event.respondWith(
       caches.open(PHOTO_CACHE_NAME).then(cache => cache.match(photoKey)).then(cached => {
         if (cached) return cached;

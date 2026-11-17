@@ -446,6 +446,7 @@ let vehiclePhotoImgEl = document.getElementById("vehiclePhotoImg");
 let vehiclePhotoLoaderEl = document.getElementById("vehiclePhotoLoader");
 const vehiclePhotoPrevBtn = document.getElementById("vehiclePhotoPrevBtn");
 const vehiclePhotoNextBtn = document.getElementById("vehiclePhotoNextBtn");
+const vehiclePhotoFullscreenBtn = document.getElementById("vehiclePhotoFullscreenBtn");
 const vehiclePhotoCounterEl = document.getElementById("vehiclePhotoCounter");
 const vehiclePhotoMetaEl = document.getElementById("vehiclePhotoMeta");
 const vehiclePhotoCaptionEl = document.getElementById("vehiclePhotoCaption");
@@ -454,6 +455,13 @@ const vehiclePhotoEmptyTitleEl = document.getElementById("vehiclePhotoEmptyTitle
 const vehiclePhotoEmptyTextEl = document.getElementById("vehiclePhotoEmptyText");
 const vehiclePhotoUploadBtn = document.getElementById("vehiclePhotoUploadBtn");
 const vehiclePhotoAddBtn = document.getElementById("vehiclePhotoAddBtn");
+const vehiclePhotoViewerEl = document.getElementById("vehiclePhotoViewer");
+const vehiclePhotoViewerImgEl = document.getElementById("vehiclePhotoViewerImg");
+const vehiclePhotoViewerCaptionEl = document.getElementById("vehiclePhotoViewerCaption");
+const vehiclePhotoViewerCounterEl = document.getElementById("vehiclePhotoViewerCounter");
+const vehiclePhotoViewerCloseBtn = document.getElementById("vehiclePhotoViewerCloseBtn");
+const vehiclePhotoViewerPrevBtn = document.getElementById("vehiclePhotoViewerPrevBtn");
+const vehiclePhotoViewerNextBtn = document.getElementById("vehiclePhotoViewerNextBtn");
 const footerSocialsEl = document.getElementById("footerSocials");
 const footerDonationLinkEl = document.getElementById("footerDonationLink");
 const footerReviewBtn = document.getElementById("footerReviewBtn");
@@ -742,7 +750,7 @@ let appDialogResolve = null;
 const usesOverlayCompatibilityMode = () =>
   isAndroidWebView ||
   isAndroidTvPlatform;
-// Updated from the current contents of media/bus on 2026-11-13.
+// Updated from the current contents of media/bus on 2026-11-17.
 const PHOTO_LIBRARY_INDEX = {
     "089024": [
         "@busspotter_04/089024.jpeg"
@@ -756,6 +764,42 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "635062": [
         "@busspotter_04/635062.jpeg"
+    ],
+    "2252": [
+        "@delijn821/2252 + 669027.jpeg"
+    ],
+    "669027": [
+        "@delijn821/2252 + 669027.jpeg"
+    ],
+    "2552": [
+        "@delijn821/2552 (2).jpeg",
+        "@delijn821/2552 (3).jpeg",
+        "@delijn821/2552.jpeg"
+    ],
+    "550528": [
+        "@delijn821/550528.jpeg"
+    ],
+    "676051": [
+        "@delijn821/676051 (2).jpeg",
+        "@delijn821/676051 (3).jpeg",
+        "@delijn821/676051 (4).jpeg",
+        "@delijn821/676051 (5).jpeg",
+        "@delijn821/676051 (6).jpeg",
+        "@delijn821/676051 (7).jpeg",
+        "@delijn821/676051.jpeg"
+    ],
+    "678080": [
+        "@delijn821/678080 (2).jpeg",
+        "@delijn821/678080.jpeg"
+    ],
+    "678090": [
+        "@delijn821/678090.jpeg"
+    ],
+    "680040": [
+        "@delijn821/680040 (2).jpeg",
+        "@delijn821/680040 (3).jpeg",
+        "@delijn821/680040 (4).jpeg",
+        "@delijn821/680040.jpeg"
     ],
     "2159": [
         "@delijn_busspotter/2159.jpeg"
@@ -773,11 +817,15 @@ const PHOTO_LIBRARY_INDEX = {
     "2889": [
         "@delijn_busspotter/2889.jpeg"
     ],
-    "2890": [
-        "@delijn_busspotter/2890.jpeg"
-    ],
     "2894": [
         "@delijn_busspotter/2894.jpeg"
+    ],
+    "2899": [
+        "@delijn_busspotter/2899.jpeg",
+        "@van.de.ven.robin/2899.jpeg"
+    ],
+    "2999": [
+        "@delijn_busspotter/2999.jpeg"
     ],
     "300812": [
         "@delijn_busspotter/300812.jpeg"
@@ -785,20 +833,19 @@ const PHOTO_LIBRARY_INDEX = {
     "301880": [
         "@delijn_busspotter/301880.jpeg"
     ],
-    "4445": [
-        "@delijn_busspotter/4445.jpeg"
-    ],
     "4450": [
         "@delijn_busspotter/4450.jpeg"
     ],
     "4451": [
         "@delijn_busspotter/4451 (2).jpeg",
+        "@delijn_busspotter/4451 (3).jpeg",
         "@delijn_busspotter/4451.jpeg"
     ],
     "4453": [
         "@delijn_busspotter/4453.jpeg"
     ],
     "4454": [
+        "@delijn_busspotter/4454 (2).jpeg",
         "@delijn_busspotter/4454.jpeg"
     ],
     "4455": [
@@ -811,10 +858,21 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/4457.jpeg",
         "@van.de.ven.robin/4457.jpeg"
     ],
+    "4458": [
+        "@delijn_busspotter/4458.jpeg",
+        "@van.de.ven.robin/4458.jpeg"
+    ],
     "4459": [
+        "@delijn_busspotter/4459 (2).jpeg",
         "@delijn_busspotter/4459.jpeg"
     ],
+    "4477": [
+        "@delijn_busspotter/4477.jpeg",
+        "@delijn_spotter/4477 (2).jpeg",
+        "@delijn_spotter/4477.jpeg"
+    ],
     "4563": [
+        "@delijn_busspotter/4563 (2).jpeg",
         "@delijn_busspotter/4563.jpeg"
     ],
     "4591": [
@@ -834,6 +892,9 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/4854 (2).jpeg",
         "@delijn_busspotter/4854.jpeg"
     ],
+    "4944": [
+        "@delijn_busspotter/4944.jpeg"
+    ],
     "4952": [
         "@delijn_busspotter/4952.jpeg",
         "@van.de.ven.robin/4952.jpeg"
@@ -850,6 +911,7 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "4979": [
         "@delijn_busspotter/4979 (2).jpeg",
+        "@delijn_busspotter/4979 (3).jpeg",
         "@delijn_busspotter/4979.jpeg"
     ],
     "4997": [
@@ -858,12 +920,22 @@ const PHOTO_LIBRARY_INDEX = {
     "5000": [
         "@delijn_busspotter/5000.jpeg"
     ],
+    "500108": [
+        "@delijn_busspotter/500108.jpeg"
+    ],
+    "500111": [
+        "@delijn_busspotter/500111.jpeg"
+    ],
     "5005": [
         "@delijn_busspotter/5005.jpeg"
     ],
     "5006": [
         "@delijn_busspotter/5006 (2).jpeg",
         "@delijn_busspotter/5006.jpeg"
+    ],
+    "5007": [
+        "@delijn_busspotter/5007.jpeg",
+        "@delijn_spotter/5007.jpeg"
     ],
     "5014": [
         "@delijn_busspotter/5014.jpeg"
@@ -880,8 +952,14 @@ const PHOTO_LIBRARY_INDEX = {
     "5246": [
         "@delijn_busspotter/5246.jpeg"
     ],
+    "5468": [
+        "@delijn_busspotter/5468.jpeg"
+    ],
     "550149": [
         "@delijn_busspotter/550149.jpeg"
+    ],
+    "550248": [
+        "@delijn_busspotter/550248.jpeg"
     ],
     "550249": [
         "@delijn_busspotter/550249.jpeg"
@@ -894,18 +972,37 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "550431": [
         "@delijn_busspotter/550431 (2).jpeg",
+        "@delijn_busspotter/550431 (3).jpeg",
         "@delijn_busspotter/550431.jpeg"
     ],
+    "550432": [
+        "@delijn_busspotter/550432.jpeg"
+    ],
     "550433": [
+        "@delijn_busspotter/550433 (2).jpeg",
         "@delijn_busspotter/550433.jpeg"
     ],
     "550434": [
         "@delijn_busspotter/550434 (2).jpeg",
+        "@delijn_busspotter/550434 (3).jpeg",
         "@delijn_busspotter/550434.jpeg"
     ],
     "550435": [
         "@delijn_busspotter/550435 (2).jpeg",
+        "@delijn_busspotter/550435 (3).jpeg",
+        "@delijn_busspotter/550435 (4).jpeg",
+        "@delijn_busspotter/550435 (5).jpeg",
+        "@delijn_busspotter/550435 (6).jpeg",
         "@delijn_busspotter/550435.jpeg"
+    ],
+    "550436": [
+        "@delijn_busspotter/550436 + 550438.jpeg"
+    ],
+    "550438": [
+        "@delijn_busspotter/550436 + 550438.jpeg"
+    ],
+    "550522": [
+        "@delijn_busspotter/550522.jpeg"
     ],
     "550523": [
         "@delijn_busspotter/550523 (2).jpeg",
@@ -914,9 +1011,11 @@ const PHOTO_LIBRARY_INDEX = {
     "550524": [
         "@delijn_busspotter/550524 (2).jpeg",
         "@delijn_busspotter/550524 (3).jpeg",
+        "@delijn_busspotter/550524 (4).jpeg",
         "@delijn_busspotter/550524.jpeg"
     ],
     "550526": [
+        "@delijn_busspotter/550526 (2).jpeg",
         "@delijn_busspotter/550526.jpeg"
     ],
     "550529": [
@@ -931,6 +1030,9 @@ const PHOTO_LIBRARY_INDEX = {
     "550951": [
         "@delijn_busspotter/550951.jpeg"
     ],
+    "5992": [
+        "@delijn_busspotter/5992.jpeg"
+    ],
     "5993": [
         "@delijn_busspotter/5993.jpeg"
     ],
@@ -943,6 +1045,9 @@ const PHOTO_LIBRARY_INDEX = {
     "610086": [
         "@delijn_busspotter/610086.jpeg"
     ],
+    "635042": [
+        "@delijn_busspotter/635042.jpeg"
+    ],
     "635048": [
         "@delijn_busspotter/635048.jpeg"
     ],
@@ -952,13 +1057,18 @@ const PHOTO_LIBRARY_INDEX = {
     "635070": [
         "@delijn_busspotter/635070.jpeg"
     ],
-    "646054": [
-        "@delijn_busspotter/646054.jpeg"
+    "643046": [
+        "@delijn_busspotter/643046 (2).jpeg",
+        "@delijn_busspotter/643046.jpeg"
     ],
     "646055": [
         "@delijn_busspotter/646055.jpeg"
     ],
+    "646057": [
+        "@delijn_busspotter/646057.jpeg"
+    ],
     "646061": [
+        "@delijn_busspotter/646061 (2).jpeg",
         "@delijn_busspotter/646061.jpeg"
     ],
     "646063": [
@@ -969,12 +1079,18 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/646071.jpeg"
     ],
     "646074": [
+        "@delijn_busspotter/646074 (2).jpeg",
         "@delijn_busspotter/646074.jpeg"
     ],
     "646075": [
+        "@delijn_busspotter/646075 (2).jpeg",
         "@delijn_busspotter/646075.jpeg",
-        "@van.de.ven.robin/646075.jpeg",
-        "@dln.spotter/646075 + 668017.jpeg"
+        "@dln.spotter/646075 + 668017.jpeg",
+        "@van.de.ven.robin/646075.jpeg"
+    ],
+    "646079": [
+        "@delijn_busspotter/646079.jpeg",
+        "@dln.spotter/646079.jpeg"
     ],
     "646080": [
         "@delijn_busspotter/646080.jpeg"
@@ -1005,6 +1121,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/668015.jpeg"
     ],
     "668019": [
+        "@delijn_busspotter/668019 (2).jpeg",
         "@delijn_busspotter/668019.jpeg"
     ],
     "668024": [
@@ -1014,11 +1131,26 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/686043 (2).jpeg",
         "@delijn_busspotter/686043.jpeg"
     ],
+    "686049": [
+        "@delijn_busspotter/686049.jpeg"
+    ],
+    "686054": [
+        "@delijn_busspotter/686054.jpeg"
+    ],
     "686055": [
         "@delijn_busspotter/686055.jpeg"
     ],
+    "689026": [
+        "@delijn_busspotter/689026.jpeg"
+    ],
+    "689030": [
+        "@delijn_busspotter/689030.jpeg",
+        "@van.de.ven.robin/689030.jpeg"
+    ],
     "689031": [
         "@delijn_busspotter/689031 (2).jpeg",
+        "@delijn_busspotter/689031 (3).jpeg",
+        "@delijn_busspotter/689031 (4).jpeg",
         "@delijn_busspotter/689031.jpeg"
     ],
     "689037": [
@@ -1031,6 +1163,7 @@ const PHOTO_LIBRARY_INDEX = {
         "@delijn_busspotter/689039.jpeg"
     ],
     "689040": [
+        "@delijn_busspotter/689040 (2).jpeg",
         "@delijn_busspotter/689040.jpeg"
     ],
     "689042": [
@@ -1054,6 +1187,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "689060": [
         "@delijn_busspotter/689060.jpeg"
+    ],
+    "TRS68": [
+        "@delijn_busspotter/TRS68.jpeg"
     ],
     "2144": [
         "@delijn_spotter/2144.jpeg"
@@ -1099,11 +1235,6 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "4299": [
         "@delijn_spotter/4299.jpeg"
-    ],
-    "4477": [
-        "@delijn_busspotter/4477.jpeg",
-        "@delijn_spotter/4477 (2).jpeg",
-        "@delijn_spotter/4477.jpeg"
     ],
     "4541": [
         "@delijn_spotter/4541.jpeg"
@@ -1161,10 +1292,6 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "4998": [
         "@delijn_spotter/4998.jpeg"
-    ],
-    "5007": [
-        "@delijn_busspotter/5007.jpeg",
-        "@delijn_spotter/5007.jpeg"
     ],
     "5058": [
         "@delijn_spotter/5058.jpeg"
@@ -1273,8 +1400,20 @@ const PHOTO_LIBRARY_INDEX = {
     "7236": [
         "@delijn_spotter/7236.jpeg"
     ],
+    "010061": [
+        "@delijn_spotter_mori/010061.jpeg"
+    ],
+    "104812": [
+        "@delijn_spotter_mori/104812.jpeg"
+    ],
     "105973": [
         "@delijn_spotter_mori/105973.jpeg"
+    ],
+    "110440": [
+        "@delijn_spotter_mori/110440.jpeg"
+    ],
+    "110991": [
+        "@delijn_spotter_mori/110991.jpeg"
     ],
     "2032": [
         "@delijn_spotter_mori/2032.jpeg"
@@ -1346,6 +1485,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "5016": [
         "@delijn_spotter_mori/5016.jpeg"
+    ],
+    "5019": [
+        "@delijn_spotter_mori/5019.jpeg"
     ],
     "5020": [
         "@delijn_spotter_mori/5020.jpeg"
@@ -1432,8 +1574,14 @@ const PHOTO_LIBRARY_INDEX = {
     "5906": [
         "@delijn_spotter_mori/5906.jpeg"
     ],
+    "610070": [
+        "@delijn_spotter_mori/610070.jpeg"
+    ],
     "6211": [
         "@delijn_spotter_mori/6211.jpeg"
+    ],
+    "632067": [
+        "@delijn_spotter_mori/632067.jpeg"
     ],
     "662029": [
         "@delijn_spotter_mori/662029.jpeg"
@@ -1462,42 +1610,6 @@ const PHOTO_LIBRARY_INDEX = {
     "7340": [
         "@delijn_spotter_mori/7340.jpeg"
     ],
-    "2252": [
-        "@delijn821/2252 + 669027.jpeg"
-    ],
-    "669027": [
-        "@delijn821/2252 + 669027.jpeg"
-    ],
-    "2552": [
-        "@delijn821/2552 (2).jpeg",
-        "@delijn821/2552 (3).jpeg",
-        "@delijn821/2552.jpeg"
-    ],
-    "550528": [
-        "@delijn821/550528.jpeg"
-    ],
-    "676051": [
-        "@delijn821/676051 (2).jpeg",
-        "@delijn821/676051 (3).jpeg",
-        "@delijn821/676051 (4).jpeg",
-        "@delijn821/676051 (5).jpeg",
-        "@delijn821/676051 (6).jpeg",
-        "@delijn821/676051 (7).jpeg",
-        "@delijn821/676051.jpeg"
-    ],
-    "678080": [
-        "@delijn821/678080 (2).jpeg",
-        "@delijn821/678080.jpeg"
-    ],
-    "678090": [
-        "@delijn821/678090.jpeg"
-    ],
-    "680040": [
-        "@delijn821/680040 (2).jpeg",
-        "@delijn821/680040 (3).jpeg",
-        "@delijn821/680040 (4).jpeg",
-        "@delijn821/680040.jpeg"
-    ],
     "331184": [
         "@delijnspotter2024/331184 (2).jpeg",
         "@delijnspotter2024/331184 (3).jpeg",
@@ -1507,14 +1619,29 @@ const PHOTO_LIBRARY_INDEX = {
     "104032": [
         "@dln.spotter/104032.jpeg"
     ],
+    "143009": [
+        "@dln.spotter/143009 + 2816.jpeg"
+    ],
+    "2816": [
+        "@dln.spotter/143009 + 2816.jpeg"
+    ],
+    "154013": [
+        "@dln.spotter/154013.jpeg"
+    ],
     "154015": [
         "@dln.spotter/154015.jpeg"
     ],
     "220630": [
         "@dln.spotter/220630.jpeg"
     ],
+    "220778": [
+        "@dln.spotter/220778.jpeg"
+    ],
     "221111": [
         "@dln.spotter/221111.jpeg"
+    ],
+    "221118": [
+        "@dln.spotter/221118.jpeg"
     ],
     "221119": [
         "@dln.spotter/221119.jpeg"
@@ -1535,6 +1662,9 @@ const PHOTO_LIBRARY_INDEX = {
     "3048": [
         "@dln.spotter/3048.jpeg"
     ],
+    "5122": [
+        "@dln.spotter/5122.jpeg"
+    ],
     "5480": [
         "@dln.spotter/5480.jpeg"
     ],
@@ -1547,13 +1677,35 @@ const PHOTO_LIBRARY_INDEX = {
     "618097": [
         "@dln.spotter/618097.jpeg"
     ],
+    "627035": [
+        "@dln.spotter/627035.jpeg"
+    ],
+    "643033": [
+        "@dln.spotter/643033.jpeg"
+    ],
+    "643034": [
+        "@dln.spotter/643034 (2).jpeg",
+        "@dln.spotter/643034.jpeg"
+    ],
+    "643037": [
+        "@dln.spotter/643037.jpeg"
+    ],
+    "643038": [
+        "@dln.spotter/643038.jpeg"
+    ],
     "643039": [
         "@dln.spotter/643039 (2).jpeg",
         "@dln.spotter/643039.jpeg"
     ],
+    "643041": [
+        "@dln.spotter/643041.jpeg"
+    ],
     "643043": [
         "@dln.spotter/643043 (2).jpeg",
         "@dln.spotter/643043.jpeg"
+    ],
+    "643045": [
+        "@dln.spotter/643045.jpeg"
     ],
     "643047": [
         "@dln.spotter/643047.jpeg"
@@ -1561,10 +1713,11 @@ const PHOTO_LIBRARY_INDEX = {
     "644081": [
         "@dln.spotter/644081.jpeg"
     ],
-    "646079": [
-        "@delijn_busspotter/646079.jpeg",
-        "@dln.spotter/646079.jpeg",
-        "@dln.spotter/646079.jpeg"
+    "646069": [
+        "@dln.spotter/646069.jpeg"
+    ],
+    "668017": [
+        "@dln.spotter/646075 + 668017.jpeg"
     ],
     "646086": [
         "@dln.spotter/646086.jpeg"
@@ -1588,6 +1741,10 @@ const PHOTO_LIBRARY_INDEX = {
     "664054": [
         "@dln.spotter/664054.jpeg"
     ],
+    "664055": [
+        "@dln.spotter/664055 (2).jpeg",
+        "@dln.spotter/664055.jpeg"
+    ],
     "664057": [
         "@dln.spotter/664057.jpeg"
     ],
@@ -1609,6 +1766,18 @@ const PHOTO_LIBRARY_INDEX = {
         "@dln.spotter/669045 (2).jpeg",
         "@dln.spotter/669045.jpeg",
         "@van.de.ven.robin/669045.jpeg"
+    ],
+    "674102": [
+        "@dln.spotter/674102.jpeg"
+    ],
+    "674123": [
+        "@dln.spotter/674123.jpeg"
+    ],
+    "675006": [
+        "@dln.spotter/675006.jpeg"
+    ],
+    "686053": [
+        "@dln.spotter/686053.jpeg"
     ],
     "678069": [
         "@robbiebobbie2024/678069 (2).jpeg",
@@ -1669,6 +1838,9 @@ const PHOTO_LIBRARY_INDEX = {
     "2362": [
         "@van.de.ven.robin/2362.jpeg"
     ],
+    "2448": [
+        "@van.de.ven.robin/2448.jpeg"
+    ],
     "2520": [
         "@van.de.ven.robin/2520.jpeg"
     ],
@@ -1684,9 +1856,8 @@ const PHOTO_LIBRARY_INDEX = {
     "2877": [
         "@van.de.ven.robin/2877.jpeg"
     ],
-    "2899": [
-        "@delijn_busspotter/2899.jpeg",
-        "@van.de.ven.robin/2899.jpeg"
+    "2890": [
+        "@van.de.ven.robin/2890.jpeg"
     ],
     "2947": [
         "@van.de.ven.robin/2947.jpeg"
@@ -1731,6 +1902,12 @@ const PHOTO_LIBRARY_INDEX = {
     "3120": [
         "@van.de.ven.robin/3120.jpeg"
     ],
+    "3298": [
+        "@van.de.ven.robin/3298.jpeg"
+    ],
+    "3300": [
+        "@van.de.ven.robin/3300.jpeg"
+    ],
     "331235": [
         "@van.de.ven.robin/331235.jpeg"
     ],
@@ -1740,9 +1917,8 @@ const PHOTO_LIBRARY_INDEX = {
     "441520": [
         "@van.de.ven.robin/441520.jpeg"
     ],
-    "4458": [
-        "@delijn_busspotter/4458.jpeg",
-        "@van.de.ven.robin/4458.jpeg"
+    "4445": [
+        "@van.de.ven.robin/4445.jpeg"
     ],
     "4575": [
         "@van.de.ven.robin/4575.jpeg"
@@ -1790,6 +1966,9 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "5299": [
         "@van.de.ven.robin/5299.jpeg"
+    ],
+    "5302": [
+        "@van.de.ven.robin/5302.jpeg"
     ],
     "5343": [
         "@van.de.ven.robin/5343.jpeg"
@@ -1926,9 +2105,6 @@ const PHOTO_LIBRARY_INDEX = {
     "689029": [
         "@van.de.ven.robin/689029.jpeg"
     ],
-    "689030": [
-        "@van.de.ven.robin/689030.jpeg"
-    ],
     "689035": [
         "@van.de.ven.robin/689035.jpeg"
     ],
@@ -1943,89 +2119,6 @@ const PHOTO_LIBRARY_INDEX = {
     ],
     "7411": [
         "@van.de.ven.robin/7411.jpeg"
-    ],
-    "010061": [
-        "@delijn_spotter_mori/010061.jpeg"
-    ],
-    "104812": [
-        "@delijn_spotter_mori/104812.jpeg"
-    ],
-    "110440": [
-        "@delijn_spotter_mori/110440.jpeg"
-    ],
-    "110991": [
-        "@delijn_spotter_mori/110991.jpeg"
-    ],
-    "5019": [
-        "@delijn_spotter_mori/5019.jpeg"
-    ],
-    "610070": [
-        "@delijn_spotter_mori/610070.jpeg"
-    ],
-    "632067": [
-        "@delijn_spotter_mori/632067.jpeg"
-    ],
-    "143009": [
-        "@dln.spotter/143009 +2816.jpeg"
-    ],
-    "2816": [
-        "@dln.spotter/143009 +2816.jpeg"
-    ],
-    "154013": [
-        "@dln.spotter/154013.jpeg"
-    ],
-    "220778": [
-        "@dln.spotter/220778.jpeg"
-    ],
-    "221118": [
-        "@dln.spotter/221118.jpeg"
-    ],
-    "5122": [
-        "@dln.spotter/5122.jpeg"
-    ],
-    "627035": [
-        "@dln.spotter/627035.jpeg"
-    ],
-    "643033": [
-        "@dln.spotter/643033.jpeg"
-    ],
-    "643034": [
-        "@dln.spotter/643034 (2).jpeg",
-        "@dln.spotter/643034.jpeg"
-    ],
-    "643037": [
-        "@dln.spotter/643037.jpeg"
-    ],
-    "643038": [
-        "@dln.spotter/643038.jpeg"
-    ],
-    "643041": [
-        "@dln.spotter/643041.jpeg"
-    ],
-    "643045": [
-        "@dln.spotter/643045.jpeg"
-    ],
-    "646069": [
-        "@dln.spotter/646069.jpeg"
-    ],
-    "668017": [
-        "@dln.spotter/646075 + 668017.jpeg"
-    ],
-    "664055": [
-        "@dln.spotter/664055 (2).jpeg",
-        "@dln.spotter/664055.jpeg"
-    ],
-    "674102": [
-        "@dln.spotter/674102.jpeg"
-    ],
-    "674123": [
-        "@dln.spotter/674123.jpeg"
-    ],
-    "675006": [
-        "@dln.spotter/675006.jpeg"
-    ],
-    "686053": [
-        "@dln.spotter/686053.jpeg"
     ]
 };
 
@@ -2053,6 +2146,7 @@ function registerOverlayModal(modalEl) {
   reviewModalEl,
   reportModalEl,
   photoUploadModalEl,
+  vehiclePhotoViewerEl,
   termsModalEl,
   weatherModalEl,
   funnyModalEl
@@ -2092,6 +2186,7 @@ function getTopInteractiveOverlay() {
 function getInteractiveOverlayFocusScope(overlayEl) {
   if (!overlayEl) return null;
   if (overlayEl === favoritesBackdropEl) return favoritesPanelEl || favoritesBackdropEl;
+  if (overlayEl === vehiclePhotoViewerEl) return overlayEl;
   return overlayEl.querySelector(".pdf-modal-card, .funny-modal-card, .menu-sheet") || overlayEl.firstElementChild || overlayEl;
 }
 
@@ -4816,6 +4911,7 @@ function setVehiclePhotoEmptyStateVisible(visible) {
   if (visible) {
     if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.hidden = true;
     if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.hidden = true;
+    if (vehiclePhotoFullscreenBtn) vehiclePhotoFullscreenBtn.hidden = true;
     if (vehiclePhotoCaptionEl) vehiclePhotoCaptionEl.hidden = true;
   }
   if (vehiclePhotoInfoEl) vehiclePhotoInfoEl.hidden = visible;
@@ -5466,7 +5562,11 @@ function buildAppAssetPath(relativePath) {
 function buildVehiclePhotoFolderPath(folderName, fileName) {
   const safeFolderName = encodeURIComponent((folderName || "").toString().trim());
   const safeFileName = encodeURIComponent((fileName || "").toString().trim());
-  return buildAppAssetPath(`media/bus/${safeFolderName}/${safeFileName}`);
+  const assetPath = buildAppAssetPath(`media/bus/${safeFolderName}/${safeFileName}`);
+  const assetVersion = (window.BB_ASSET_VERSION || "").toString().trim();
+  return assetPath && assetVersion
+    ? `${assetPath}?v=${encodeURIComponent(assetVersion)}`
+    : assetPath;
 }
 
 function getIndexedPhotoEntries(vehicleId) {
@@ -5498,7 +5598,7 @@ function getIndexedPhotoEntries(vehicleId) {
 }
 
 function getPhotoEntrySuffixOrder(entry) {
-  const rawSrc = (entry?.src || "").toString();
+  const rawSrc = (entry?.src || "").toString().split("?")[0] || "";
   if (!rawSrc) return Number.MAX_SAFE_INTEGER;
   const encodedFileName = rawSrc.split("/").pop() || "";
   const fileName = decodeURIComponent(encodedFileName);
@@ -5803,6 +5903,46 @@ function updateVehiclePhotoNavigation() {
       : "";
     vehiclePhotoCounterEl.setAttribute("aria-hidden", String(!hasMultiplePhotos));
   }
+  if (vehiclePhotoFullscreenBtn) {
+    vehiclePhotoFullscreenBtn.hidden = !photoCount;
+    vehiclePhotoFullscreenBtn.disabled = !photoCount;
+  }
+}
+
+function renderVehiclePhotoViewer() {
+  if (!vehiclePhotoViewerEl || !vehiclePhotoViewerImgEl) return;
+  const activeEntry = currentVehiclePhotoEntries[currentVehiclePhotoIndex];
+  if (!activeEntry) {
+    hideVehiclePhotoViewer();
+    return;
+  }
+  const copy = buildVehiclePhotoCopy(activeEntry, currentPhotoVehicleId);
+  vehiclePhotoViewerImgEl.src = buildVehiclePhotoRequestUrl(activeEntry.displaySrc || activeEntry.src);
+  vehiclePhotoViewerImgEl.alt = copy.alt;
+  if (vehiclePhotoViewerCaptionEl) {
+    vehiclePhotoViewerCaptionEl.textContent = copy.caption;
+    vehiclePhotoViewerCaptionEl.hidden = !copy.caption;
+  }
+  const hasMultiplePhotos = currentVehiclePhotoEntries.length > 1;
+  if (vehiclePhotoViewerPrevBtn) vehiclePhotoViewerPrevBtn.hidden = !hasMultiplePhotos;
+  if (vehiclePhotoViewerNextBtn) vehiclePhotoViewerNextBtn.hidden = !hasMultiplePhotos;
+  if (vehiclePhotoViewerCounterEl) {
+    vehiclePhotoViewerCounterEl.hidden = !hasMultiplePhotos;
+    vehiclePhotoViewerCounterEl.textContent = hasMultiplePhotos
+      ? `${currentVehiclePhotoIndex + 1} / ${currentVehiclePhotoEntries.length}`
+      : "";
+  }
+}
+
+function showVehiclePhotoViewer() {
+  if (!currentVehiclePhotoEntries.length || !vehiclePhotoViewerEl) return;
+  renderVehiclePhotoViewer();
+  openOverlayModal(vehiclePhotoViewerEl, { focusTarget: vehiclePhotoViewerCloseBtn });
+}
+
+function hideVehiclePhotoViewer() {
+  closeOverlayModal(vehiclePhotoViewerEl);
+  if (vehiclePhotoViewerImgEl) vehiclePhotoViewerImgEl.removeAttribute("src");
 }
 
 function renderVehiclePhotoMeta(copy) {
@@ -5854,6 +5994,7 @@ function renderActiveVehiclePhoto() {
   vehiclePhotoCaptionEl.hidden = !copy.caption;
   renderVehiclePhotoMeta(copy);
   updateVehiclePhotoNavigation();
+  if (vehiclePhotoViewerEl && !vehiclePhotoViewerEl.hidden) renderVehiclePhotoViewer();
   void enrichResolvedPhotoEntry(activeEntry).then(() => {
     if (renderToken !== vehiclePhotoRenderToken || currentVehiclePhotoEntries[safeIndex] !== activeEntry) return;
     renderVehiclePhotoMeta(buildVehiclePhotoCopy(activeEntry, currentPhotoVehicleId));
@@ -7181,6 +7322,14 @@ function applyTranslations() {
   }
   if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.setAttribute("aria-label", getLabel("photoPrevious", "Vorige foto"));
   if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.setAttribute("aria-label", getLabel("photoNext", "Volgende foto"));
+  if (vehiclePhotoFullscreenBtn) {
+    vehiclePhotoFullscreenBtn.setAttribute("aria-label", getLabel("photoFullscreen", "Foto volledig scherm bekijken"));
+    vehiclePhotoFullscreenBtn.title = getLabel("photoFullscreen", "Foto volledig scherm bekijken");
+  }
+  if (vehiclePhotoViewerEl) vehiclePhotoViewerEl.setAttribute("aria-label", getLabel("photoFullscreen", "Foto volledig scherm bekijken"));
+  if (vehiclePhotoViewerCloseBtn) vehiclePhotoViewerCloseBtn.setAttribute("aria-label", getLabel("photoFullscreenClose", "Foto sluiten"));
+  if (vehiclePhotoViewerPrevBtn) vehiclePhotoViewerPrevBtn.setAttribute("aria-label", getLabel("photoPrevious", "Vorige foto"));
+  if (vehiclePhotoViewerNextBtn) vehiclePhotoViewerNextBtn.setAttribute("aria-label", getLabel("photoNext", "Volgende foto"));
   updateVehiclePhotoTexts();
   if (footerSocialsEl) footerSocialsEl.setAttribute("aria-label", t("footerSocials"));
   if (footerDonationLinkEl) footerDonationLinkEl.setAttribute("aria-label", getLabel("donationLabel", "Steun BUSBIB"));
@@ -8026,6 +8175,10 @@ function closeInteractiveOverlay(overlayEl) {
   }
   if (overlayEl === photoUploadModalEl) {
     hidePhotoUploadModal();
+    return true;
+  }
+  if (overlayEl === vehiclePhotoViewerEl) {
+    hideVehiclePhotoViewer();
     return true;
   }
   if (overlayEl === termsModalEl) {
@@ -9148,6 +9301,26 @@ vehiclePhotoNextBtn?.addEventListener("click", () => {
   currentVehiclePhotoIndex = (currentVehiclePhotoIndex + 1) % currentVehiclePhotoEntries.length;
   renderActiveVehiclePhoto();
 });
+vehiclePhotoFullscreenBtn?.addEventListener("click", showVehiclePhotoViewer);
+vehiclePhotoFrameEl?.addEventListener("click", (event) => {
+  if (event.target === vehiclePhotoImgEl && vehiclePhotoImgEl?.classList.contains("is-visible")) {
+    showVehiclePhotoViewer();
+  }
+});
+vehiclePhotoViewerCloseBtn?.addEventListener("click", hideVehiclePhotoViewer);
+vehiclePhotoViewerEl?.addEventListener("click", (event) => {
+  if (event.target === vehiclePhotoViewerEl) hideVehiclePhotoViewer();
+});
+vehiclePhotoViewerPrevBtn?.addEventListener("click", () => {
+  if (currentVehiclePhotoEntries.length < 2) return;
+  currentVehiclePhotoIndex = (currentVehiclePhotoIndex - 1 + currentVehiclePhotoEntries.length) % currentVehiclePhotoEntries.length;
+  renderActiveVehiclePhoto();
+});
+vehiclePhotoViewerNextBtn?.addEventListener("click", () => {
+  if (currentVehiclePhotoEntries.length < 2) return;
+  currentVehiclePhotoIndex = (currentVehiclePhotoIndex + 1) % currentVehiclePhotoEntries.length;
+  renderActiveVehiclePhoto();
+});
 compareModalConfirmBtn?.addEventListener("click", async () => {
   const query = compareVehicleInputEl?.value.trim() || "";
   if (!query) return;
@@ -9319,6 +9492,18 @@ settingsInfoBtn?.addEventListener("click", () => {
 });
 document.addEventListener("keydown", (event) => {
   const activeOverlayEl = getTopInteractiveOverlay();
+  if (activeOverlayEl === vehiclePhotoViewerEl && currentVehiclePhotoEntries.length > 1) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      vehiclePhotoViewerPrevBtn?.click();
+      return;
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      vehiclePhotoViewerNextBtn?.click();
+      return;
+    }
+  }
   if (activeOverlayEl && event.key === "Tab" && trapInteractiveOverlayFocus(event, activeOverlayEl)) {
     return;
   }

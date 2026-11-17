@@ -67,6 +67,8 @@ nl: {
   photoCard: "Voertuigfoto",
   photoAlt: "Foto van voertuig {id}",
   photoCaption: "Voertuig {id}",
+  photoFullscreen: "Foto volledig scherm bekijken",
+  photoFullscreenClose: "Foto sluiten",
   currentStop: "Huidige halte",
   vehicleModelLabel: "Model",
   vehicleOwnerLabel: "Firma (eigenaar)",
@@ -254,6 +256,8 @@ en: {
   photoCard: "Vehicle photo",
   photoAlt: "Photo of vehicle {id}",
   photoCaption: "Vehicle {id}",
+  photoFullscreen: "View photo full screen",
+  photoFullscreenClose: "Close photo",
   currentStop: "Current stop",
   vehicleModelLabel: "Model",
   vehicleOwnerLabel: "Operator / owner",
@@ -884,7 +888,9 @@ Object.assign(window.BB_TRANSLATIONS.i18n.fr, {
   searchZone01: "Rechercher sur Zone 01",
   missingVehicleHelp: "Vérifiez le numéro du véhicule. Vous ne le trouvez toujours pas ? Signalez-le avec le formulaire ou poursuivez votre recherche sur Zone 01.",
   photoAlt: "Photo du vehicule {id}",
-  photoCaption: "Vehicule {id}"
+  photoCaption: "Vehicule {id}",
+  photoFullscreen: "Afficher la photo en plein écran",
+  photoFullscreenClose: "Fermer la photo"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.en, {
   confirmPythonDownload: "Download script.py to this device now?",
@@ -898,7 +904,9 @@ Object.assign(window.BB_TRANSLATIONS.i18n.de, {
   searchZone01: "Auf Zone 01 suchen",
   missingVehicleHelp: "Prüfen Sie die Fahrzeugnummer. Wird das Fahrzeug weiterhin nicht gefunden? Melden Sie es über das Formular oder suchen Sie auf Zone 01 weiter.",
   photoAlt: "Foto von Fahrzeug {id}",
-  photoCaption: "Fahrzeug {id}"
+  photoCaption: "Fahrzeug {id}",
+  photoFullscreen: "Foto im Vollbild anzeigen",
+  photoFullscreenClose: "Foto schließen"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   confirmPythonDownload: "Pobrac teraz script.py na to urzadzenie?",
@@ -909,7 +917,9 @@ Object.assign(window.BB_TRANSLATIONS.i18n.pl, {
   searchZone01: "Szukaj w Zone 01",
   missingVehicleHelp: "Sprawdź numer pojazdu. Nadal go nie ma? Zgłoś go przez formularz lub szukaj dalej w Zone 01.",
   photoAlt: "Zdjecie pojazdu {id}",
-  photoCaption: "Pojazd {id}"
+  photoCaption: "Pojazd {id}",
+  photoFullscreen: "Wyświetl zdjęcie na pełnym ekranie",
+  photoFullscreenClose: "Zamknij zdjęcie"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   confirmPythonDownload: "Descargar ahora script.py en este dispositivo?",
@@ -920,7 +930,9 @@ Object.assign(window.BB_TRANSLATIONS.i18n.es, {
   searchZone01: "Buscar en Zone 01",
   missingVehicleHelp: "Comprueba el número del vehículo. ¿Sigue sin aparecer? Avísanos mediante el formulario o continúa la búsqueda en Zone 01.",
   photoAlt: "Foto del vehiculo {id}",
-  photoCaption: "Vehiculo {id}"
+  photoCaption: "Vehiculo {id}",
+  photoFullscreen: "Ver foto a pantalla completa",
+  photoFullscreenClose: "Cerrar foto"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   confirmPythonDownload: "Skachat' script.py na eto ustroystvo seychas?",
@@ -931,7 +943,9 @@ Object.assign(window.BB_TRANSLATIONS.i18n.ru, {
   searchZone01: "Искать на Zone 01",
   missingVehicleHelp: "Проверьте номер транспорта. Если он всё ещё не найден, сообщите о нём через форму или продолжите поиск на Zone 01.",
   photoAlt: "Foto transporta {id}",
-  photoCaption: "Transport {id}"
+  photoCaption: "Transport {id}",
+  photoFullscreen: "Открыть фото на весь экран",
+  photoFullscreenClose: "Закрыть фото"
 });
 Object.assign(window.BB_TRANSLATIONS.i18n.nl, {
   busNotYetInService: "Bus nog niet in dienst",

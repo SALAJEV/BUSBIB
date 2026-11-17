@@ -59,26 +59,28 @@ async function createWorker() {
   return { request, caches, handlers, fetchCount: () => fetchCount };
 }
 
-test("photo cache is bounded and versioned URLs share one entry", async () => {
+test("photo cache is bounded and versions are independent cache entries", async () => {
   const worker = await createWorker();
   await Promise.all(Array.from({ length: 20 }, (_, i) =>
     worker.request(`https://busbib.test/media/bus/photo${i}.jpeg?v=1`)
   ));
-  const cache = await worker.caches.open("busbib-photos-v2");
+  const cache = await worker.caches.open("busbib-photos-v4");
   const keys = await cache.keys();
   assert.equal(keys.length, 16);
-  assert.ok(keys.every((key) => !new URL(key.url).search));
+  assert.ok(keys.every((key) => new URL(key.url).searchParams.get("v") === "1"));
   const fetchCount = worker.fetchCount();
-  await worker.request(`${keys[0].url}?v=2`);
-  assert.equal(worker.fetchCount(), fetchCount);
+  const newVersion = new URL(keys[0].url);
+  newVersion.searchParams.set("v", "2");
+  await worker.request(newVersion.href);
+  assert.equal(worker.fetchCount(), fetchCount + 1);
   assert.equal((await cache.keys()).length, 16);
 });
 
 test("versioned shell assets are served without a network request", async () => {
   const worker = await createWorker();
-  const cache = await worker.caches.open("busbib-v255");
-  await cache.put("https://busbib.test/app.js?v=20261109-39", new Response("cached"));
-  const response = await worker.request("https://busbib.test/app.js?v=20261109-39");
+  const cache = await worker.caches.open("busbib-v257");
+  await cache.put("https://busbib.test/app.js?v=20261117-41", new Response("cached"));
+  const response = await worker.request("https://busbib.test/app.js?v=20261117-41");
   assert.equal(await (await response).text(), "cached");
   assert.equal(worker.fetchCount(), 0);
 });
@@ -92,11 +94,11 @@ test("external tiles and range requests bypass service-worker caching", async ()
 
 test("activation removes old BUSBIB caches without touching other applications", async () => {
   const worker = await createWorker();
-  for (const name of ["busbib-v254", "busbib-photos-v1", "busbib-v255", "busbib-photos-v2", "other-app"]) {
+  for (const name of ["busbib-v256", "busbib-photos-v3", "busbib-v257", "busbib-photos-v4", "other-app"]) {
     await worker.caches.open(name);
   }
   let activation;
   worker.handlers.activate({ waitUntil(value) { activation = value; } });
   await activation;
-  assert.deepEqual((await worker.caches.keys()).sort(), ["busbib-photos-v2", "busbib-v255", "other-app"].sort());
+  assert.deepEqual((await worker.caches.keys()).sort(), ["busbib-photos-v4", "busbib-v257", "other-app"].sort());
 });
