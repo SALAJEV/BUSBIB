@@ -2609,4 +2609,21 @@ Object.entries({
   }).forEach(([language, uploadLimitReached]) => {
     window.BB_TRANSLATIONS.i18n[language].uploadLimitReached = uploadLimitReached;
   });
+
+  Object.entries({
+    nl: ["Foto insturen is tijdelijk niet beschikbaar door een serverconfiguratie. Probeer het later opnieuw.", "De beveiligingscontrole is tijdelijk niet beschikbaar. Probeer het later opnieuw.", "Foto insturen is alleen beschikbaar via de officiële BUSBIB-website."],
+    en: ["Photo submissions are temporarily unavailable because of a server configuration issue. Please try again later.", "The security check is temporarily unavailable. Please try again later.", "Photo submissions are only available through the official BUSBIB website."],
+    fr: ["L'envoi de photos est temporairement indisponible à cause de la configuration du serveur. Réessayez plus tard.", "Le contrôle de sécurité est temporairement indisponible. Réessayez plus tard.", "L'envoi de photos est disponible uniquement via le site officiel BUSBIB."],
+    de: ["Das Einsenden von Fotos ist wegen einer Serverkonfiguration vorübergehend nicht verfügbar. Bitte später erneut versuchen.", "Die Sicherheitsprüfung ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.", "Das Einsenden von Fotos ist nur über die offizielle BUSBIB-Website verfügbar."],
+    pl: ["Wysyłanie zdjęć jest tymczasowo niedostępne z powodu konfiguracji serwera. Spróbuj później.", "Kontrola bezpieczeństwa jest tymczasowo niedostępna. Spróbuj później.", "Wysyłanie zdjęć jest dostępne tylko przez oficjalną witrynę BUSBIB."],
+    es: ["El envío de fotos no está disponible temporalmente por la configuración del servidor. Inténtalo más tarde.", "La comprobación de seguridad no está disponible temporalmente. Inténtalo más tarde.", "El envío de fotos solo está disponible desde el sitio oficial de BUSBIB."],
+    ru: ["Отправка фотографий временно недоступна из-за конфигурации сервера. Попробуйте позже.", "Проверка безопасности временно недоступна. Попробуйте позже.", "Отправка фотографий доступна только через официальный сайт BUSBIB."]
+  }).forEach(([language, values]) => {
+    const [photoUploadServerUnavailable, photoUploadVerificationUnavailable, photoUploadInvalidOrigin] = values;
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], {
+      photoUploadServerUnavailable,
+      photoUploadVerificationUnavailable,
+      photoUploadInvalidOrigin
+    });
+  });
 });

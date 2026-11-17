@@ -2729,7 +2729,11 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_M
     const response = await fetch(url, { ...options, signal: controller.signal });
     if (!response.ok) {
       const error = new Error(`HTTP ${response.status} voor ${url}`);
-      error.photoUploadError = response.headers.get("X-Photo-Upload-Error");
+      const headerCode = response.headers.get("X-Photo-Upload-Error");
+      const payload = await response.json().catch(() => null);
+      error.photoUploadError = headerCode || (
+        payload && typeof payload.error === "string" ? payload.error : ""
+      );
       throw error;
     }
     return response;
@@ -9262,9 +9266,16 @@ photoUploadFormEl?.addEventListener("submit", async (event) => {
   } catch (error) {
     console.warn("Foto insturen mislukt", error);
     photoUploadStatusEl.dataset.state = "error";
-    photoUploadStatusEl.textContent = error?.photoUploadError === "monthly-limit"
-      ? getLabel("uploadLimitReached", "De uploadlimiet is bereikt. Probeer later opnieuw.")
-      : getLabel("uploadFailed", "Versturen mislukt. Probeer het later opnieuw.");
+    const uploadErrorMessages = {
+      "monthly-limit": getLabel("uploadLimitReached", "De uploadlimiet is bereikt. Probeer later opnieuw."),
+      unavailable: getLabel("photoUploadServerUnavailable", "Foto insturen is tijdelijk niet beschikbaar door een serverconfiguratie. Probeer het later opnieuw."),
+      verification: getLabel("photoUploadVerificationUnavailable", "De beveiligingscontrole is tijdelijk niet beschikbaar. Probeer het later opnieuw."),
+      origin: getLabel("photoUploadInvalidOrigin", "Foto insturen is alleen beschikbaar via de officiële BUSBIB-website."),
+      image: getLabel("uploadInvalidImage", "Kies een JPEG-, PNG- of WebP-foto van maximaal 8 MB."),
+      size: getLabel("uploadInvalidImage", "Kies een JPEG-, PNG- of WebP-foto van maximaal 8 MB.")
+    };
+    photoUploadStatusEl.textContent = uploadErrorMessages[error?.photoUploadError]
+      || getLabel("uploadFailed", "Versturen mislukt. Probeer het later opnieuw.");
     photoUploadSubmitting = false;
     if (photoUploadChallengeId !== null && window.turnstile) window.turnstile.reset(photoUploadChallengeId);
   } finally {
