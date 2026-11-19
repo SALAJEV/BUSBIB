@@ -59,3 +59,89 @@ test("phone app zoom is locked while browser, tablet and map zoom remain availab
   context.syncPhoneAppViewport();
   assert.match(content, /user-scalable=no/);
 });
+
+test("vehicle card moves into fullscreen and returns to the page when fullscreen closes", async () => {
+  const source = await readFile(new URL("../app.js", import.meta.url), "utf8");
+  const start = source.indexOf("function positionHomeGtfsVehicleCard()");
+  const end = source.indexOf("function buildVehicleMapPopup(", start);
+  assert.ok(start >= 0 && end > start);
+  const classes = new Set();
+  const classList = {
+    contains: (name) => classes.has(name),
+    toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name),
+    remove: (name) => classes.delete(name)
+  };
+  const card = {
+    hidden: false,
+    _map: {
+      getContainer: () => ({ getBoundingClientRect: () => ({ left: 10, top: 100 }) }),
+      latLngToContainerPoint: () => ({ x: 200, y: 180 })
+    },
+    _anchorLatLng: [50, 4],
+    offsetHeight: 120,
+    classList,
+    style: { setProperty() {} }
+  };
+  const body = { appendChild: (element) => { element.parentElement = body; } };
+  const panelClasses = new Set();
+  const panel = {
+    classList: { contains: (name) => panelClasses.has(name) },
+    appendChild: (element) => { element.parentElement = panel; }
+  };
+  card.parentElement = body;
+  const context = {
+    document: { getElementById: () => card, body, fullscreenElement: panel },
+    window: { innerWidth: 390, innerHeight: 844 },
+    homeGtfsMapPanelEl: panel
+  };
+  vm.runInNewContext(source.slice(start, end), context);
+  context.positionHomeGtfsVehicleCard();
+  assert.equal(card.parentElement, panel);
+  assert.equal(classes.has("is-map-fullscreen-top"), true);
+
+  context.document.fullscreenElement = null;
+  panelClasses.add("map-fullscreen-fallback");
+  context.positionHomeGtfsVehicleCard();
+  assert.equal(card.parentElement, panel);
+  assert.equal(classes.has("is-map-fullscreen-top"), true);
+
+  panelClasses.clear();
+  context.positionHomeGtfsVehicleCard();
+  assert.equal(card.parentElement, body);
+  assert.equal(classes.has("is-map-fullscreen-top"), false);
+  assert.match(card.style.left, /^\d+px$/);
+  assert.match(card.style.top, /^\d+px$/);
+});
+
+test("map fullscreen locks page scrolling and restores it on exit", async () => {
+  const source = await readFile(new URL("../app.js", import.meta.url), "utf8");
+  const start = source.indexOf("function syncMapFullscreenPage()");
+  const end = source.indexOf("function closeMapFullscreen(", start);
+  assert.ok(start >= 0 && end > start);
+  const htmlClasses = new Set();
+  const bodyClasses = new Set();
+  const makeClassList = (classes) => ({
+    toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name)
+  });
+  let fallback = false;
+  const context = {
+    document: {
+      querySelector: () => fallback ? {} : null,
+      fullscreenElement: { querySelector: () => ({}) },
+      documentElement: { classList: makeClassList(htmlClasses) },
+      body: { classList: makeClassList(bodyClasses) }
+    }
+  };
+  vm.runInNewContext(source.slice(start, end), context);
+  context.syncMapFullscreenPage();
+  assert.equal(htmlClasses.has("map-fullscreen-open"), true);
+  assert.equal(bodyClasses.has("map-fullscreen-open"), true);
+  context.document.fullscreenElement = null;
+  fallback = true;
+  context.syncMapFullscreenPage();
+  assert.equal(htmlClasses.has("map-fullscreen-open"), true);
+  fallback = false;
+  context.syncMapFullscreenPage();
+  assert.equal(htmlClasses.has("map-fullscreen-open"), false);
+  assert.equal(bodyClasses.has("map-fullscreen-open"), false);
+});

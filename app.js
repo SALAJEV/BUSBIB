@@ -447,6 +447,8 @@ let vehiclePhotoLoaderEl = document.getElementById("vehiclePhotoLoader");
 const vehiclePhotoPrevBtn = document.getElementById("vehiclePhotoPrevBtn");
 const vehiclePhotoNextBtn = document.getElementById("vehiclePhotoNextBtn");
 const vehiclePhotoFullscreenBtn = document.getElementById("vehiclePhotoFullscreenBtn");
+const vehiclePhotoCardActionsBtn = document.getElementById("vehiclePhotoCardActionsBtn");
+const vehiclePhotoCardActionsMenuEl = document.getElementById("vehiclePhotoCardActionsMenu");
 const vehiclePhotoCounterEl = document.getElementById("vehiclePhotoCounter");
 const vehiclePhotoMetaEl = document.getElementById("vehiclePhotoMeta");
 const vehiclePhotoCaptionEl = document.getElementById("vehiclePhotoCaption");
@@ -462,6 +464,8 @@ const vehiclePhotoViewerCounterEl = document.getElementById("vehiclePhotoViewerC
 const vehiclePhotoViewerCloseBtn = document.getElementById("vehiclePhotoViewerCloseBtn");
 const vehiclePhotoViewerPrevBtn = document.getElementById("vehiclePhotoViewerPrevBtn");
 const vehiclePhotoViewerNextBtn = document.getElementById("vehiclePhotoViewerNextBtn");
+const vehiclePhotoViewerActionsBtn = document.getElementById("vehiclePhotoViewerActionsBtn");
+const vehiclePhotoViewerActionsMenuEl = document.getElementById("vehiclePhotoViewerActionsMenu");
 const footerSocialsEl = document.getElementById("footerSocials");
 const footerDonationLinkEl = document.getElementById("footerDonationLink");
 const footerReviewBtn = document.getElementById("footerReviewBtn");
@@ -715,7 +719,7 @@ let realtimePausedByInactivity = false;
 let deeplinkHandled = false;
 let routeNavigationLocked = false;
 let injectedInitialHomeHistoryState = false;
-const APP_VERSION = "2026.11.09-23";
+const APP_VERSION = "2026.11.19-24";
 const dataLoadTimestamps = {
   realtime: 0
 };
@@ -3814,8 +3818,8 @@ function updateDocumentTitle(vehicleId = "") {
     : getLabel("homePageTitle", "BUSBIB | Bussen en trams van De Lijn live volgen");
 }
 
-const DEFAULT_HEADER_ROUTE = "95";
-const DEFAULT_HEADER_DESTINATION = "Bussegem";
+const DEFAULT_HEADER_ROUTE = "VI";
+const DEFAULT_HEADER_DESTINATION = "Vice City";
 const DEFAULT_HEADER_ROUTE_COLOR = "#0072CE";
 const DEFAULT_HEADER_ROUTE_TEXT_COLOR = "#FFFFFF";
 
@@ -4170,6 +4174,17 @@ function positionHomeGtfsVehicleCard() {
   const cardEl = document.getElementById("homeGtfsVehicleCard");
   const map = cardEl?._map;
   if (!cardEl || cardEl.hidden || !map || !cardEl._anchorLatLng) return;
+  const isMapFullscreen =
+    document.fullscreenElement === homeGtfsMapPanelEl ||
+    homeGtfsMapPanelEl?.classList.contains("map-fullscreen-fallback");
+  const cardParent = isMapFullscreen ? homeGtfsMapPanelEl : document.body;
+  if (cardParent && cardEl.parentElement !== cardParent) cardParent.appendChild(cardEl);
+  cardEl.classList.toggle("is-map-fullscreen-top", !!isMapFullscreen);
+  if (isMapFullscreen) {
+    cardEl.classList.remove("is-below");
+    cardEl.style.width = `min(340px, calc(100vw - 80px))`;
+    return;
+  }
   const mapRect = map.getContainer().getBoundingClientRect();
   const point = map.latLngToContainerPoint(cardEl._anchorLatLng);
   const x = mapRect.left + point.x;
@@ -4249,7 +4264,7 @@ function setHomeGtfsMapStatus(message, tone = "") {
   if (!homeGtfsMapStatusEl) return;
   const errorEl = document.getElementById("homeGtfsMapError");
   if (tone === "error") {
-    closeMapFullscreen(homeGtfsMapEl);
+    closeMapFullscreen(homeGtfsMapPanelEl);
     closeHomeGtfsVehicleCard();
     homeGtfsMapPanelEl?.classList.add("is-unavailable");
     if (errorEl) errorEl.hidden = false;
@@ -4282,7 +4297,7 @@ function closeHomeGtfsVehicleCard() {
 function setHomeGtfsMapVisible(visible) {
   if (!homeGtfsMapPanelEl) return;
   const shouldShow = visible && settings.showHomeRealtimeMap;
-  if (!shouldShow) closeMapFullscreen(homeGtfsMapEl);
+  if (!shouldShow) closeMapFullscreen(homeGtfsMapPanelEl);
   homeGtfsMapPanelEl.hidden = !shouldShow;
   homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!shouldShow));
   if (!shouldShow) closeHomeGtfsVehicleCard();
@@ -4348,7 +4363,7 @@ async function initHomeGtfsMap() {
   }).setView(HOME_GTFS_MAP_CENTER, HOME_GTFS_MAP_ZOOM);
   addPublicTransportTileLayer(homeGtfsMap);
   addCurrentLocationControl(homeGtfsMap);
-  addMapFullscreenControl(homeGtfsMap);
+  addMapFullscreenControl(homeGtfsMap, homeGtfsMapPanelEl);
   homeGtfsMapMarkers = L.layerGroup().addTo(homeGtfsMap);
 }
 
@@ -4361,6 +4376,15 @@ function updateMapFullscreenButton(button, active) {
   button.setAttribute("aria-pressed", String(active));
 }
 
+function syncMapFullscreenPage() {
+  const active = Boolean(
+    document.querySelector(".map-fullscreen-fallback") ||
+    document.fullscreenElement?.querySelector(".leaflet-control-fullscreen-button")
+  );
+  document.documentElement.classList.toggle("map-fullscreen-open", active);
+  document.body.classList.toggle("map-fullscreen-open", active);
+}
+
 function closeMapFullscreen(container) {
   if (!container) return;
   if (document.fullscreenElement === container) {
@@ -4368,24 +4392,31 @@ function closeMapFullscreen(container) {
   }
   if (container.classList.contains("map-fullscreen-fallback")) {
     container.classList.remove("map-fullscreen-fallback");
-    document.body.classList.remove("map-fullscreen-open");
+    syncMapFullscreenPage();
     container.querySelector(".leaflet-control-fullscreen-button")?.focus({ preventScroll: true });
-    const mapInstance = container === homeGtfsMapEl ? homeGtfsMap : map;
-    window.requestAnimationFrame(() => mapInstance?.invalidateSize(false));
+    const mapInstance = container === homeGtfsMapPanelEl || container === homeGtfsMapEl ? homeGtfsMap : map;
+    window.requestAnimationFrame(() => {
+      mapInstance?.invalidateSize(false);
+      if (mapInstance === homeGtfsMap) positionHomeGtfsVehicleCard();
+    });
     const button = container.querySelector(".leaflet-control-fullscreen-button");
     if (button) updateMapFullscreenButton(button, false);
   }
 }
 
-function addMapFullscreenControl(mapInstance) {
+function addMapFullscreenControl(mapInstance, fullscreenContainer = mapInstance.getContainer()) {
   const L = window.L;
-  const container = mapInstance.getContainer();
+  const container = fullscreenContainer;
   const control = L.control({ position: "topleft" });
   let button;
   const sync = () => {
     const active = document.fullscreenElement === container || container.classList.contains("map-fullscreen-fallback");
+    syncMapFullscreenPage();
     updateMapFullscreenButton(button, active);
-    window.requestAnimationFrame(() => mapInstance.invalidateSize(false));
+    window.requestAnimationFrame(() => {
+      mapInstance.invalidateSize(false);
+      if (mapInstance === homeGtfsMap) positionHomeGtfsVehicleCard();
+    });
   };
   control.onAdd = () => {
     const wrapper = L.DomUtil.create("div", "leaflet-bar leaflet-control-fullscreen");
@@ -4409,7 +4440,6 @@ function addMapFullscreenControl(mapInstance) {
         }
       }
       container.classList.add("map-fullscreen-fallback");
-      document.body.classList.add("map-fullscreen-open");
       sync();
     });
     return wrapper;
@@ -4808,6 +4838,7 @@ function updateVehiclePhotoTexts() {
   if (!photoCardTitleEl || !vehiclePhotoCaptionEl) return;
   photoCardTitleEl.textContent = translateTemplate("photoCard", "Voertuigfoto");
   updatePhotoUploadCopy(currentPhotoVehicleId);
+  updateVehiclePhotoActionLabels();
   renderActiveVehiclePhoto();
 }
 
@@ -4913,9 +4944,12 @@ function setVehiclePhotoEmptyStateVisible(visible) {
   if (visible) setVehiclePhotoFrameLoading(false);
   if (visible) clearVehiclePhotoImageElement(true);
   if (visible) {
+    closeVehiclePhotoActionMenus();
     if (vehiclePhotoPrevBtn) vehiclePhotoPrevBtn.hidden = true;
     if (vehiclePhotoNextBtn) vehiclePhotoNextBtn.hidden = true;
     if (vehiclePhotoFullscreenBtn) vehiclePhotoFullscreenBtn.hidden = true;
+    if (vehiclePhotoCardActionsBtn) vehiclePhotoCardActionsBtn.hidden = true;
+    if (vehiclePhotoCardActionsMenuEl) vehiclePhotoCardActionsMenuEl.hidden = true;
     if (vehiclePhotoCaptionEl) vehiclePhotoCaptionEl.hidden = true;
   }
   if (vehiclePhotoInfoEl) vehiclePhotoInfoEl.hidden = visible;
@@ -5543,6 +5577,13 @@ function buildVehiclePhotoEntry(src, maker = "", sortOrder = 0) {
   };
 }
 
+// Only photographers with explicit download permission belong on this list.
+const PHOTO_DOWNLOAD_ALLOWED_MAKERS = new Set(["@delijn_busspotter"]);
+
+function isVehiclePhotoDownloadAllowed(entry) {
+  return PHOTO_DOWNLOAD_ALLOWED_MAKERS.has(cleanText(entry?.metaFields?.maker).toLowerCase());
+}
+
 function getVehiclePhotoAliases(vehicleId) {
   const bus = findBusById(vehicleId);
   const aliases = new Set([
@@ -5675,12 +5716,6 @@ function hasKnownPhotoPhotographer(entry) {
 }
 
 function compareVehiclePhotoEntries(left, right) {
-  const leftHasKnownPhotographer = hasKnownPhotoPhotographer(left);
-  const rightHasKnownPhotographer = hasKnownPhotoPhotographer(right);
-  if (leftHasKnownPhotographer !== rightHasKnownPhotographer) {
-    return leftHasKnownPhotographer ? -1 : 1;
-  }
-
   const leftTimestamp = Number.isFinite(left?.dateSortTimestamp)
     ? left.dateSortTimestamp
     : getPhotoMetadataTimestamp(left?.metaFields?.date);
@@ -5697,6 +5732,12 @@ function compareVehiclePhotoEntries(left, right) {
   if (leftHasKnownDate && rightHasKnownDate) {
     const dateDiff = rightTimestamp - leftTimestamp;
     if (dateDiff !== 0) return dateDiff;
+  }
+
+  const leftHasKnownPhotographer = hasKnownPhotoPhotographer(left);
+  const rightHasKnownPhotographer = hasKnownPhotoPhotographer(right);
+  if (leftHasKnownPhotographer !== rightHasKnownPhotographer) {
+    return leftHasKnownPhotographer ? -1 : 1;
   }
 
   const fileNameDiff = getPhotoEntryFileName(left).localeCompare(
@@ -5816,7 +5857,9 @@ function buildVehiclePhotoRequestUrl(src) {
 }
 
 async function resolveVehiclePhotoEntries(vehicleId) {
-  return sortVehiclePhotoEntries(getIndexedPhotoEntries(vehicleId));
+  const entries = getIndexedPhotoEntries(vehicleId);
+  await Promise.all(entries.map((entry) => enrichResolvedPhotoEntry(entry)));
+  return sortVehiclePhotoEntries(entries);
 }
 
 function buildVehiclePhotoCopy(entry, vehicleId) {
@@ -5911,6 +5954,10 @@ function updateVehiclePhotoNavigation() {
     vehiclePhotoFullscreenBtn.hidden = !photoCount;
     vehiclePhotoFullscreenBtn.disabled = !photoCount;
   }
+  if (vehiclePhotoCardActionsBtn) {
+    vehiclePhotoCardActionsBtn.hidden = !photoCount;
+    vehiclePhotoCardActionsBtn.disabled = !photoCount;
+  }
 }
 
 function renderVehiclePhotoViewer() {
@@ -5945,6 +5992,7 @@ function showVehiclePhotoViewer() {
 }
 
 function hideVehiclePhotoViewer() {
+  closeVehiclePhotoActionMenus();
   closeOverlayModal(vehiclePhotoViewerEl);
   if (vehiclePhotoViewerImgEl) vehiclePhotoViewerImgEl.removeAttribute("src");
 }
@@ -5967,6 +6015,7 @@ async function hydrateActiveVehiclePhotoLocation(entry, vehicleId, entryIndex) {
 
 function renderActiveVehiclePhoto() {
   if (!vehiclePhotoCaptionEl) return;
+  closeVehiclePhotoActionMenus();
   if (!currentPhotoVehicleId || !currentVehiclePhotoEntries.length) {
     setVehiclePhotoFrameLoading(false);
     clearVehiclePhotoImageElement(true);
@@ -6103,6 +6152,7 @@ async function verifyInternetConnection(force = false) {
 }
 
 function hideVehiclePhotoCard() {
+  closeVehiclePhotoActionMenus();
   vehiclePhotoLookupToken += 1;
   currentPhotoVehicleId = "";
   currentVehiclePhotoEntries = [];
@@ -6162,6 +6212,8 @@ async function updateVehiclePhotoCard(vehicleId) {
   }
 
   vehiclePhotoEntriesCache.set(normalizedVehicleId, photoEntries);
+  photoWidgetVehicleCache = null;
+  if (currentPageView === "menu") renderPhotoWidgetChoices();
   currentPhotoVehicleId = normalizedVehicleId;
   currentVehiclePhotoEntries = photoEntries;
   currentVehiclePhotoIndex = 0;
@@ -8492,12 +8544,179 @@ function getPhotoWidgetVehicles() {
     const vehicle = findBusById(id);
     const canonicalId = normalize(vehicle?.Voertuignummer || id);
     if (!vehicles.has(canonicalId)) {
-      const photos = getIndexedPhotoEntries(canonicalId);
+      const photos = vehiclePhotoEntriesCache.get(canonicalId) || getIndexedPhotoEntries(canonicalId);
       if (photos.length) vehicles.set(canonicalId, { id: canonicalId, vehicle, photos });
     }
   });
   photoWidgetVehicleCache = [...vehicles.values()].sort((a, b) => getVehicleDisplayId(a.id).localeCompare(getVehicleDisplayId(b.id), undefined, { numeric: true }));
   return photoWidgetVehicleCache;
+}
+
+function buildPhotoWidgetChoicesWithEntry(currentChoices, vehicleId, photoSrc) {
+  const id = (vehicleId || "").toString().trim();
+  const src = (photoSrc || "").toString().trim();
+  if (!id || !src) return null;
+
+  const choices = Array.from({ length: 3 }, (_, index) => {
+    const choice = currentChoices?.[index];
+    return {
+      id: (choice?.id || "").toString().trim(),
+      src: (choice?.src || "").toString().trim()
+    };
+  });
+  const existingIndex = choices.findIndex((choice) => choice.id === id);
+  const targetIndex = existingIndex >= 0
+    ? existingIndex
+    : choices.findIndex((choice) => !choice.id || !choice.src);
+  if (targetIndex < 0) return null;
+  choices[targetIndex] = { id, src };
+  return choices;
+}
+
+function updateVehiclePhotoActionLabels() {
+  const labels = {
+    actions: getLabel("photoActions", "Fotoacties"),
+    download: getLabel("photoDownload", "Foto downloaden"),
+    widget: getLabel("photoAddToHomeWidget", "Aan startpagina toevoegen")
+  };
+  [vehiclePhotoCardActionsBtn, vehiclePhotoViewerActionsBtn].forEach((button) => {
+    if (!button) return;
+    button.setAttribute("aria-label", labels.actions);
+    button.title = labels.actions;
+  });
+  [vehiclePhotoCardActionsMenuEl, vehiclePhotoViewerActionsMenuEl].forEach((menu) => {
+    if (menu) menu.setAttribute("aria-label", labels.actions);
+  });
+  document.querySelectorAll("[data-photo-action-label]").forEach((label) => {
+    const action = label.getAttribute("data-photo-action-label");
+    if (action === "download") label.textContent = labels.download;
+    if (action === "widget") label.textContent = labels.widget;
+  });
+}
+
+function closeVehiclePhotoActionMenus(restoreFocusTo = null) {
+  [
+    [vehiclePhotoCardActionsBtn, vehiclePhotoCardActionsMenuEl],
+    [vehiclePhotoViewerActionsBtn, vehiclePhotoViewerActionsMenuEl]
+  ].forEach(([button, menu]) => {
+    if (!button || !menu) return;
+    menu.hidden = true;
+    button.setAttribute("aria-expanded", "false");
+  });
+  restoreFocusTo?.focus();
+}
+
+function toggleVehiclePhotoActionMenu(button, menu) {
+  if (!button || !menu) return;
+  const shouldOpen = menu.hidden;
+  closeVehiclePhotoActionMenus();
+  if (!shouldOpen) return;
+  menu.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+  menu.querySelector('[data-photo-action="download"]')?.focus();
+}
+
+function handleVehiclePhotoActionMenuKeydown(event, button, menu) {
+  const items = Array.from(menu.querySelectorAll('[role="menuitem"]:not(:disabled)'));
+  if (!items.length) return;
+  const currentIndex = items.indexOf(document.activeElement);
+  let nextIndex = -1;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1 + items.length) % items.length;
+  if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  if (event.key === "Home") nextIndex = 0;
+  if (event.key === "End") nextIndex = items.length - 1;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeVehiclePhotoActionMenus(button);
+    return;
+  }
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+  if (nextIndex < 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  items[nextIndex].focus();
+}
+
+function bindVehiclePhotoActionMenu(button, menu) {
+  const container = button?.closest(".vehicle-photo-actions");
+  if (!container || !menu) return;
+  button.addEventListener("click", () => toggleVehiclePhotoActionMenu(button, menu));
+  menu.addEventListener("click", (event) => {
+    const actionButton = event.target instanceof Element
+      ? event.target.closest("[data-photo-action]")
+      : null;
+    if (!(actionButton instanceof HTMLButtonElement)) return;
+    const action = actionButton.getAttribute("data-photo-action");
+    closeVehiclePhotoActionMenus(button);
+    if (action === "download") void downloadActiveVehiclePhoto();
+    if (action === "widget") addActiveVehiclePhotoToHomeWidget();
+  });
+  menu.addEventListener("keydown", (event) => handleVehiclePhotoActionMenuKeydown(event, button, menu));
+}
+
+async function downloadActiveVehiclePhoto() {
+  const entry = currentVehiclePhotoEntries[currentVehiclePhotoIndex];
+  if (!entry) {
+    void showAppAlert(getLabel("photoDownloadUnavailable", "Deze foto kan niet worden gedownload."));
+    return;
+  }
+  if (!isVehiclePhotoDownloadAllowed(entry)) {
+    void showAppAlert(getLabel("photoDownloadDenied", "De fotograaf heeft downloaden van deze foto niet toegestaan."));
+    return;
+  }
+
+  try {
+    const photoUrl = buildVehiclePhotoRequestUrl(entry.displaySrc || entry.src);
+    const response = await fetchWithTimeout(photoUrl, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Foto ophalen mislukt: HTTP ${response.status}`);
+    const objectUrl = URL.createObjectURL(await response.blob());
+    const extension = new URL(photoUrl, document.baseURI).pathname.match(/\.[a-z0-9]{2,5}$/i)?.[0] || ".jpg";
+    const vehicleId = getVehicleDisplayId(currentPhotoVehicleId) || currentPhotoVehicleId;
+    const downloadLink = document.createElement("a");
+    downloadLink.href = objectUrl;
+    downloadLink.download = `BUSBIB-${vehicleId}-${currentVehiclePhotoIndex + 1}${extension}`;
+    downloadLink.rel = "noopener";
+    downloadLink.style.display = "none";
+    try {
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    } finally {
+      downloadLink.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    }
+  } catch (error) {
+    console.error("Voertuigfoto downloaden mislukt", error);
+    void showAppAlert(getLabel("photoDownloadFailed", "Foto downloaden is mislukt. Probeer het opnieuw."));
+  }
+}
+
+function addActiveVehiclePhotoToHomeWidget() {
+  const entry = currentVehiclePhotoEntries[currentVehiclePhotoIndex];
+  if (!entry || !currentPhotoVehicleId) {
+    void showAppAlert(getLabel("photoWidgetAddUnavailable", "Deze foto kan niet aan de widget worden toegevoegd."));
+    return;
+  }
+  const choices = buildPhotoWidgetChoicesWithEntry(
+    settings.photoWidgetChoices,
+    currentPhotoVehicleId,
+    entry.src
+  );
+  if (!choices) {
+    void showAppAlert(getLabel("photoWidgetFull", "De fotowidget is vol. Verwijder eerst een foto via Instellingen."));
+    return;
+  }
+  settings.photoWidgetChoices = choices;
+  settings.showPhotoWidget = true;
+  if (showPhotoWidgetToggle) showPhotoWidgetToggle.checked = true;
+  saveSettings();
+  renderPhotoWidgetChoices();
+  renderPhotoWidget();
+  void showAppAlert(getLabel("photoWidgetAdded", "Foto toegevoegd aan de widget op de startpagina."));
 }
 
 function renderPhotoWidgetChoices() {
@@ -8534,7 +8753,7 @@ function renderPhotoWidget() {
   const cards = (settings.photoWidgetChoices || []).map((choice) => {
     if (!choice?.id) return "";
     const vehicle = findBusById(choice.id);
-    const photos = getIndexedPhotoEntries(choice.id);
+    const photos = vehiclePhotoEntriesCache.get(normalize(choice.id)) || getIndexedPhotoEntries(choice.id);
     const photo = photos.find((entry) => entry.src === choice.src) || photos[0];
     if (!photo) return "";
     const number = getVehicleDisplayId(vehicle || choice.id);
@@ -9313,6 +9532,20 @@ vehiclePhotoNextBtn?.addEventListener("click", () => {
   renderActiveVehiclePhoto();
 });
 vehiclePhotoFullscreenBtn?.addEventListener("click", showVehiclePhotoViewer);
+bindVehiclePhotoActionMenu(vehiclePhotoCardActionsBtn, vehiclePhotoCardActionsMenuEl);
+bindVehiclePhotoActionMenu(vehiclePhotoViewerActionsBtn, vehiclePhotoViewerActionsMenuEl);
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element) || !target.closest(".vehicle-photo-actions")) {
+    closeVehiclePhotoActionMenus();
+  }
+});
+document.addEventListener("focusin", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element) || !target.closest(".vehicle-photo-actions")) {
+    closeVehiclePhotoActionMenus();
+  }
+});
 vehiclePhotoFrameEl?.addEventListener("click", (event) => {
   if (event.target === vehiclePhotoImgEl && vehiclePhotoImgEl?.classList.contains("is-visible")) {
     showVehiclePhotoViewer();
@@ -9502,6 +9735,16 @@ settingsInfoBtn?.addEventListener("click", () => {
   showInfoModal();
 });
 document.addEventListener("keydown", (event) => {
+  const openPhotoActionMenu = [
+    [vehiclePhotoCardActionsBtn, vehiclePhotoCardActionsMenuEl],
+    [vehiclePhotoViewerActionsBtn, vehiclePhotoViewerActionsMenuEl]
+  ].find(([, menu]) => menu && !menu.hidden);
+  if (openPhotoActionMenu && event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeVehiclePhotoActionMenus(openPhotoActionMenu[0]);
+    return;
+  }
   const activeOverlayEl = getTopInteractiveOverlay();
   if (activeOverlayEl === vehiclePhotoViewerEl && currentVehiclePhotoEntries.length > 1) {
     if (event.key === "ArrowLeft") {
@@ -10388,7 +10631,6 @@ function getHomeGtfsCanvasLayerClass() {
       if (!closestSnapshot) return;
       const cardEl = document.getElementById("homeGtfsVehicleCard");
       if (!cardEl) return;
-      if (cardEl.parentElement !== document.body) document.body.appendChild(cardEl);
       cardEl.innerHTML = buildHomeGtfsMapPopup(closestSnapshot);
       cardEl.hidden = false;
       cardEl._anchorLatLng = [closestSnapshot.latitude, closestSnapshot.longitude];

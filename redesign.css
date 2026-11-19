@@ -100,8 +100,10 @@ body {
   background: var(--page);
 }
 
+html.map-fullscreen-open,
 body.map-fullscreen-open {
   overflow: hidden;
+  scrollbar-gutter: auto;
 }
 
 #photoUploadModal .photo-upload-card {
@@ -236,10 +238,35 @@ body.map-fullscreen-open {
   line-height: 1.45;
 }
 
-.home-gtfs-map:fullscreen,
+.home-gtfs-map-panel:fullscreen,
+.home-gtfs-map-panel.map-fullscreen-fallback {
+  position: fixed !important;
+  inset: 0 !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  gap: 12px;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100dvh;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--surface) !important;
+  overflow: hidden;
+  animation: none;
+}
+
+.home-gtfs-map-panel.map-fullscreen-fallback {
+  z-index: 10000;
+}
+
 #realtimeVehicleCard #map:fullscreen,
-.home-gtfs-map.map-fullscreen-fallback,
 #realtimeVehicleCard #map.map-fullscreen-fallback {
+  box-sizing: border-box;
   width: 100% !important;
   height: 100% !important;
   min-height: 0;
@@ -247,7 +274,6 @@ body.map-fullscreen-open {
   border-radius: 0;
 }
 
-.home-gtfs-map.map-fullscreen-fallback,
 #realtimeVehicleCard #map.map-fullscreen-fallback {
   position: fixed !important;
   inset: 0;
@@ -256,20 +282,50 @@ body.map-fullscreen-open {
   height: 100dvh !important;
 }
 
+.home-gtfs-map-panel:fullscreen > .home-gtfs-map,
+.home-gtfs-map-panel.map-fullscreen-fallback > .home-gtfs-map {
+  flex: 1 1 0;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin-top: 0;
+}
+
+.home-gtfs-map-panel:fullscreen > .home-map-filter,
+.home-gtfs-map-panel.map-fullscreen-fallback > .home-map-filter {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
 .leaflet-control-fullscreen-button {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 5px;
+  width: 26px;
+  height: 26px;
+  padding: 3px;
   border: 0;
   background: #fff;
-  color: #222;
+  color: #000;
   cursor: pointer;
 }
 
 .leaflet-control-fullscreen-button:hover {
   background: #f4f4f4;
+}
+
+.leaflet-touch .leaflet-control-fullscreen-button {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+}
+
+:root[data-resolved-theme="dark"] .leaflet-control-fullscreen-button {
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+
+:root[data-resolved-theme="dark"] .leaflet-control-fullscreen-button:hover {
+  background: var(--surface-soft);
 }
 
 .leaflet-control-fullscreen-button:focus-visible {
@@ -285,6 +341,19 @@ body.map-fullscreen-open {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.home-gtfs-vehicle-card.is-map-fullscreen-top {
+  z-index: 10001;
+  top: max(12px, env(safe-area-inset-top)) !important;
+  right: max(12px, env(safe-area-inset-right));
+  left: auto !important;
+  max-height: min(42dvh, 360px);
+  overflow-y: auto;
+}
+
+.home-gtfs-vehicle-card.is-map-fullscreen-top::after {
+  display: none;
 }
 
 .container {

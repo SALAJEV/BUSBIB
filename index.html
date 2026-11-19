@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261117-41">
-<link rel="stylesheet" href="redesign.css?v=20261117-41">
+<link rel="stylesheet" href="style.css?v=20261119-42">
+<link rel="stylesheet" href="redesign.css?v=20261119-42">
 <script src="site-config.js?v=20261117-40"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261117-41";
+  window.BB_ASSET_VERSION = "20261119-42";
 </script>
 </head>
 <body>
@@ -108,8 +108,8 @@
           <strong id="headerVisualTitle">Open meteen de juiste bus en volg de rit live.</strong>
         </div>
         <span class="header-visual-card header-visual-card--primary">
-          <span class="header-visual-card-route">95</span>
-          <span class="header-visual-card-destination">Bussegem</span>
+          <span class="header-visual-card-route">VI</span>
+          <span class="header-visual-card-destination">Vice City</span>
         </span>
       </div>
     </div>
@@ -229,6 +229,21 @@
                 <button id="vehiclePhotoFullscreenBtn" class="photo-fullscreen-btn" type="button" hidden aria-label="Foto volledig scherm bekijken">
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>
                 </button>
+                <div class="vehicle-photo-actions vehicle-photo-actions--frame">
+                  <button id="vehiclePhotoCardActionsBtn" class="vehicle-photo-actions-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vehiclePhotoCardActionsMenu" aria-label="Fotoacties" title="Fotoacties">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
+                  </button>
+                  <div id="vehiclePhotoCardActionsMenu" class="vehicle-photo-actions-menu" role="menu" aria-label="Fotoacties" hidden>
+                    <button class="vehicle-photo-action" type="button" role="menuitem" data-photo-action="download">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"></path></svg>
+                      <span data-photo-action-label="download">Foto downloaden</span>
+                    </button>
+                    <button class="vehicle-photo-action" type="button" role="menuitem" data-photo-action="widget">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="7" height="7" rx="1.5"></rect><rect x="13" y="4" width="7" height="7" rx="1.5"></rect><rect x="4" y="13" width="7" height="7" rx="1.5"></rect><path d="M16.5 13v7m-3.5-3.5h7"></path></svg>
+                      <span data-photo-action-label="widget">Aan startpagina toevoegen</span>
+                    </button>
+                  </div>
+                </div>
                 <button id="vehiclePhotoPrevBtn" class="photo-nav-btn photo-nav-btn--prev" type="button" hidden aria-label="Vorige foto">
                   <svg class="photo-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 5-7 7 7 7"></path></svg>
                 </button>
@@ -481,6 +496,21 @@
 <div id="vehiclePhotoViewer" class="vehicle-photo-viewer" hidden role="dialog" aria-modal="true" aria-label="Foto volledig scherm">
   <div class="vehicle-photo-viewer-toolbar">
     <p id="vehiclePhotoViewerCounter" class="vehicle-photo-viewer-counter" hidden></p>
+    <div class="vehicle-photo-actions vehicle-photo-actions--viewer">
+      <button id="vehiclePhotoViewerActionsBtn" class="vehicle-photo-actions-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="vehiclePhotoViewerActionsMenu" aria-label="Fotoacties" title="Fotoacties">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
+      </button>
+      <div id="vehiclePhotoViewerActionsMenu" class="vehicle-photo-actions-menu" role="menu" aria-label="Fotoacties" hidden>
+        <button class="vehicle-photo-action" type="button" role="menuitem" data-photo-action="download">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"></path></svg>
+          <span data-photo-action-label="download">Foto downloaden</span>
+        </button>
+        <button class="vehicle-photo-action" type="button" role="menuitem" data-photo-action="widget">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="7" height="7" rx="1.5"></rect><rect x="13" y="4" width="7" height="7" rx="1.5"></rect><rect x="4" y="13" width="7" height="7" rx="1.5"></rect><path d="M16.5 13v7m-3.5-3.5h7"></path></svg>
+          <span data-photo-action-label="widget">Aan startpagina toevoegen</span>
+        </button>
+      </div>
+    </div>
     <button id="vehiclePhotoViewerCloseBtn" class="vehicle-photo-viewer-close" type="button" aria-label="Foto sluiten">&times;</button>
   </div>
   <button id="vehiclePhotoViewerPrevBtn" class="vehicle-photo-viewer-nav vehicle-photo-viewer-nav--prev" type="button" hidden aria-label="Vorige foto">
@@ -896,7 +926,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261117-41";
+    var assetVersion = window.BB_ASSET_VERSION || "20261119-42";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

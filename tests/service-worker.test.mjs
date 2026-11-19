@@ -78,9 +78,9 @@ test("photo cache is bounded and versions are independent cache entries", async 
 
 test("versioned shell assets are served without a network request", async () => {
   const worker = await createWorker();
-  const cache = await worker.caches.open("busbib-v257");
-  await cache.put("https://busbib.test/app.js?v=20261117-41", new Response("cached"));
-  const response = await worker.request("https://busbib.test/app.js?v=20261117-41");
+  const cache = await worker.caches.open("busbib-v258");
+  await cache.put("https://busbib.test/app.js?v=20261119-42", new Response("cached"));
+  const response = await worker.request("https://busbib.test/app.js?v=20261119-42");
   assert.equal(await (await response).text(), "cached");
   assert.equal(worker.fetchCount(), 0);
 });
@@ -94,11 +94,11 @@ test("external tiles and range requests bypass service-worker caching", async ()
 
 test("activation removes old BUSBIB caches without touching other applications", async () => {
   const worker = await createWorker();
-  for (const name of ["busbib-v256", "busbib-photos-v3", "busbib-v257", "busbib-photos-v4", "other-app"]) {
+  for (const name of ["busbib-v256", "busbib-v257", "busbib-photos-v3", "busbib-v258", "busbib-photos-v4", "other-app"]) {
     await worker.caches.open(name);
   }
   let activation;
   worker.handlers.activate({ waitUntil(value) { activation = value; } });
   await activation;
-  assert.deepEqual((await worker.caches.keys()).sort(), ["busbib-photos-v4", "busbib-v257", "other-app"].sort());
+  assert.deepEqual((await worker.caches.keys()).sort(), ["busbib-photos-v4", "busbib-v258", "other-app"].sort());
 });

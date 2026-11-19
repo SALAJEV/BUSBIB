@@ -2574,6 +2574,103 @@ footer {
   stroke-width: 2;
 }
 
+.vehicle-photo-actions {
+  position: relative;
+}
+
+.vehicle-photo-actions--frame {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 62px;
+}
+
+.vehicle-photo-actions-trigger {
+  display: grid;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(15, 20, 27, 0.82);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.vehicle-photo-actions-trigger:hover,
+.vehicle-photo-actions-trigger[aria-expanded="true"] {
+  border-color: #fff;
+  background: rgba(15, 20, 27, 0.96);
+}
+
+.vehicle-photo-actions-trigger svg,
+.vehicle-photo-action svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.vehicle-photo-actions-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 9px);
+  right: 0;
+  display: grid;
+  width: min(270px, calc(100vw - 28px));
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(24, 29, 36, 0.97);
+  color: #fff;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(16px);
+}
+
+.vehicle-photo-actions-menu[hidden] {
+  display: none;
+}
+
+.vehicle-photo-action {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vehicle-photo-action:hover,
+.vehicle-photo-action:focus-visible {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.vehicle-photo-action:focus-visible,
+.vehicle-photo-actions-trigger:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.vehicle-photo-action svg {
+  flex: 0 0 20px;
+  opacity: 0.84;
+}
+
 .vehicle-photo-viewer {
   position: fixed;
   z-index: 1300;
@@ -4502,6 +4599,17 @@ body.site-disabled {
   .photo-fullscreen-btn {
     top: 10px;
     right: 10px;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .vehicle-photo-actions--frame {
+    top: 10px;
+    right: 58px;
+  }
+
+  .vehicle-photo-actions-trigger {
     width: 40px;
     min-width: 40px;
     min-height: 40px;

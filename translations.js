@@ -2626,4 +2626,86 @@ Object.entries({
       photoUploadInvalidOrigin
     });
   });
+
+  Object.entries({
+    nl: {
+      photoActions: "Fotoacties",
+      photoDownload: "Foto downloaden",
+      photoAddToHomeWidget: "Aan startpagina toevoegen",
+      photoDownloadDenied: "De fotograaf heeft downloaden van deze foto niet toegestaan.",
+      photoDownloadFailed: "Foto downloaden is mislukt. Probeer het opnieuw.",
+      photoDownloadUnavailable: "Deze foto kan niet worden gedownload.",
+      photoWidgetAddUnavailable: "Deze foto kan niet aan de widget worden toegevoegd.",
+      photoWidgetFull: "De fotowidget is vol. Verwijder eerst een foto via Instellingen.",
+      photoWidgetAdded: "Foto toegevoegd aan de widget op de startpagina."
+    },
+    fr: {
+      photoActions: "Actions sur la photo",
+      photoDownload: "Télécharger la photo",
+      photoAddToHomeWidget: "Ajouter à la page d’accueil",
+      photoDownloadDenied: "Le photographe n’autorise pas le téléchargement de cette photo.",
+      photoDownloadFailed: "Le téléchargement a échoué. Réessayez.",
+      photoDownloadUnavailable: "Cette photo ne peut pas être téléchargée.",
+      photoWidgetAddUnavailable: "Cette photo ne peut pas être ajoutée au widget.",
+      photoWidgetFull: "Le widget photo est plein. Supprimez d’abord une photo dans les paramètres.",
+      photoWidgetAdded: "Photo ajoutée au widget de la page d’accueil."
+    },
+    en: {
+      photoActions: "Photo actions",
+      photoDownload: "Download photo",
+      photoAddToHomeWidget: "Add to home page",
+      photoDownloadDenied: "The photographer has not allowed this photo to be downloaded.",
+      photoDownloadFailed: "The photo could not be downloaded. Please try again.",
+      photoDownloadUnavailable: "This photo is unavailable for download.",
+      photoWidgetAddUnavailable: "This photo could not be added to the widget.",
+      photoWidgetFull: "The photo widget is full. Remove a photo in Settings first.",
+      photoWidgetAdded: "Photo added to the home page widget."
+    },
+    de: {
+      photoActions: "Fotoaktionen",
+      photoDownload: "Foto herunterladen",
+      photoAddToHomeWidget: "Zur Startseite hinzufügen",
+      photoDownloadDenied: "Der Fotograf hat das Herunterladen dieses Fotos nicht erlaubt.",
+      photoDownloadFailed: "Das Foto konnte nicht heruntergeladen werden. Bitte erneut versuchen.",
+      photoDownloadUnavailable: "Dieses Foto kann nicht heruntergeladen werden.",
+      photoWidgetAddUnavailable: "Dieses Foto konnte nicht zum Widget hinzugefügt werden.",
+      photoWidgetFull: "Das Foto-Widget ist voll. Entferne zuerst ein Foto in den Einstellungen.",
+      photoWidgetAdded: "Foto zum Widget auf der Startseite hinzugefügt."
+    },
+    pl: {
+      photoActions: "Opcje zdjęcia",
+      photoDownload: "Pobierz zdjęcie",
+      photoAddToHomeWidget: "Dodaj do strony głównej",
+      photoDownloadDenied: "Fotograf nie zezwolił na pobranie tego zdjęcia.",
+      photoDownloadFailed: "Nie udało się pobrać zdjęcia. Spróbuj ponownie.",
+      photoDownloadUnavailable: "Tego zdjęcia nie można pobrać.",
+      photoWidgetAddUnavailable: "Nie można dodać tego zdjęcia do widżetu.",
+      photoWidgetFull: "Widżet zdjęć jest pełny. Najpierw usuń zdjęcie w ustawieniach.",
+      photoWidgetAdded: "Zdjęcie dodano do widżetu na stronie głównej."
+    },
+    es: {
+      photoActions: "Acciones de la foto",
+      photoDownload: "Descargar foto",
+      photoAddToHomeWidget: "Añadir a la página principal",
+      photoDownloadDenied: "El fotógrafo no ha permitido descargar esta foto.",
+      photoDownloadFailed: "No se pudo descargar la foto. Inténtalo de nuevo.",
+      photoDownloadUnavailable: "Esta foto no se puede descargar.",
+      photoWidgetAddUnavailable: "No se pudo añadir esta foto al widget.",
+      photoWidgetFull: "El widget de fotos está lleno. Elimina una foto en Ajustes primero.",
+      photoWidgetAdded: "Foto añadida al widget de la página principal."
+    },
+    ru: {
+      photoActions: "Действия с фото",
+      photoDownload: "Скачать фото",
+      photoAddToHomeWidget: "Добавить на главную страницу",
+      photoDownloadDenied: "Автор не разрешил скачивать это фото.",
+      photoDownloadFailed: "Не удалось скачать фото. Попробуйте ещё раз.",
+      photoDownloadUnavailable: "Это фото нельзя скачать.",
+      photoWidgetAddUnavailable: "Не удалось добавить это фото в виджет.",
+      photoWidgetFull: "Виджет фото заполнен. Сначала удалите фото в настройках.",
+      photoWidgetAdded: "Фото добавлено в виджет на главной странице."
+    }
+  }).forEach(([language, labels]) => {
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], labels);
+  });
 });
