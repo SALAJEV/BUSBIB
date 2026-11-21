@@ -145,3 +145,98 @@ test("map fullscreen locks page scrolling and restores it on exit", async () => 
   assert.equal(htmlClasses.has("map-fullscreen-open"), false);
   assert.equal(bodyClasses.has("map-fullscreen-open"), false);
 });
+
+test("home map keeps its position on refresh and filter, but recenters when returning", async () => {
+  const source = await readFile(new URL("../app.js", import.meta.url), "utf8");
+  const timers = [];
+  const calls = [];
+  const map = {
+    center: null,
+    zoom: 9,
+    setView(center, zoom) { this.center = [...center]; this.zoom = zoom; calls.push([...center]); return this; },
+    getZoom() { return this.zoom; },
+    invalidateSize() {}
+  };
+  const markers = { addTo: () => markers, clearLayers() {}, addLayer() {} };
+  const panel = { hidden: false, setAttribute() {} };
+  const context = {
+    homeGtfsMapPanelEl: panel,
+    homeGtfsMapEl: {},
+    homeGtfsMap: null,
+    homeGtfsMapMarkers: null,
+    HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE: 48,
+    settings: { showHomeRealtimeMap: true },
+    window: { setTimeout: (callback) => timers.push(callback) },
+    ensureLeafletLoaded: async () => ({ map: () => map, layerGroup: () => markers }),
+    getScrollFriendlyMapOptions: () => ({}),
+    addPublicTransportTileLayer() {},
+    addCurrentLocationControl() {},
+    addMapFullscreenControl() {},
+    closeMapFullscreen() {},
+    closeHomeGtfsVehicleCard() {},
+    getHomeGtfsCanvasLayerClass: () => null,
+    homeMapModelFilterEl: null,
+    homeGtfsMapSnapshots: [],
+    updateOpenHomeGtfsMapVehicleCard() {},
+    setHomeGtfsMapStatus() {},
+    getLabel: (_key, fallback) => fallback,
+    homeGtfsMapStarted: false,
+    homeGtfsMapIsRefreshing: false,
+    homeGtfsMapPausedByInactivity: false,
+    homeGtfsMapRequestToken: 0,
+    homeGtfsMapRefreshBtn: null,
+    voertuigen: [{}],
+    routes: [{}],
+    stopsById: new Map([["stop", {}]]),
+    fetchRealtimeFeed: async () => ({}),
+    getRealtimeFeedDerivedData: () => ({ gpsEntityByVehicleId: new Map([["1", {}]]) }),
+    getHomeGtfsMapSnapshot: () => ({ latitude: 51, longitude: 4, vehicleId: "1" }),
+    updateHomeMapFilterOptions() {},
+    trips: [{}],
+    console
+  };
+  for (const name of ["HOME_GTFS_MAP_CENTER", "HOME_GTFS_MAP_ZOOM"]) {
+    const declaration = source.match(new RegExp(`const ${name} = [^;]+;`));
+    assert.ok(declaration);
+    vm.runInNewContext(declaration[0], context);
+  }
+  for (const [start, end] of [
+    ["function setHomeGtfsMapVisible(", "function addPublicTransportTileLayer("],
+    ["async function initHomeGtfsMap(", "function updateMapFullscreenButton("],
+    ["async function renderHomeGtfsMap(", "function getHomeMapModelKey("],
+    ["async function applyHomeMapFilter(", "function redrawHomeGtfsMapMarkers("],
+    ["async function refreshHomeGtfsMap(", "function startHomeGtfsMapRefresh("]
+  ]) {
+    const from = source.indexOf(start);
+    const to = source.indexOf(end, from);
+    assert.ok(from >= 0 && to > from);
+    vm.runInNewContext(source.slice(from, to), context);
+  }
+  const flushTimers = () => { while (timers.length) timers.shift()(); };
+  await context.refreshHomeGtfsMap();
+  flushTimers();
+  assert.deepEqual(map.center, [51.037861, 4.240528]);
+  assert.equal(map.zoom, 9);
+
+  map.setView([51.2, 4.5], 14);
+  await context.refreshHomeGtfsMap();
+  await context.refreshHomeGtfsMap({ force: true });
+  await context.applyHomeMapFilter();
+  context.setHomeGtfsMapVisible(true);
+  flushTimers();
+  assert.deepEqual(map.center, [51.2, 4.5]);
+  assert.equal(map.zoom, 14);
+  assert.equal(calls.length, 2);
+
+  context.getRealtimeFeedDerivedData = () => ({ gpsEntityByVehicleId: new Map() });
+  await context.refreshHomeGtfsMap();
+  flushTimers();
+  assert.deepEqual(map.center, [51.2, 4.5]);
+
+  context.setHomeGtfsMapVisible(false);
+  context.setHomeGtfsMapVisible(true);
+  flushTimers();
+  assert.deepEqual(map.center, [51.037861, 4.240528]);
+  assert.equal(map.zoom, 14);
+  assert.equal(calls.length, 3);
+});

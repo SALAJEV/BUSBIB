@@ -3861,7 +3861,7 @@ footer {
 }
 
 .line-search-modal-card {
-  width: min(100%, 820px);
+  width: min(100%, 1180px);
 }
 
 .line-search-form {
@@ -3876,6 +3876,13 @@ footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 9px;
+}
+
+.line-search-controls input {
+  min-height: 54px;
+  padding-inline: 18px;
+  border-radius: 12px;
+  font-size: 1rem;
 }
 
 .line-search-controls .btn {
@@ -3986,24 +3993,25 @@ footer {
 
 .line-search-results {
   display: grid;
-  max-height: min(48vh, 520px);
-  gap: 12px;
-  margin-top: 12px;
-  overflow: auto;
-  overscroll-behavior: contain;
+  gap: 18px;
+  margin-top: 18px;
 }
 
 .line-search-route {
   min-width: 0;
-  padding: 13px;
+  padding: clamp(16px, 2.2vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .line-search-route-header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 11px;
-  padding-bottom: 11px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -4025,7 +4033,7 @@ footer {
 
 .line-search-route-copy h4 {
   margin: 0;
-  font-size: 0.97rem;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
   overflow-wrap: anywhere;
 }
 
@@ -4042,17 +4050,74 @@ footer {
   text-align: right;
 }
 
+.line-search-route-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.line-search-map-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 10px;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.line-search-map {
+  width: 100%;
+  height: clamp(300px, 42vw, 460px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.line-search-map.is-unavailable {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.line-map-vehicle-icon {
+  background: transparent;
+  border: 0;
+}
+
+.line-map-vehicle-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.line-map-popup {
+  display: grid;
+  gap: 6px;
+  min-width: 150px;
+}
+
+.line-map-popup-button {
+  margin-top: 4px;
+}
+
 .line-search-trip-list {
   display: grid;
   gap: 8px;
-  padding-top: 10px;
+  padding-top: 14px;
 }
 
 .line-search-trip {
   display: grid;
   min-width: 0;
   gap: 8px;
-  padding: 10px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
 }
 
 .line-search-trip-heading {
@@ -6353,6 +6418,38 @@ body.route-page-open .container > .results-wrap {
   grid-template-columns: auto minmax(0, 1fr) auto auto;
 }
 
+@media (max-width: 600px) {
+  .line-search-modal-card {
+    width: 100%;
+  }
+
+  .line-search-route {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .line-search-route-header {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .line-search-route-count {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .line-search-route-actions {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    justify-content: flex-end;
+  }
+
+  .line-search-route-actions .transit-share-btn {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+}
+
 @media (max-width: 760px) {
   .home-favorites-grid {
     grid-template-columns: 1fr;
@@ -6386,4 +6483,234 @@ body.route-page-open .container > .home-favorites-panel {
 
 #homeFavoritesPanel[hidden] {
   display: none;
+}
+
+/* Instellingen: duidelijke groepen, meer contrast en rustigere bediening. */
+.settings-panel-section {
+  --settings-accent: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.settings-panel-intro {
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 16px;
+  background: linear-gradient(120deg, var(--settings-accent), var(--surface) 72%);
+}
+
+.settings-panel-intro h4 {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+
+.settings-panel-intro p {
+  max-width: 58ch;
+  line-height: 1.6;
+}
+
+.settings-categories {
+  gap: 16px;
+}
+
+.settings-category {
+  padding: 18px;
+  border-color: var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 5%);
+}
+
+.settings-category-heading {
+  gap: 11px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-category-index {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  font-size: .72rem;
+}
+
+.settings-category-heading h5 {
+  font-size: 1rem;
+}
+
+.settings-grid {
+  gap: 10px;
+}
+
+.settings-card {
+  gap: 9px;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: .86rem;
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.settings-card:focus-within,
+.settings-card--toggle:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface-soft));
+}
+
+.settings-card select {
+  min-height: 46px;
+  border-radius: 10px;
+  background-color: var(--surface);
+}
+
+.settings-card--toggle {
+  min-height: 68px;
+  padding-inline: 15px;
+}
+
+.widget-photo-settings {
+  grid-column: 1 / -1;
+}
+
+.settings-actions {
+  margin-top: 18px;
+}
+
+@media (max-width: 680px) {
+  .settings-panel-intro {
+    padding: 16px;
+  }
+
+  .settings-categories {
+    gap: 12px;
+  }
+
+  .settings-category,
+  #routePageOutlet .settings-category {
+    padding: 15px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+
+  .settings-category-heading {
+    margin-bottom: 12px;
+  }
+
+  .settings-grid,
+  #routePageOutlet .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.settings-panel-intro {
+  position: relative;
+  isolation: isolate;
+  min-height: 118px;
+  align-content: center;
+  overflow: hidden;
+  padding: 22px 88px 22px 22px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 92% 12%, color-mix(in srgb, var(--accent) 26%, transparent) 0 3px, transparent 4px) 0 0 / 18px 18px,
+    linear-gradient(115deg, color-mix(in srgb, var(--accent) 19%, var(--surface)), var(--surface) 76%);
+}
+
+.settings-panel-intro::after {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: 22px;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 10%);
+  color: var(--accent-hover);
+  content: "?";
+  font-size: 28px;
+  transform: translateY(-50%) rotate(-8deg);
+}
+
+.settings-panel-intro h4 {
+  max-width: 24ch;
+  font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+}
+
+.settings-panel-intro p {
+  max-width: 52ch;
+}
+
+@media (max-width: 420px) {
+  .settings-panel-intro {
+    min-height: 112px;
+    padding: 18px 72px 18px 16px;
+  }
+
+  .settings-panel-intro::after {
+    right: 13px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 23px;
+  }
+}
+
+/* GTA VI geïnspireerde neon kustthema. */
+:root[data-color-theme="gta6"] {
+  --accent: #df526c;
+  --accent-hover: #bd3d58;
+  --accent-soft: #fde9ed;
+  --accent-ink: #ffffff;
+  --warning: #b27b32;
+  --header-surface-a: #b44c62;
+  --header-surface-b: #72506e;
+  --page-pattern: radial-gradient(ellipse at 20% 20%, color-mix(in srgb, #f3a64a 12%, transparent), transparent 58%), radial-gradient(ellipse at 80% 75%, color-mix(in srgb, #bf5578 9%, transparent), transparent 56%);
+  --page-pattern-size: auto;
+}
+
+:root[data-color-theme="gta6"]:not([data-theme="dark"]):not([data-resolved-theme="dark"]) {
+  --page: #f7f1ee;
+  --page-top: #fff9f3;
+  --surface: #fffdfb;
+  --surface-raised: #ffffff;
+  --surface-soft: #f8eeeb;
+  --surface-tint: #f5e5e4;
+  --ink: #30282c;
+  --muted: #786b70;
+  --faint: #998c91;
+  --line: #eadcda;
+  --line-strong: #d7c3c3;
+}
+
+:root[data-color-theme="gta6"][data-theme="dark"],
+:root[data-color-theme="gta6"][data-resolved-theme="dark"] {
+  --page: #17181d;
+  --page-top: #24202a;
+  --surface: #24232a;
+  --surface-raised: #302b34;
+  --surface-soft: #302b33;
+  --surface-tint: #3a2d38;
+  --ink: #f8eef0;
+  --muted: #c4b2b7;
+  --faint: #a28f96;
+  --line: #493b44;
+  --line-strong: #65505b;
+  --accent: #f17b8c;
+  --accent-hover: #ff9aa7;
+  --accent-soft: #492e3b;
+  --accent-ink: #21191e;
+  --header-surface-a: #6b3d55;
+  --header-surface-b: #352b3c;
+}
+
+:root[data-color-theme="gta6"] .card h2,
+:root[data-color-theme="gta6"] .settings-category-index {
+  border-left-color: #e7a64e;
 }

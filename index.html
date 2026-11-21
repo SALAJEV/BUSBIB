@@ -27,13 +27,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <title>BUSBIB | Bussen en trams van De Lijn live volgen</title>
-<link rel="stylesheet" href="style.css?v=20261119-42">
-<link rel="stylesheet" href="redesign.css?v=20261119-42">
+<link rel="stylesheet" href="style.css?v=20261119-44">
+<link rel="stylesheet" href="redesign.css?v=20261119-44">
 <script src="site-config.js?v=20261117-40"></script>
 <script>
   var siteConfig = window.BB_SITE_CONFIG || {};
   window.BB_SITE_ENABLED = siteConfig.siteEnabled ?? 1;
-  window.BB_ASSET_VERSION = "20261119-42";
+  window.BB_ASSET_VERSION = "20261119-44";
 </script>
 </head>
 <body>
@@ -365,6 +365,7 @@
                 <option value="orange" id="colorOrangeOpt">Oranje</option>
                 <option value="red" id="colorRedOpt">Rood</option>
                 <option value="purple" id="colorPurpleOpt">Paars</option>
+                <option value="gta6" id="colorGta6Opt">GTA VI</option>
               </select>
             </div>
             <div class="settings-card">
@@ -665,6 +666,7 @@
               <option value="orange" id="firstRunColorOrangeOpt">Oranje</option>
               <option value="red" id="firstRunColorRedOpt">Rood</option>
               <option value="purple" id="firstRunColorPurpleOpt">Paars</option>
+              <option value="gta6" id="firstRunColorGta6Opt">GTA VI</option>
             </select>
           </div>
           <div class="settings-card">
@@ -926,7 +928,7 @@
 
 <script>
   (function () {
-    var assetVersion = window.BB_ASSET_VERSION || "20261119-42";
+    var assetVersion = window.BB_ASSET_VERSION || "20261119-44";
     var siteConfig = window.BB_SITE_CONFIG || {};
     var compatibilityCopy = {
       nl: {

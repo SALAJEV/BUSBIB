@@ -131,7 +131,7 @@ const REALTIME_PERSISTED_MAX_AGE_MS = 3 * 60 * 1000;
 const HOME_GTFS_MAP_REFRESH_MS = 30000;
 const ALLOWED_HOME_MAP_REFRESH_INTERVALS_SEC = [30, 60, 120];
 const HOME_GTFS_MAP_SNAPSHOT_BATCH_SIZE = 48;
-const HOME_GTFS_MAP_CENTER = [51.037778, 4.240556];
+const HOME_GTFS_MAP_CENTER = [51.037861, 4.240528];
 const HOME_GTFS_MAP_ZOOM = 9;
 const HOME_GTFS_MAP_INACTIVITY_LIMIT_MS = 8 * 60 * 1000;
 const TRACKING_STATUS_BANNER_ENABLED = Number(window.BB_SITE_CONFIG?.trackingStatusBannerEnabled ?? window.BB_SITE_CONFIG?.bannerEnabled ?? 0);
@@ -184,6 +184,7 @@ const colorGreenOptEl = document.getElementById("colorGreenOpt");
 const colorBlueOptEl = document.getElementById("colorBlueOpt");
 const colorOrangeOptEl = document.getElementById("colorOrangeOpt");
 const colorRedOptEl = document.getElementById("colorRedOpt");
+const colorGta6OptEl = document.getElementById("colorGta6Opt");
 const colorPurpleOptEl = document.getElementById("colorPurpleOpt");
 const themeColorMetaEls = Array.from(document.querySelectorAll('meta[name="theme-color"]'));
 const colorSchemeMetaEl = document.querySelector('meta[name="color-scheme"]');
@@ -2505,6 +2506,7 @@ function goBackFromRoutePage() {
 }
 
 function setCurrentPageView(view) {
+  if (view !== "lijn" && lineSearchModalEl && !lineSearchModalEl.hidden) resetLineSearchPage();
   currentPageView = view;
   const pageElements = [halteSearchModalEl, lineSearchModalEl, favoritesBackdropEl];
   pageElements.forEach((pageEl) => {
@@ -2581,6 +2583,10 @@ let halteSearchRequestToken = 0;
 let lineSearchRequestToken = 0;
 let lineSearchSuggestionToken = 0;
 let lineSearchRouteIndex = null;
+let lineSearchMaps = [];
+let lineSearchMapObserver = null;
+let lineSearchRefreshHandle = null;
+let lineSearchRefreshing = false;
 let photoWidgetVehicleCache = null;
 let halteSearchIndex = null;
 const halteSearchCache = new Map();
@@ -2595,7 +2601,7 @@ const delayLexicon = translationsConfig.delayLexicon || {};
 const DEFAULT_LANG = "nl";
 const FALLBACK_LANG = "en";
 const ALLOWED_LANGUAGES = ["nl", "fr", "en", "de", "pl", "es", "ru"];
-const ALLOWED_COLOR_THEMES = ["classic", "blue", "green", "yellow", "orange", "red", "purple"];
+const ALLOWED_COLOR_THEMES = ["classic", "blue", "green", "yellow", "orange", "red", "purple", "gta6"];
 const ALLOWED_UPDATE_INTERVALS = [10000, 15000, 30000];
 const ALLOWED_TEXT_SCALES = ["normal", "large", "largest"];
 const REQUEST_TIMEOUT_MS = 12000;
@@ -3289,7 +3295,7 @@ function prepareLineSearchPage() {
   if (lineSearchInputEl) lineSearchInputEl.value = "";
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
   clearLineSearchSuggestions();
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
+  clearLineSearchResults();
   setLineSearchStatus("");
 }
 
@@ -3302,7 +3308,7 @@ function resetLineSearchPage() {
   if (lineSearchInputEl) lineSearchInputEl.value = "";
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
   clearLineSearchSuggestions();
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
+  clearLineSearchResults();
   setLineSearchStatus("");
 }
 
@@ -3452,7 +3458,7 @@ async function showLineSearchRoute(route) {
   }
   const requestToken = ++lineSearchRequestToken;
   clearLineSearchSuggestions();
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
+  clearLineSearchResults();
   setLineSearchStatus(getLabel("lineSearchLoading", "Lijnen en actuele voertuigen worden geladen..."));
   if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = true;
   try {
@@ -3546,7 +3552,8 @@ function getLineSearchActiveTrips(route, derivedData) {
       tripGroup.vehicles.set(normalizeLookup(vehicleId), {
         id: cleanText(vehicleId),
         vehicle,
-        displayId
+        displayId,
+        position: getLineSearchVehiclePosition(vehiclePayload.position)
       });
     }
   }
@@ -3564,12 +3571,174 @@ function getLineSearchActiveTrips(route, derivedData) {
     );
 }
 
+function getLineSearchVehiclePosition(position) {
+  const lat = position?.latitude ?? position?.lat;
+  const lng = position?.longitude ?? position?.lon ?? position?.lng;
+  if (lat == null || lng == null || String(lat).trim() === "" || String(lng).trim() === "") return null;
+  const latitude = Number(lat);
+  const longitude = Number(lng);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+      Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+  const bearing = Number(position.bearing);
+  return { latitude, longitude, bearing: Number.isFinite(bearing) ? bearing : 0 };
+}
+
+function clearLineSearchResults() {
+  if (lineSearchRefreshHandle) clearInterval(lineSearchRefreshHandle);
+  lineSearchRefreshHandle = null;
+  lineSearchMapObserver?.disconnect();
+  lineSearchMapObserver = null;
+  for (const entry of lineSearchMaps) {
+    if (entry.map) {
+      closeMapFullscreen(entry.container);
+      entry.map.remove();
+    }
+  }
+  lineSearchMaps = [];
+  lineSearchResultsEl?.replaceChildren();
+}
+
+function openLineSearchVehicle(vehicleId) {
+  if (!vehicleId) return;
+  resetLineSearchPage();
+  setVehicleInputResolvedId(voertuigInput, "");
+  voertuigInput.value = getVisibleVehicleId(vehicleId);
+  void zoekAlles({ queryOverride: vehicleId, closeKeyboard: true, historyMode: "push" });
+}
+
+function updateLineSearchMapMarkers(entry, fit = false) {
+  if (!entry.map || !entry.markers) return;
+  entry.markers.clearLayers();
+  const bounds = [];
+  for (const trip of entry.activeTrips) {
+    for (const vehicle of trip.vehicles) {
+      if (!vehicle.position) continue;
+      const { latitude, longitude, bearing } = vehicle.position;
+      const position = [latitude, longitude];
+      bounds.push(position);
+      const icon = window.L.divIcon({
+        className: "line-map-vehicle-icon",
+        html: `<img src="media/icons/navicon.png" alt="" style="transform:rotate(${bearing}deg)">`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+      const label = (vehicle.vehicle && getVehicleKind(vehicle.vehicle) === "tram"
+        ? getLabel("lineSearchTram", "Tram {vehicle}")
+        : getLabel("lineSearchVehicle", "Bus {vehicle}")).replace("{vehicle}", vehicle.displayId);
+      const popup = document.createElement("div");
+      popup.className = "line-map-popup";
+      const title = document.createElement("strong");
+      title.textContent = label;
+      popup.append(title);
+      if (trip.destination) {
+        const destination = document.createElement("span");
+        destination.textContent = trip.destination;
+        popup.append(destination);
+      }
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn line-map-popup-button";
+      button.textContent = getLabel("lineMapOpenVehicle", "Bekijk voertuig");
+      button.addEventListener("click", () => openLineSearchVehicle(vehicle.id));
+      popup.append(button);
+      window.L.marker(position, { icon, title: label, alt: label })
+        .bindPopup(popup)
+        .addTo(entry.markers);
+    }
+  }
+  if (fit && bounds.length === 1) entry.map.setView(bounds[0], 14, { animate: false });
+  else if (fit && bounds.length > 1) entry.map.fitBounds(bounds, { padding: [36, 36], maxZoom: 14, animate: false });
+}
+
+async function initLineSearchMap(entry) {
+  if (entry.loading || entry.map) return;
+  entry.loading = true;
+  try {
+    const L = await ensureLeafletLoaded();
+    if (!lineSearchMaps.includes(entry)) return;
+    entry.map = L.map(entry.container, {
+      zoomControl: true,
+      preferCanvas: true,
+      ...getScrollFriendlyMapOptions()
+    }).setView(HOME_GTFS_MAP_CENTER, HOME_GTFS_MAP_ZOOM);
+    addPublicTransportTileLayer(entry.map);
+    addCurrentLocationControl(entry.map);
+    addMapFullscreenControl(entry.map);
+    entry.markers = L.layerGroup().addTo(entry.map);
+    updateLineSearchMapMarkers(entry, true);
+  } catch (error) {
+    console.warn("Lijnkaart laden mislukt", error);
+    if (lineSearchMaps.includes(entry)) {
+      entry.container.textContent = getLabel("lineMapError", "De kaart kon niet worden geladen.");
+      entry.container.classList.add("is-unavailable");
+    }
+  } finally {
+    entry.loading = false;
+  }
+}
+
+function updateLineSearchResults(routeResults) {
+  for (const entry of routeResults) {
+    const vehicleCount = entry.activeTrips.reduce((count, trip) => count + trip.vehicles.length, 0);
+    const count = getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
+      .replace("{trips}", String(entry.activeTrips.length))
+      .replace("{vehicles}", String(vehicleCount));
+    entry.section.querySelector(".line-search-route-count").textContent = count;
+    entry.section.querySelector(".line-search-route-content").innerHTML = buildLineSearchTripMarkup(entry.activeTrips);
+    updateLineSearchMapMarkers(entry);
+  }
+  const trips = routeResults.reduce((count, entry) => count + entry.activeTrips.length, 0);
+  const vehicles = routeResults.reduce((count, entry) => count + entry.activeTrips.reduce((n, trip) => n + trip.vehicles.length, 0), 0);
+  setLineSearchStatus(getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
+    .replace("{trips}", String(trips)).replace("{vehicles}", String(vehicles)));
+}
+
+async function refreshLineSearchResults() {
+  if (lineSearchRefreshing || document.hidden || lineSearchModalEl?.hidden || !lineSearchMaps.length) return;
+  if (Date.now() - lastUserInteractionAt >= HOME_GTFS_MAP_INACTIVITY_LIMIT_MS) return;
+  lineSearchRefreshing = true;
+  const requestToken = lineSearchRequestToken;
+  try {
+    const data = await fetchRealtimeFeed({ force: true });
+    if (requestToken !== lineSearchRequestToken || lineSearchModalEl?.hidden) return;
+    const derivedData = getRealtimeFeedDerivedData(data);
+    for (const entry of lineSearchMaps) entry.activeTrips = getLineSearchActiveTrips(entry.route, derivedData);
+    updateLineSearchResults(lineSearchMaps);
+  } catch (error) {
+    console.warn("Realtime lijngegevens verversen mislukt", error);
+    if (requestToken === lineSearchRequestToken) {
+      setLineSearchStatus(getLabel("lineRealtimeUnavailable", "Actuele voertuigen zijn tijdelijk niet beschikbaar."), true);
+    }
+  } finally {
+    lineSearchRefreshing = false;
+  }
+}
+
+function buildLineSearchTripMarkup(activeTrips, realtimeUnavailable = false) {
+  return activeTrips.length
+    ? `<div class="line-search-trip-list">${activeTrips.map((trip) => {
+        const tripLabel = trip.destination || getLabel("lineSearchTripFallback", "Rit {trip}")
+          .replace("{trip}", trip.tripId || "?");
+        const vehicleMarkup = trip.vehicles.map((vehicle) => {
+          const ariaLabel = vehicle.vehicle?.Voertuigsoort === "tram"
+            ? getLabel("lineSearchTram", "Tram {vehicle}").replace("{vehicle}", vehicle.displayId)
+            : getLabel("lineSearchVehicle", "Bus {vehicle}").replace("{vehicle}", vehicle.displayId);
+          return `<button class="line-search-vehicle" type="button" data-line-vehicle-id="${escapeHtml(vehicle.id)}" aria-label="${escapeHtml(ariaLabel)}">${buildVehicleIdMarkup(vehicle.vehicle || vehicle.id, vehicle.displayId)}</button>`;
+        }).join("");
+        return `<article class="line-search-trip"><div class="line-search-trip-heading"><strong>${escapeHtml(tripLabel)}</strong>${trip.tripId ? `<span>${escapeHtml(trip.tripId)}</span>` : ""}</div><div class="line-search-vehicles">${vehicleMarkup}</div></article>`;
+      }).join("")}</div>`
+    : `<p class="line-search-empty">${escapeHtml(realtimeUnavailable
+        ? getLabel("lineRealtimeUnavailable", "Actuele voertuigen zijn tijdelijk niet beschikbaar.")
+        : getLabel("lineSearchNoActiveVehicles", "Er zijn momenteel geen actieve ritten of voertuigen voor deze lijn gevonden."))}</p>`;
+}
+
 function renderLineSearchResults(matchedRoutes, derivedData, { realtimeUnavailable = false } = {}) {
+  clearLineSearchResults();
   const routeResults = matchedRoutes.map((route) => ({
     route,
     activeTrips: getLineSearchActiveTrips(route, derivedData)
   }));
-  const routeSections = routeResults.map(({ route, activeTrips }) => {
+  const routeSections = routeResults.map(({ route, activeTrips }, index) => {
     const activeVehicleCount = activeTrips.reduce((count, trip) => count + trip.vehicles.length, 0);
     const routeShortName = cleanText(route.route_short_name) || cleanText(route.route_id);
     const routeLongName = cleanText(route.route_long_name);
@@ -3579,26 +3748,35 @@ function renderLineSearchResults(matchedRoutes, derivedData, { realtimeUnavailab
     const routeCount = realtimeUnavailable ? "" : getLabel("lineSearchActiveTrips", "{trips} actieve ritten · {vehicles} voertuigen")
       .replace("{trips}", String(activeTrips.length))
       .replace("{vehicles}", String(activeVehicleCount));
-    const tripMarkup = activeTrips.length
-      ? `<div class="line-search-trip-list">${activeTrips.map((trip) => {
-          const tripLabel = trip.destination || getLabel("lineSearchTripFallback", "Rit {trip}")
-            .replace("{trip}", trip.tripId || "?");
-          const vehicleMarkup = trip.vehicles.map((vehicle) => {
-            const ariaLabel = vehicle.vehicle?.Voertuigsoort === "tram"
-              ? getLabel("lineSearchTram", "Tram {vehicle}").replace("{vehicle}", vehicle.displayId)
-              : getLabel("lineSearchVehicle", "Bus {vehicle}").replace("{vehicle}", vehicle.displayId);
-            return `<button class="line-search-vehicle" type="button" data-line-vehicle-id="${escapeHtml(vehicle.id)}" aria-label="${escapeHtml(ariaLabel)}">${buildVehicleIdMarkup(vehicle.vehicle || vehicle.id, vehicle.displayId)}</button>`;
-          }).join("");
-          return `<article class="line-search-trip"><div class="line-search-trip-heading"><strong>${escapeHtml(tripLabel)}</strong>${trip.tripId ? `<span>${escapeHtml(trip.tripId)}</span>` : ""}</div><div class="line-search-vehicles">${vehicleMarkup}</div></article>`;
-        }).join("")}</div>`
-      : `<p class="line-search-empty">${escapeHtml(realtimeUnavailable
-          ? getLabel("lineRealtimeUnavailable", "Actuele voertuigen zijn tijdelijk niet beschikbaar.")
-          : getLabel("lineSearchNoActiveVehicles", "Er zijn momenteel geen actieve ritten of voertuigen voor deze lijn gevonden."))}</p>`;
-
-    return `<section class="line-search-route"><header class="line-search-route-header">${getLineSearchBadgeMarkup(route)}<div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span><button class="btn transit-share-btn" type="button" data-share-line="${escapeHtml(routeId)}">${escapeHtml(getLabel("shareLink", "Delen"))}</button><button class="favorite-line-toggle${isFavorite ? " is-favorite" : ""}" type="button" data-line-favorite-toggle="${escapeHtml(routeId)}" aria-pressed="${String(isFavorite)}" aria-label="${escapeHtml(favoriteLabel)}">${isFavorite ? "★" : "☆"}</button></header>${tripMarkup}</section>`;
+    const mapLabel = getLabel("lineMapTitle", "Voertuigen op de kaart");
+    return `<section class="line-search-route"><header class="line-search-route-header">${getLineSearchBadgeMarkup(route)}<div class="line-search-route-copy"><h4>${escapeHtml(routeLongName || routeShortName)}</h4><p>${escapeHtml(routeId)}</p></div><span class="line-search-route-count">${escapeHtml(routeCount)}</span><div class="line-search-route-actions"><button class="btn transit-share-btn" type="button" data-share-line="${escapeHtml(routeId)}">${escapeHtml(getLabel("shareLink", "Delen"))}</button><button class="favorite-line-toggle${isFavorite ? " is-favorite" : ""}" type="button" data-line-favorite-toggle="${escapeHtml(routeId)}" aria-pressed="${String(isFavorite)}" aria-label="${escapeHtml(favoriteLabel)}">${isFavorite ? "★" : "☆"}</button></div></header><div class="line-search-map-heading">${escapeHtml(mapLabel)}</div><div class="line-search-map" data-line-map="${index}" role="region" aria-label="${escapeHtml(`${mapLabel}: ${routeLongName || routeShortName}`)}"></div><div class="line-search-route-content">${buildLineSearchTripMarkup(activeTrips, realtimeUnavailable)}</div></section>`;
   }).join("");
 
   lineSearchResultsEl.innerHTML = routeSections;
+  lineSearchMaps = Array.from(lineSearchResultsEl.querySelectorAll("[data-line-map]"), (container, index) => ({
+    ...routeResults[index],
+    container,
+    section: container.closest(".line-search-route"),
+    map: null,
+    markers: null,
+    loading: false
+  }));
+  if ("IntersectionObserver" in window) {
+    lineSearchMapObserver = new IntersectionObserver((entries) => {
+      for (const observed of entries) {
+        if (!observed.isIntersecting) continue;
+        const entry = lineSearchMaps.find((item) => item.container === observed.target);
+        lineSearchMapObserver?.unobserve(observed.target);
+        if (entry) void initLineSearchMap(entry);
+      }
+    }, { rootMargin: "200px" });
+    lineSearchMaps.forEach((entry) => lineSearchMapObserver.observe(entry.container));
+  } else {
+    lineSearchMaps.forEach((entry) => void initLineSearchMap(entry));
+  }
+  if (!realtimeUnavailable) {
+    lineSearchRefreshHandle = setInterval(() => void refreshLineSearchResults(), getHomeGtfsMapRefreshIntervalMs());
+  }
   const totalTrips = routeResults.reduce(
     (count, result) => count + result.activeTrips.length,
     0
@@ -3618,7 +3796,7 @@ function renderLineSearchResults(matchedRoutes, derivedData, { realtimeUnavailab
 async function searchLines() {
   const query = cleanText(lineSearchInputEl?.value);
   const requestToken = ++lineSearchRequestToken;
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
+  clearLineSearchResults();
   if (!query) {
     if (lineSearchSubmitBtn) lineSearchSubmitBtn.disabled = false;
     setLineSearchStatus(getLabel("lineSearchPrompt", "Voer een lijnnummer, bestemming of lijncode in."), true);
@@ -4297,12 +4475,19 @@ function closeHomeGtfsVehicleCard() {
 function setHomeGtfsMapVisible(visible) {
   if (!homeGtfsMapPanelEl) return;
   const shouldShow = visible && settings.showHomeRealtimeMap;
+  const wasHidden = homeGtfsMapPanelEl.hidden;
   if (!shouldShow) closeMapFullscreen(homeGtfsMapPanelEl);
   homeGtfsMapPanelEl.hidden = !shouldShow;
   homeGtfsMapPanelEl.setAttribute("aria-hidden", String(!shouldShow));
   if (!shouldShow) closeHomeGtfsVehicleCard();
   if (shouldShow && homeGtfsMap) {
-    window.setTimeout(() => homeGtfsMap.invalidateSize(), 0);
+    window.setTimeout(() => {
+      if (homeGtfsMapPanelEl.hidden) return;
+      homeGtfsMap.invalidateSize();
+      if (wasHidden) {
+        homeGtfsMap.setView(HOME_GTFS_MAP_CENTER, homeGtfsMap.getZoom() || HOME_GTFS_MAP_ZOOM, { animate: false });
+      }
+    }, 0);
   }
 }
 
@@ -4346,7 +4531,11 @@ if (!window.__busbibCtrlWheelZoomBound) {
   document.addEventListener("wheel", (event) => {
     if (!(event.ctrlKey || event.metaKey)) return;
     const mapContainer = event.target instanceof Element ? event.target.closest(".leaflet-container") : null;
-    const mapInstance = mapContainer === homeGtfsMapEl ? homeGtfsMap : mapContainer === document.getElementById("map") ? map : null;
+    const mapInstance = mapContainer === homeGtfsMapEl
+      ? homeGtfsMap
+      : mapContainer === document.getElementById("map")
+        ? map
+        : lineSearchMaps.find((entry) => entry.container === mapContainer)?.map;
     if (!mapInstance) return;
     event.preventDefault();
     mapInstance.setZoom(mapInstance.getZoom() + (event.deltaY < 0 ? 1 : -1));
@@ -4394,9 +4583,11 @@ function closeMapFullscreen(container) {
     container.classList.remove("map-fullscreen-fallback");
     syncMapFullscreenPage();
     container.querySelector(".leaflet-control-fullscreen-button")?.focus({ preventScroll: true });
-    const mapInstance = container === homeGtfsMapPanelEl || container === homeGtfsMapEl ? homeGtfsMap : map;
+    const mapInstance = container === homeGtfsMapPanelEl || container === homeGtfsMapEl
+      ? homeGtfsMap
+      : lineSearchMaps.find((entry) => entry.container === container)?.map || map;
     window.requestAnimationFrame(() => {
-      mapInstance?.invalidateSize(false);
+      if (mapInstance?._loaded) mapInstance.invalidateSize(false);
       if (mapInstance === homeGtfsMap) positionHomeGtfsVehicleCard();
     });
     const button = container.querySelector(".leaflet-control-fullscreen-button");
@@ -4414,7 +4605,7 @@ function addMapFullscreenControl(mapInstance, fullscreenContainer = mapInstance.
     syncMapFullscreenPage();
     updateMapFullscreenButton(button, active);
     window.requestAnimationFrame(() => {
-      mapInstance.invalidateSize(false);
+      if (mapInstance._loaded) mapInstance.invalidateSize(false);
       if (mapInstance === homeGtfsMap) positionHomeGtfsVehicleCard();
     });
   };
@@ -4445,9 +4636,14 @@ function addMapFullscreenControl(mapInstance, fullscreenContainer = mapInstance.
     return wrapper;
   };
   control.addTo(mapInstance);
-  document.addEventListener("fullscreenchange", sync);
-  document.addEventListener("keydown", (event) => {
+  const onKeyDown = (event) => {
     if (event.key === "Escape" && container.classList.contains("map-fullscreen-fallback")) closeMapFullscreen(container);
+  };
+  document.addEventListener("fullscreenchange", sync);
+  document.addEventListener("keydown", onKeyDown);
+  mapInstance.on("unload", () => {
+    document.removeEventListener("fullscreenchange", sync);
+    document.removeEventListener("keydown", onKeyDown);
   });
 }
 
@@ -4613,26 +4809,17 @@ function updateOpenHomeGtfsMapVehicleCard(snapshots) {
   positionHomeGtfsVehicleCard();
 }
 
-async function renderHomeGtfsMap(snapshots, { recenter = true } = {}) {
+async function renderHomeGtfsMap(snapshots) {
   if (!homeGtfsMapPanelEl || !homeGtfsMapEl) return;
   await initHomeGtfsMap();
   if (!homeGtfsMapMarkers || !homeGtfsMap) return;
   homeGtfsMapMarkers.clearLayers();
-  const bounds = [];
-
-  snapshots.forEach((snapshot) => {
-    bounds.push([snapshot.latitude, snapshot.longitude]);
-  });
   const CanvasLayer = getHomeGtfsCanvasLayerClass();
   if (CanvasLayer) {
     homeGtfsMapMarkers.addLayer(new CanvasLayer(snapshots));
   }
 
-  window.setTimeout(() => {
-    homeGtfsMap.invalidateSize();
-    if (!bounds.length || !recenter) return;
-    homeGtfsMap.setView(HOME_GTFS_MAP_CENTER, homeGtfsMap.getZoom() || HOME_GTFS_MAP_ZOOM, { animate: false });
-  }, 0);
+  window.setTimeout(() => homeGtfsMap.invalidateSize(), 0);
 }
 
 function getHomeMapModelKey(snapshot) {
@@ -4684,12 +4871,12 @@ function updateHomeMapFilterOptions() {
   }
 }
 
-async function applyHomeMapFilter({ recenter = false } = {}) {
+async function applyHomeMapFilter() {
   const selected = homeMapModelFilterEl?.value || "";
   const visible = selected
     ? homeGtfsMapSnapshots.filter((snapshot) => getHomeMapModelKey(snapshot) === selected)
     : homeGtfsMapSnapshots;
-  await renderHomeGtfsMap(visible, { recenter });
+  await renderHomeGtfsMap(visible);
   updateOpenHomeGtfsMapVehicleCard(visible);
   setHomeGtfsMapStatus(getLabel("homeGtfsMapLoaded", "{count} voertuigen actief op de kaart").replace("{count}", String(visible.length)), visible.length ? "" : "muted");
 }
@@ -4769,7 +4956,7 @@ async function refreshHomeGtfsMap(options = {}) {
 
     homeGtfsMapSnapshots = snapshots;
     updateHomeMapFilterOptions();
-    await applyHomeMapFilter({ recenter: true });
+    await applyHomeMapFilter();
     if (requestToken !== homeGtfsMapRequestToken) return;
     if (trips.length === 0 && !tripsLoadPromise && !homeGtfsMapTripsDeferred) {
       // Grote ritten-dataset pas na de eerste kaartweergave laden en dan de kaart verrijken.
@@ -7291,6 +7478,7 @@ function applyTranslations() {
   colorBlueOptEl.textContent = t("colorBlue");
   colorOrangeOptEl.textContent = t("colorOrange");
   colorRedOptEl.textContent = t("colorRed");
+  if (colorGta6OptEl) colorGta6OptEl.textContent = t("colorGta6");
   colorPurpleOptEl.textContent = t("colorPurple");
   if (halteSearchToggleBtn) {
     halteSearchToggleBtn.textContent = getLabel("haltSearch", "Halte zoeken");
@@ -9672,7 +9860,7 @@ lineSearchInputEl?.addEventListener("input", () => {
   clearTransitLinkParameter("route");
   lineSearchRequestToken += 1;
   clearLineSearchSuggestions();
-  if (lineSearchResultsEl) lineSearchResultsEl.replaceChildren();
+  clearLineSearchResults();
   setLineSearchStatus("");
   scheduleLineSearchSuggestions();
 });
@@ -9717,16 +9905,7 @@ lineSearchResultsEl?.addEventListener("click", (event) => {
   }
   const vehicleButton = target.closest("[data-line-vehicle-id]");
   if (!(vehicleButton instanceof HTMLButtonElement)) return;
-  const vehicleId = vehicleButton.getAttribute("data-line-vehicle-id") || "";
-  if (!vehicleId) return;
-  resetLineSearchPage();
-  setVehicleInputResolvedId(voertuigInput, "");
-  voertuigInput.value = getVisibleVehicleId(vehicleId);
-  void zoekAlles({
-    queryOverride: vehicleId,
-    closeKeyboard: true,
-    historyMode: "push"
-  });
+  openLineSearchVehicle(vehicleButton.getAttribute("data-line-vehicle-id") || "");
 });
 offlineRetryBtn?.addEventListener("click", () => {
   verifyInternetConnection(true).catch(() => {});

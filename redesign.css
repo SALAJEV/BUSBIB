@@ -265,7 +265,9 @@ body.map-fullscreen-open {
 }
 
 #realtimeVehicleCard #map:fullscreen,
-#realtimeVehicleCard #map.map-fullscreen-fallback {
+#realtimeVehicleCard #map.map-fullscreen-fallback,
+.line-search-map:fullscreen,
+.line-search-map.map-fullscreen-fallback {
   box-sizing: border-box;
   width: 100% !important;
   height: 100% !important;
@@ -274,7 +276,8 @@ body.map-fullscreen-open {
   border-radius: 0;
 }
 
-#realtimeVehicleCard #map.map-fullscreen-fallback {
+#realtimeVehicleCard #map.map-fullscreen-fallback,
+.line-search-map.map-fullscreen-fallback {
   position: fixed !important;
   inset: 0;
   z-index: 10000;

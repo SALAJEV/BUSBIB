@@ -56,6 +56,7 @@ nl: {
   colorOrange: "Oranje",
   colorPurple: "Paars",
   colorRed: "Rood",
+  colorGta6: "GTA VI",
   stylePreset: "Stijl",
   styleStandard: "Standaard",
   styleCompact: "Compact",
@@ -153,6 +154,7 @@ fr: {
   colorOrange: "Orange",
   colorPurple: "Violet",
   colorRed: "Rouge",
+  colorGta6: "GTA VI",
   stylePreset: "Style",
   styleStandard: "Standard",
   styleCompact: "Compact",
@@ -245,6 +247,7 @@ en: {
   colorOrange: "Orange",
   colorPurple: "Purple",
   colorRed: "Red",
+  colorGta6: "GTA VI",
   stylePreset: "Style",
   styleStandard: "Standard",
   styleCompact: "Compact",
@@ -343,6 +346,7 @@ de: {
   colorOrange: "Orange",
   colorPurple: "Lila",
   colorRed: "Rot",
+  colorGta6: "GTA VI",
   stylePreset: "Stil",
   styleStandard: "Standard",
   styleCompact: "Kompakt",
@@ -430,6 +434,7 @@ pl: {
   colorOrange: "Pomarańczowy",
   colorPurple: "Fioletowy",
   colorRed: "Czerwony",
+  colorGta6: "GTA VI",
   stylePreset: "Styl",
   styleStandard: "Standardowy",
   styleCompact: "Kompaktowy",
@@ -517,6 +522,7 @@ es: {
   colorOrange: "Naranja",
   colorPurple: "Morado",
   colorRed: "Rojo",
+  colorGta6: "GTA VI",
   stylePreset: "Estilo",
   styleStandard: "Estándar",
   styleCompact: "Compacto",
@@ -604,6 +610,7 @@ ru: {
   colorOrange: "Оранжевый",
   colorPurple: "Фиолетовый",
   colorRed: "Красный",
+  colorGta6: "GTA VI",
   stylePreset: "Стиль",
   styleStandard: "Стандартный",
   styleCompact: "Компактный",
@@ -2579,6 +2586,18 @@ Object.entries({
     ru: "Данные о транспорте временно недоступны."
   }).forEach(([language, lineRealtimeUnavailable]) => {
     Object.assign(window.BB_TRANSLATIONS.i18n[language], { lineRealtimeUnavailable });
+  });
+
+  Object.entries({
+    nl: ["Voertuigen op de kaart", "Bekijk voertuig", "De kaart kon niet worden geladen."],
+    fr: ["Véhicules sur la carte", "Voir le véhicule", "Impossible de charger la carte."],
+    en: ["Vehicles on the map", "View vehicle", "The map could not be loaded."],
+    de: ["Fahrzeuge auf der Karte", "Fahrzeug ansehen", "Die Karte konnte nicht geladen werden."],
+    pl: ["Pojazdy na mapie", "Zobacz pojazd", "Nie udało się załadować mapy."],
+    es: ["Vehículos en el mapa", "Ver vehículo", "No se pudo cargar el mapa."],
+    ru: ["Транспорт на карте", "Посмотреть транспорт", "Не удалось загрузить карту."]
+  }).forEach(([language, [lineMapTitle, lineMapOpenVehicle, lineMapError]]) => {
+    Object.assign(window.BB_TRANSLATIONS.i18n[language], { lineMapTitle, lineMapOpenVehicle, lineMapError });
   });
 
   Object.entries({
